@@ -1,0 +1,193 @@
+// Google Sheets API 설정 (예시 파일)
+// 이 파일을 config.js로 복사한 후 실제 값을 입력하세요
+
+const GOOGLE_SHEETS_CONFIG = {
+    // Google Cloud Console에서 생성한 API 키를 여기에 입력하세요
+    // 예: 'AIzaSyD...'
+    API_KEY: 'YOUR_API_KEY_HERE',
+
+    // Google Sheets ID (스프레드시트 URL에서 추출)
+    // 예: https://docs.google.com/spreadsheets/d/[SHEET_ID]/edit
+    SPREADSHEET_ID: 'YOUR_SPREADSHEET_ID_HERE',
+
+    // 시트 이름 (탭 이름) - 변경하지 마세요
+    SHEETS: {
+        PRODUCTS: 'products',  // 제품 정보 시트
+        PRICES: 'prices'       // 가격 정보 시트
+    }
+};
+
+/**
+ * 사용 방법:
+ *
+ * 1. 이 파일을 config.js로 복사:
+ *    cp config.js.example config.js
+ *
+ * 2. config.js를 열어서 YOUR_API_KEY_HERE와 YOUR_SPREADSHEET_ID_HERE를
+ *    실제 값으로 교체
+ *
+ * 3. docs/google_sheets_setup_guide.md를 참고하여 설정 완료
+ */
+
+/**
+ * Google Sheets API를 사용하여 데이터 가져오기
+ */
+async function fetchSheetData(sheetName, range = 'A:Z') {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.SPREADSHEET_ID}/values/${sheetName}!${range}?key=${GOOGLE_SHEETS_CONFIG.API_KEY}`;
+
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.values || [];
+    } catch (error) {
+        console.error(`Google Sheets API 오류 (${sheetName}):`, error);
+        throw error;
+    }
+}
+
+/**
+ * CSV 형식의 데이터를 객체 배열로 변환
+ */
+function parseSheetData(rows) {
+    if (!rows || rows.length === 0) {
+        return [];
+    }
+
+    const headers = rows[0];
+    const data = [];
+
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const item = {};
+
+        headers.forEach((header, index) => {
+            item[header] = row[index] || '';
+        });
+
+        data.push(item);
+    }
+
+    return data;
+}
+
+/**
+ * 제품 데이터 로드
+ */
+async function loadProducts() {
+    try {
+        const rows = await fetchSheetData(GOOGLE_SHEETS_CONFIG.SHEETS.PRODUCTS);
+        const parsedData = parseSheetData(rows);
+
+        return parsedData.map(item => ({
+            id: item.product_id,
+            name: item.product_name,
+            category: item.category,
+            description: item.description
+        }));
+    } catch (error) {
+        console.error('제품 데이터 로드 실패:', error);
+        return getDefaultProducts();
+    }
+}
+
+/**
+ * 가격 데이터 로드
+ */
+async function loadPrices() {
+    try {
+        const rows = await fetchSheetData(GOOGLE_SHEETS_CONFIG.SHEETS.PRICES);
+        const parsedData = parseSheetData(rows);
+
+        return parsedData.map(item => ({
+            productId: item.product_id,
+            widthMin: parseInt(item.width_min),
+            widthMax: parseInt(item.width_max),
+            heightMin: parseInt(item.height_min),
+            heightMax: parseInt(item.height_max),
+            price: parseInt(item.price)
+        }));
+    } catch (error) {
+        console.error('가격 데이터 로드 실패:', error);
+        return getDefaultPrices();
+    }
+}
+
+/**
+ * 기본 제품 데이터 (API 실패 시 폴백)
+ */
+function getDefaultProducts() {
+    return [
+        {
+            id: 'auto-ventilation',
+            name: '침실용 창+발코니 이중창+거실 이중창',
+            category: '이중창',
+            description: '자동 환기 시스템이 내장된 고급 이중창'
+        },
+        {
+            id: 'sliding-door',
+            name: '복도 창+거실 가벽 슬라이딩',
+            category: '슬라이딩',
+            description: '공간 활용도가 높은 슬라이딩 도어'
+        },
+        {
+            id: 'double-window',
+            name: '안방+거실+발코니 이중창+발코니',
+            category: '이중창',
+            description: '단열 성능이 우수한 기본 이중창'
+        },
+        {
+            id: 'folding-door',
+            name: '거실용 폴딩도어 스마트발코니',
+            category: '폴딩도어',
+            description: '개방감이 뛰어난 폴딩 도어'
+        }
+    ];
+}
+
+/**
+ * 기본 가격 데이터 (API 실패 시 폴백)
+ */
+function getDefaultPrices() {
+    return [
+        // auto-ventilation
+        { productId: 'auto-ventilation', widthMin: 500, widthMax: 1500, heightMin: 500, heightMax: 1200, price: 800000 },
+        { productId: 'auto-ventilation', widthMin: 1501, widthMax: 2500, heightMin: 500, heightMax: 1200, price: 1200000 },
+        { productId: 'auto-ventilation', widthMin: 2501, widthMax: 3500, heightMin: 500, heightMax: 1200, price: 1600000 },
+        { productId: 'auto-ventilation', widthMin: 500, widthMax: 1500, heightMin: 1201, heightMax: 2000, price: 1000000 },
+        { productId: 'auto-ventilation', widthMin: 1501, widthMax: 2500, heightMin: 1201, heightMax: 2000, price: 1500000 },
+        { productId: 'auto-ventilation', widthMin: 2501, widthMax: 3500, heightMin: 1201, heightMax: 2000, price: 2000000 },
+        { productId: 'auto-ventilation', widthMin: 3501, widthMax: 10000, heightMin: 2001, heightMax: 5000, price: 3500000 },
+
+        // sliding-door
+        { productId: 'sliding-door', widthMin: 500, widthMax: 1500, heightMin: 500, heightMax: 1500, price: 900000 },
+        { productId: 'sliding-door', widthMin: 1501, widthMax: 2500, heightMin: 500, heightMax: 1500, price: 1400000 },
+        { productId: 'sliding-door', widthMin: 2501, widthMax: 3500, heightMin: 500, heightMax: 1500, price: 1900000 },
+        { productId: 'sliding-door', widthMin: 500, widthMax: 1500, heightMin: 1501, heightMax: 2500, price: 1200000 },
+        { productId: 'sliding-door', widthMin: 1501, widthMax: 2500, heightMin: 1501, heightMax: 2500, price: 1800000 },
+        { productId: 'sliding-door', widthMin: 2501, widthMax: 3500, heightMin: 1501, heightMax: 2500, price: 2400000 },
+        { productId: 'sliding-door', widthMin: 3501, widthMax: 10000, heightMin: 2501, heightMax: 5000, price: 4000000 },
+
+        // double-window
+        { productId: 'double-window', widthMin: 500, widthMax: 1500, heightMin: 500, heightMax: 1200, price: 600000 },
+        { productId: 'double-window', widthMin: 1501, widthMax: 2500, heightMin: 500, heightMax: 1200, price: 900000 },
+        { productId: 'double-window', widthMin: 2501, widthMax: 3500, heightMin: 500, heightMax: 1200, price: 1200000 },
+        { productId: 'double-window', widthMin: 500, widthMax: 1500, heightMin: 1201, heightMax: 2000, price: 800000 },
+        { productId: 'double-window', widthMin: 1501, widthMax: 2500, heightMin: 1201, heightMax: 2000, price: 1200000 },
+        { productId: 'double-window', widthMin: 2501, widthMax: 3500, heightMin: 1201, heightMax: 2000, price: 1600000 },
+        { productId: 'double-window', widthMin: 3501, widthMax: 10000, heightMin: 2001, heightMax: 5000, price: 2800000 },
+
+        // folding-door
+        { productId: 'folding-door', widthMin: 500, widthMax: 2000, heightMin: 500, heightMax: 1500, price: 1100000 },
+        { productId: 'folding-door', widthMin: 2001, widthMax: 3000, heightMin: 500, heightMax: 1500, price: 1600000 },
+        { productId: 'folding-door', widthMin: 3001, widthMax: 4000, heightMin: 500, heightMax: 1500, price: 2100000 },
+        { productId: 'folding-door', widthMin: 500, widthMax: 2000, heightMin: 1501, heightMax: 2500, price: 1500000 },
+        { productId: 'folding-door', widthMin: 2001, widthMax: 3000, heightMin: 1501, heightMax: 2500, price: 2200000 },
+        { productId: 'folding-door', widthMin: 3001, widthMax: 4000, heightMin: 1501, heightMax: 2500, price: 2900000 },
+        { productId: 'folding-door', widthMin: 4001, widthMax: 10000, heightMin: 2501, heightMax: 5000, price: 4500000 }
+    ];
+}

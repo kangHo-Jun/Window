@@ -179,6 +179,18 @@ body {
     margin-bottom: 20px;
 }
 
+/* Selection Section (평형/확장형 분리) */
+.selection-section {
+    margin-bottom: 30px;
+}
+
+.section-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+}
+
 /* Option Grid */
 .option-grid {
     display: grid;
@@ -535,17 +547,40 @@ body {
 }
 
 /* Next Button */
+/* Button Group (뒤로/다음 버튼) */
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.back-btn,
 .next-btn {
-    width: 100%;
+    flex: 1;
     padding: 18px;
-    background: #333;
-    color: white;
     border: none;
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s;
     border-radius: 8px;
+}
+
+.back-btn {
+    background: white;
+    color: #666;
+    border: 2px solid #e0e0e0;
+}
+
+.back-btn:hover {
+    background: #f5f5f5;
+    border-color: #999;
+    color: #333;
+}
+
+.next-btn {
+    background: #333;
+    color: white;
 }
 
 .next-btn:hover:not(:disabled) {
@@ -557,6 +592,11 @@ body {
 .next-btn:disabled {
     background: #ccc;
     cursor: not-allowed;
+}
+
+/* Step 1에서는 Next 버튼만 있으므로 전체 너비 */
+.step-content:first-of-type .next-btn {
+    width: 100%;
 }
 
 /* Result Page */

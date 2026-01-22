@@ -1,30 +1,5 @@
-// Product Data (제품 정보)
-const products = [
-    {
-        id: 'auto-ventilation',
-        name: '침실용 창+발코니 이중창+거실 이중창',
-        category: '이중창',
-        description: '자동 환기 시스템이 내장된 고급 이중창'
-    },
-    {
-        id: 'sliding-door',
-        name: '복도 창+거실 가벽 슬라이딩',
-        category: '슬라이딩',
-        description: '공간 활용도가 높은 슬라이딩 도어'
-    },
-    {
-        id: 'double-window',
-        name: '안방+거실+발코니 이중창+발코니',
-        category: '이중창',
-        description: '단열 성능이 우수한 기본 이중창'
-    },
-    {
-        id: 'folding-door',
-        name: '거실용 폴딩도어 스마트발코니',
-        category: '폴딩도어',
-        description: '개방감이 뛰어난 폴딩 도어'
-    }
-];
+// Product Data (제품 정보) - Google Sheets에서 로드됨
+let products = [];
 
 // Spaces by Type (평형별 공간 매핑)
 const spacesByType = {
@@ -38,45 +13,8 @@ const spacesByType = {
     '50평대-확장형': ['거실', '안방', '침실1', '침실2', '침실3', '침실4', '주방', '다용도실', '드레스룸', '서재', '안방발코니', '터닝도어']
 };
 
-// Price Table (가격 테이블 - 가로/세로 범위별 가격)
-// 형식: { productId, widthMin, widthMax, heightMin, heightMax, price }
-const priceTable = [
-    // auto-ventilation (자동환기창)
-    { productId: 'auto-ventilation', widthMin: 500, widthMax: 1500, heightMin: 500, heightMax: 1200, price: 800000 },
-    { productId: 'auto-ventilation', widthMin: 1501, widthMax: 2500, heightMin: 500, heightMax: 1200, price: 1200000 },
-    { productId: 'auto-ventilation', widthMin: 2501, widthMax: 3500, heightMin: 500, heightMax: 1200, price: 1600000 },
-    { productId: 'auto-ventilation', widthMin: 500, widthMax: 1500, heightMin: 1201, heightMax: 2000, price: 1000000 },
-    { productId: 'auto-ventilation', widthMin: 1501, widthMax: 2500, heightMin: 1201, heightMax: 2000, price: 1500000 },
-    { productId: 'auto-ventilation', widthMin: 2501, widthMax: 3500, heightMin: 1201, heightMax: 2000, price: 2000000 },
-    { productId: 'auto-ventilation', widthMin: 3501, widthMax: 10000, heightMin: 2001, heightMax: 5000, price: 3500000 },
-
-    // sliding-door (슬라이딩 도어)
-    { productId: 'sliding-door', widthMin: 500, widthMax: 1500, heightMin: 500, heightMax: 1500, price: 900000 },
-    { productId: 'sliding-door', widthMin: 1501, widthMax: 2500, heightMin: 500, heightMax: 1500, price: 1400000 },
-    { productId: 'sliding-door', widthMin: 2501, widthMax: 3500, heightMin: 500, heightMax: 1500, price: 1900000 },
-    { productId: 'sliding-door', widthMin: 500, widthMax: 1500, heightMin: 1501, heightMax: 2500, price: 1200000 },
-    { productId: 'sliding-door', widthMin: 1501, widthMax: 2500, heightMin: 1501, heightMax: 2500, price: 1800000 },
-    { productId: 'sliding-door', widthMin: 2501, widthMax: 3500, heightMin: 1501, heightMax: 2500, price: 2400000 },
-    { productId: 'sliding-door', widthMin: 3501, widthMax: 10000, heightMin: 2501, heightMax: 5000, price: 4000000 },
-
-    // double-window (일반 이중창)
-    { productId: 'double-window', widthMin: 500, widthMax: 1500, heightMin: 500, heightMax: 1200, price: 600000 },
-    { productId: 'double-window', widthMin: 1501, widthMax: 2500, heightMin: 500, heightMax: 1200, price: 900000 },
-    { productId: 'double-window', widthMin: 2501, widthMax: 3500, heightMin: 500, heightMax: 1200, price: 1200000 },
-    { productId: 'double-window', widthMin: 500, widthMax: 1500, heightMin: 1201, heightMax: 2000, price: 800000 },
-    { productId: 'double-window', widthMin: 1501, widthMax: 2500, heightMin: 1201, heightMax: 2000, price: 1200000 },
-    { productId: 'double-window', widthMin: 2501, widthMax: 3500, heightMin: 1201, heightMax: 2000, price: 1600000 },
-    { productId: 'double-window', widthMin: 3501, widthMax: 10000, heightMin: 2001, heightMax: 5000, price: 2800000 },
-
-    // folding-door (폴딩 도어)
-    { productId: 'folding-door', widthMin: 500, widthMax: 2000, heightMin: 500, heightMax: 1500, price: 1100000 },
-    { productId: 'folding-door', widthMin: 2001, widthMax: 3000, heightMin: 500, heightMax: 1500, price: 1600000 },
-    { productId: 'folding-door', widthMin: 3001, widthMax: 4000, heightMin: 500, heightMax: 1500, price: 2100000 },
-    { productId: 'folding-door', widthMin: 500, widthMax: 2000, heightMin: 1501, heightMax: 2500, price: 1500000 },
-    { productId: 'folding-door', widthMin: 2001, widthMax: 3000, heightMin: 1501, heightMax: 2500, price: 2200000 },
-    { productId: 'folding-door', widthMin: 3001, widthMax: 4000, heightMin: 1501, heightMax: 2500, price: 2900000 },
-    { productId: 'folding-door', widthMin: 4001, widthMax: 10000, heightMin: 2501, heightMax: 5000, price: 4500000 }
-];
+// Price Table (가격 테이블) - Google Sheets에서 로드됨
+let priceTable = [];
 
 // State management
 const state = {
@@ -91,7 +29,27 @@ const state = {
 };
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Google Sheets에서 제품 및 가격 데이터 로드
+    try {
+        showToast('데이터를 불러오는 중...');
+
+        // 병렬로 데이터 로드
+        const [productsData, pricesData] = await Promise.all([
+            loadProducts(),
+            loadPrices()
+        ]);
+
+        products = productsData;
+        priceTable = pricesData;
+
+        console.log('데이터 로드 완료:', { products, priceTable });
+    } catch (error) {
+        console.error('데이터 로드 실패, 기본 데이터 사용:', error);
+        products = getDefaultProducts();
+        priceTable = getDefaultPrices();
+    }
+
     // 공유 링크에서 데이터 로드 시도
     loadFromShareLink();
 
@@ -115,28 +73,51 @@ function initializeStep1() {
     });
 }
 
-// Step 2: Size Type (8가지 조합 한 번에 선택)
+// Step 2: Size Type (평형과 확장형 분리 선택)
 function initializeStep2() {
     const step2 = document.getElementById('step2');
-    const sizeOptions = step2.querySelectorAll('.option-btn');
+    const sizeButtons = step2.querySelectorAll('.size-btn');
+    const expansionButtons = step2.querySelectorAll('.expansion-btn');
     const nextBtn = step2.querySelector('.next-btn');
 
-    sizeOptions.forEach(option => {
-        option.addEventListener('click', () => {
+    // 평형 선택 이벤트
+    sizeButtons.forEach(button => {
+        button.addEventListener('click', () => {
             // 이전 선택 제거
-            sizeOptions.forEach(opt => opt.classList.remove('selected'));
+            sizeButtons.forEach(btn => btn.classList.remove('selected'));
 
             // 현재 선택
-            option.classList.add('selected');
+            button.classList.add('selected');
+            state.sizeType = button.dataset.size;
 
-            // state에 평형과 확장형 동시 저장
-            state.sizeType = option.dataset.size;
-            state.expansionType = option.dataset.expansion;
-
-            // Next 버튼 활성화
-            nextBtn.disabled = false;
+            // Next 버튼 활성화 체크
+            checkStep2Complete();
         });
     });
+
+    // 확장형 선택 이벤트
+    expansionButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // 이전 선택 제거
+            expansionButtons.forEach(btn => btn.classList.remove('selected'));
+
+            // 현재 선택
+            button.classList.add('selected');
+            state.expansionType = button.dataset.expansion;
+
+            // Next 버튼 활성화 체크
+            checkStep2Complete();
+        });
+    });
+
+    // 두 가지 모두 선택되었는지 확인
+    function checkStep2Complete() {
+        if (state.sizeType && state.expansionType) {
+            nextBtn.disabled = false;
+        } else {
+            nextBtn.disabled = true;
+        }
+    }
 
     nextBtn.addEventListener('click', () => {
         if (state.sizeType && state.expansionType) {
@@ -157,11 +138,14 @@ function initializeStep3() {
  */
 function renderStep3() {
     const step3 = document.getElementById('step3');
-    const nextBtn = step3.querySelector('.next-btn');
+    const buttonGroup = step3.querySelector('.button-group');
+    let nextBtn = buttonGroup.querySelector('.next-btn');
 
     // 평형 타입 키 생성 (예: '30평대-확장형')
     const typeKey = `${state.sizeType}평대-${state.expansionType === 'expanded' ? '확장형' : '비확장형'}`;
     const spaces = spacesByType[typeKey] || [];
+
+    console.log('renderStep3 호출:', { sizeType: state.sizeType, expansionType: state.expansionType, typeKey, spaces });
 
     // 공간 리스트 컨테이너 찾기 또는 생성
     let spaceContainer = step3.querySelector('.space-selection-container');
@@ -203,6 +187,12 @@ function renderStep3() {
     const spaceButtons = step3.querySelectorAll('.space-btn');
     const spaceCountDisplay = document.getElementById('spaceCountDisplay');
 
+    // 공간 카운트 업데이트 함수
+    function updateSpaceCount() {
+        spaceCountDisplay.textContent = `총 ${state.selectedSpaces.length}개`;
+        nextBtn.disabled = state.selectedSpaces.length === 0;
+    }
+
     selectAllCheckbox.addEventListener('change', () => {
         if (selectAllCheckbox.checked) {
             // 전체 선택
@@ -238,17 +228,13 @@ function renderStep3() {
         });
     });
 
-    // 공간 카운트 업데이트 함수
-    function updateSpaceCount() {
-        spaceCountDisplay.textContent = `총 ${state.selectedSpaces.length}개`;
-        nextBtn.disabled = state.selectedSpaces.length === 0;
-    }
-
-    // Next 버튼 이벤트 (기존 리스너 제거 후 재등록)
+    // Next 버튼 이벤트 재설정 (기존 이벤트 제거)
     const newNextBtn = nextBtn.cloneNode(true);
     nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
+    nextBtn = newNextBtn; // 참조 업데이트
 
-    newNextBtn.addEventListener('click', () => {
+    nextBtn.addEventListener('click', () => {
+        console.log('Next 버튼 클릭됨:', state.selectedSpaces);
         if (state.selectedSpaces.length > 0) {
             // Step 4 진입 전 상태 초기화
             state.currentSpaceIndex = 0;
@@ -256,6 +242,8 @@ function renderStep3() {
             state.selectedProduct = null;
 
             goToStep(4);
+        } else {
+            console.warn('공간이 선택되지 않았습니다.');
         }
     });
 
@@ -294,14 +282,14 @@ function renderStep4() {
     // 사이즈 입력 이벤트 리스너 설정
     setupSizeInput();
 
-    // "다음 공간" 버튼 이벤트 리스너 설정
-    setupNextSpaceButton();
+    // "이전/다음 공간" 버튼 이벤트 리스너 설정
+    setupSpaceButtons();
 
     // 기존에 입력된 데이터가 있으면 복원
     restoreSpaceData(currentSpace);
 }
 
-// 공간 탭 렌더링
+// 공간 탭 렌더링 (클릭 인터랙션 추가)
 function renderStep4SpaceTabs() {
     const spaceTabs = document.getElementById('spaceTabs');
     spaceTabs.innerHTML = '';
@@ -310,21 +298,61 @@ function renderStep4SpaceTabs() {
         const tab = document.createElement('div');
         tab.className = 'space-tab';
         tab.textContent = space;
+        tab.dataset.spaceIndex = index;
 
         // 탭 상태 설정
         if (state.spaceProducts[space]) {
-            // 완료된 공간
+            // 완료된 공간 - 클릭 가능
             tab.classList.add('completed');
+            tab.style.cursor = 'pointer';
+
+            // 클릭 이벤트: 해당 공간으로 이동하여 수정 가능
+            tab.addEventListener('click', () => {
+                // 현재 공간의 데이터를 임시 저장 (입력 중이던 데이터 보존)
+                saveCurrentSpaceData();
+
+                // currentSpaceIndex 변경
+                state.currentSpaceIndex = index;
+
+                // Step 4 다시 렌더링
+                renderStep4();
+            });
         } else if (index === state.currentSpaceIndex) {
-            // 현재 입력 중인 공간
+            // 현재 입력 중인 공간 - 클릭 불가
             tab.classList.add('current');
+            tab.style.cursor = 'default';
         } else {
-            // 대기 중인 공간
+            // 대기 중인 공간 - 클릭 불가
             tab.classList.add('pending');
+            tab.style.cursor = 'not-allowed';
         }
 
         spaceTabs.appendChild(tab);
     });
+}
+
+/**
+ * saveCurrentSpaceData - 현재 입력 중인 데이터를 임시 저장
+ * (탭 이동 시 입력 중이던 데이터가 사라지지 않도록)
+ */
+function saveCurrentSpaceData() {
+    const currentSpace = state.selectedSpaces[state.currentSpaceIndex];
+    const widthInput = document.getElementById('windowWidth');
+    const heightInput = document.getElementById('windowHeight');
+
+    // 제품이 선택되어 있고, 사이즈가 입력되어 있으면 저장
+    if (state.selectedProduct && widthInput && heightInput && widthInput.value && heightInput.value) {
+        const width = parseInt(widthInput.value);
+        const height = parseInt(heightInput.value);
+
+        if (width >= 500 && width <= 10000 && height >= 500 && height <= 5000) {
+            state.spaceProducts[currentSpace] = {
+                product: state.selectedProduct,
+                width: width,
+                height: height
+            };
+        }
+    }
 }
 
 // 제품 선택 설정
@@ -389,9 +417,29 @@ function validateStep4Input() {
 }
 
 // "다음 공간" 버튼 설정
-function setupNextSpaceButton() {
+function setupSpaceButtons() {
+    const prevBtn = document.getElementById('prevSpaceBtn');
     const nextBtn = document.getElementById('nextSpaceBtn');
     const currentSpace = state.selectedSpaces[state.currentSpaceIndex];
+
+    // 이전 버튼 표시/숨김 (첫 번째 공간이면 Step 3로 이동)
+    if (state.currentSpaceIndex === 0) {
+        prevBtn.textContent = '공간 선택';
+        prevBtn.onclick = () => goToStep(3);
+    } else {
+        prevBtn.textContent = '이전 공간';
+        prevBtn.onclick = () => {
+            // 현재 데이터 임시 저장
+            saveCurrentSpaceData();
+
+            // 이전 공간으로 이동
+            state.currentSpaceIndex--;
+            state.selectedProduct = null;
+
+            // Step 4 다시 렌더링
+            renderStep4();
+        };
+    }
 
     // 버튼 텍스트 변경 (마지막 공간이면 "결과 보기")
     if (state.currentSpaceIndex === state.selectedSpaces.length - 1) {

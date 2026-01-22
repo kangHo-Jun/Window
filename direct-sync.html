@@ -57,22 +57,35 @@
                     <button class="next-btn">Next</button>
                 </div>
 
-                <!-- Step 2: Size Type (8가지 조합) -->
+                <!-- Step 2: Size Type (평형과 확장형 분리) -->
                 <div class="step-content" id="step2">
                     <h2 class="step-heading">STEP. 02</h2>
                     <p class="step-description">평형을 선택해 주세요.</p>
-                    <p class="step-subdescription">평형과 확장 여부를 선택해주세요.</p>
-                    <div class="option-grid">
-                        <button class="option-btn" data-size="20" data-expansion="expanded">20평대 확장형</button>
-                        <button class="option-btn" data-size="20" data-expansion="non-expanded">20평대 비확장형</button>
-                        <button class="option-btn" data-size="30" data-expansion="expanded">30평대 확장형</button>
-                        <button class="option-btn" data-size="30" data-expansion="non-expanded">30평대 비확장형</button>
-                        <button class="option-btn" data-size="40" data-expansion="expanded">40평대 확장형</button>
-                        <button class="option-btn" data-size="40" data-expansion="non-expanded">40평대 비확장형</button>
-                        <button class="option-btn" data-size="50" data-expansion="expanded">50평대 확장형</button>
-                        <button class="option-btn" data-size="50" data-expansion="non-expanded">50평대 비확장형</button>
+
+                    <!-- 평형 선택 섹션 -->
+                    <div class="selection-section">
+                        <p class="section-label">평형</p>
+                        <div class="option-grid" id="sizeGrid">
+                            <button class="option-btn size-btn" data-size="20">20평</button>
+                            <button class="option-btn size-btn" data-size="30">30평</button>
+                            <button class="option-btn size-btn" data-size="40">40평</button>
+                            <button class="option-btn size-btn" data-size="50">50평</button>
+                        </div>
                     </div>
-                    <button class="next-btn" disabled>Next</button>
+
+                    <!-- 확장형 선택 섹션 -->
+                    <div class="selection-section">
+                        <p class="section-label">확장 여부</p>
+                        <div class="option-grid" id="expansionGrid">
+                            <button class="option-btn expansion-btn" data-expansion="expanded">확장형</button>
+                            <button class="option-btn expansion-btn" data-expansion="non-expanded">비확장형</button>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="back-btn" onclick="goToStep(1)">이전</button>
+                        <button class="next-btn" disabled>Next</button>
+                    </div>
                 </div>
 
                 <!-- Step 3: Space Selection (동적 렌더링) -->
@@ -81,7 +94,10 @@
                     <p class="step-description">공간을 선택해 주세요.</p>
                     <p class="step-subdescription">선택하신 평형에 맞는 공간을 선택해주세요.</p>
                     <!-- 공간 리스트는 JavaScript renderStep3()에서 동적으로 생성됩니다 -->
-                    <button class="next-btn" disabled>Next</button>
+                    <div class="button-group">
+                        <button class="back-btn" onclick="goToStep(2)">이전</button>
+                        <button class="next-btn" disabled>Next</button>
+                    </div>
                 </div>
 
                 <!-- Step 4: Product Selection -->
@@ -144,7 +160,10 @@
                         </div>
                     </div>
 
-                    <button class="next-btn" id="nextSpaceBtn" disabled>다음 공간</button>
+                    <div class="button-group">
+                        <button class="back-btn" id="prevSpaceBtn">이전</button>
+                        <button class="next-btn" id="nextSpaceBtn" disabled>다음 공간</button>
+                    </div>
                 </div>
 
                 <!-- Result Page -->
@@ -202,6 +221,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
+    <!-- Google Sheets API 설정 -->
+    <script src="config.js"></script>
     <script src="direct-sync.js"></script>
 </body>
 

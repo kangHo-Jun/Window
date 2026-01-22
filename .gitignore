@@ -1,0 +1,25 @@
+# Google Sheets API 설정 (개인 API 키 포함)
+config.js
+
+# macOS 시스템 파일
+.DS_Store
+
+# 에디터 설정
+.vscode/
+.idea/
+
+# 로그 파일
+*.log
+
+# 임시 파일
+*.tmp
+*.swp
+*~
+
+# Node.js (필요 시)
+node_modules/
+package-lock.json
+
+# Python (로컬 서버용)
+__pycache__/
+*.pyc

@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Read(//Users/zart/Documents/창호/**)",
-      "Read(//Users/zart/Documents/창호/**)"
+      "Read(//Users/zart/Documents/창호/**)",
+      "Bash(osascript:*)"
     ]
   }
 }
