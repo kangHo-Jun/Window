@@ -8,7 +8,7 @@
 
 body {
     font-family: 'Noto Sans KR', sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
     min-height: 100vh;
     color: #333;
 }
@@ -50,7 +50,7 @@ body {
 }
 
 .nav a:hover {
-    color: #667eea;
+    color: #3b82f6;
 }
 
 /* Main Content */
@@ -103,9 +103,10 @@ body {
 }
 
 .progress-step.active .step-number {
-    background: #667eea;
-    border-color: #667eea;
+    background: #3b82f6;
+    border-color: #3b82f6;
     color: white;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
 .step-label {
@@ -115,7 +116,7 @@ body {
 }
 
 .progress-step.active .step-label {
-    color: #667eea;
+    color: #3b82f6;
     font-weight: 700;
 }
 
@@ -198,8 +199,10 @@ body {
 }
 
 .option-btn:hover {
-    border-color: #667eea;
-    background: #f8f9ff;
+    border-color: #3b82f6;
+    background: #eff6ff;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
 }
 
 .option-btn.selected {
@@ -228,13 +231,17 @@ body {
 }
 
 .sub-option-btn:hover {
-    border-color: #667eea;
+    border-color: #3b82f6;
+    background: #eff6ff;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
 }
 
 .sub-option-btn.selected {
-    background: #2c7a7b;
+    background: #10b981;
     color: white;
-    border-color: #2c7a7b;
+    border-color: #10b981;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
 }
 
 /* Space Selection */
@@ -251,13 +258,14 @@ body {
 .icon-check {
     width: 24px;
     height: 24px;
-    background: #2c7a7b;
+    background: #10b981;
     color: white;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 14px;
+    font-weight: bold;
 }
 
 .space-label {
@@ -275,9 +283,49 @@ body {
 }
 
 .space-btn.selected {
-    background: #2c7a7b;
+    background: #10b981;
     color: white;
-    border-color: #2c7a7b;
+    border-color: #10b981;
+}
+
+/* 전체 선택 체크박스 */
+.select-all-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 20px;
+    background: #f0f9ff;
+    border: 2px solid #3b82f6;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.select-all-container:hover {
+    background: #dbeafe;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.select-all-checkbox {
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    accent-color: #3b82f6;
+}
+
+.select-all-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e40af;
+    cursor: pointer;
+    user-select: none;
+}
+
+.select-all-description {
+    font-size: 13px;
+    color: #64748b;
+    margin-left: auto;
 }
 
 /* Space Tabs Navigation */
@@ -305,25 +353,29 @@ body {
     gap: 5px;
 }
 
-/* 완료된 공간 탭 (초록색 + 체크마크) */
+/* 완료된 공간 탭 (녹색 + 체크마크) */
 .space-tab.completed {
-    background: #2c7a7b;
+    background: #10b981;
     color: white;
-    border-color: #2c7a7b;
+    border-color: #10b981;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
 }
 
 .space-tab.completed::before {
     content: '✓';
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
+    margin-right: 2px;
 }
 
-/* 현재 입력 중인 공간 탭 (파란색/보라색) */
+/* 현재 입력 중인 공간 탭 (파란색 강조) */
 .space-tab.current {
-    background: #667eea;
+    background: #3b82f6;
     color: white;
-    border-color: #667eea;
+    border-color: #3b82f6;
     font-weight: 700;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
 }
 
 /* 대기 중인 공간 탭 (회색) */
@@ -338,9 +390,10 @@ body {
 .size-input-section {
     margin: 30px 0;
     padding: 25px;
-    background: #f8f9ff;
+    background: #f0f9ff;
     border-radius: 12px;
-    border: 2px solid #667eea;
+    border: 2px solid #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
 }
 
 .size-input-heading {
@@ -388,8 +441,9 @@ body {
 
 .size-input:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #3b82f6;
     background: white;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .size-input::placeholder {
@@ -424,14 +478,32 @@ body {
 }
 
 .product-card:hover {
-    border-color: #667eea;
-    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+    border-color: #3b82f6;
+    box-shadow: 0 5px 20px rgba(59, 130, 246, 0.2);
     transform: translateY(-5px);
 }
 
 .product-card.selected {
-    border-color: #2c7a7b;
-    background: #f0fffe;
+    border-color: #10b981;
+    background: #ecfdf5;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.product-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    width: 28px;
+    height: 28px;
+    background: #10b981;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
 }
 
 .product-badge {
@@ -477,9 +549,9 @@ body {
 }
 
 .next-btn:hover:not(:disabled) {
-    background: #667eea;
+    background: #3b82f6;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
 }
 
 .next-btn:disabled {
@@ -507,7 +579,7 @@ body {
 .result-info {
     text-align: center;
     font-size: 18px;
-    color: #667eea;
+    color: #3b82f6;
     margin-bottom: 40px;
 }
 
@@ -519,7 +591,7 @@ body {
 .product-check {
     width: 50px;
     height: 50px;
-    background: #2c7a7b;
+    background: #10b981;
     color: white;
     border-radius: 50%;
     display: flex;
@@ -527,6 +599,7 @@ body {
     justify-content: center;
     font-size: 24px;
     margin: 0 auto 20px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 .result-image {
@@ -576,7 +649,9 @@ body {
 }
 
 .estimate-btn:hover {
-    background: #667eea;
+    background: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
 }
 
 .price-note {
@@ -584,6 +659,156 @@ body {
     font-size: 12px;
     color: #999;
     margin-bottom: 40px;
+}
+
+/* PDF 저장 및 공유 버튼 */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.pdf-btn,
+.share-btn {
+    flex: 1;
+    padding: 16px 24px;
+    border: 2px solid #e0e0e0;
+    background: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.pdf-btn {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.pdf-btn:hover {
+    background: #ef4444;
+    color: white;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+    transform: translateY(-2px);
+}
+
+.pdf-btn::before {
+    content: '📄';
+    font-size: 18px;
+}
+
+.share-btn {
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.share-btn:hover {
+    background: #3b82f6;
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    transform: translateY(-2px);
+}
+
+.share-btn::before {
+    content: '🔗';
+    font-size: 18px;
+}
+
+/* 결과 테이블 */
+.result-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 30px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.result-table thead {
+    background: #f8fafc;
+}
+
+.result-table th {
+    padding: 16px;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 700;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.result-table td {
+    padding: 16px;
+    font-size: 14px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.result-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.result-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.result-table .price-cell {
+    font-weight: 600;
+    color: #3b82f6;
+}
+
+/* 총 가격 요약 */
+.price-summary {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.price-row:last-child {
+    border-bottom: none;
+    padding-top: 20px;
+    margin-top: 10px;
+    border-top: 2px solid #cbd5e1;
+}
+
+.price-row-label {
+    font-size: 15px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.price-row-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.price-row:last-child .price-row-label {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.price-row:last-child .price-row-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #3b82f6;
 }
 
 .consultation-banner {
@@ -617,7 +842,7 @@ body {
 
 .consultation-btn {
     padding: 12px 30px;
-    background: #2c7a7b;
+    background: #10b981;
     color: white;
     border: none;
     font-size: 14px;
@@ -628,8 +853,9 @@ body {
 }
 
 .consultation-btn:hover {
-    background: #38b2ac;
+    background: #059669;
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 /* Footer */

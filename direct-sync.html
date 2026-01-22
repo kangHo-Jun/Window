@@ -46,53 +46,41 @@
             <div class="form-container">
                 <div class="form-title">나만의 창·작품 SYNC</div>
 
-                <!-- Step 1: Housing Type -->
+                <!-- Step 1: Housing Type (아파트 자동 선택) -->
                 <div class="step-content active" id="step1">
                     <h2 class="step-heading">STEP. 01</h2>
                     <p class="step-description">주거형태를 선택해 주세요.</p>
+                    <p class="step-subdescription">현재는 아파트만 지원됩니다.</p>
                     <div class="option-grid">
-                        <button class="option-btn" data-value="apartment">아파트</button>
-                        <button class="option-btn" data-value="villa">빌라</button>
-                        <button class="option-btn" data-value="house">주택</button>
-                        <button class="option-btn" data-value="other">기타</button>
+                        <button class="option-btn selected" data-value="apartment">아파트</button>
                     </div>
-                    <button class="next-btn" disabled>Next</button>
+                    <button class="next-btn">Next</button>
                 </div>
 
-                <!-- Step 2: Size Type -->
+                <!-- Step 2: Size Type (8가지 조합) -->
                 <div class="step-content" id="step2">
                     <h2 class="step-heading">STEP. 02</h2>
                     <p class="step-description">평형을 선택해 주세요.</p>
+                    <p class="step-subdescription">평형과 확장 여부를 선택해주세요.</p>
                     <div class="option-grid">
-                        <button class="option-btn" data-value="20">20평대</button>
-                        <button class="option-btn" data-value="30">30평대</button>
-                        <button class="option-btn" data-value="40">40평대</button>
-                    </div>
-                    <div class="sub-options">
-                        <button class="sub-option-btn" data-value="expanded">확장형</button>
-                        <button class="sub-option-btn" data-value="non-expanded">비확장형</button>
+                        <button class="option-btn" data-size="20" data-expansion="expanded">20평대 확장형</button>
+                        <button class="option-btn" data-size="20" data-expansion="non-expanded">20평대 비확장형</button>
+                        <button class="option-btn" data-size="30" data-expansion="expanded">30평대 확장형</button>
+                        <button class="option-btn" data-size="30" data-expansion="non-expanded">30평대 비확장형</button>
+                        <button class="option-btn" data-size="40" data-expansion="expanded">40평대 확장형</button>
+                        <button class="option-btn" data-size="40" data-expansion="non-expanded">40평대 비확장형</button>
+                        <button class="option-btn" data-size="50" data-expansion="expanded">50평대 확장형</button>
+                        <button class="option-btn" data-size="50" data-expansion="non-expanded">50평대 비확장형</button>
                     </div>
                     <button class="next-btn" disabled>Next</button>
                 </div>
 
-                <!-- Step 3: Space Selection -->
+                <!-- Step 3: Space Selection (동적 렌더링) -->
                 <div class="step-content" id="step3">
                     <h2 class="step-heading">STEP. 03</h2>
                     <p class="step-description">공간을 선택해 주세요.</p>
-                    <div class="space-info">
-                        <span class="icon-check">✓</span>
-                        <span class="space-label">전체선택</span>
-                        <span class="space-count">총 0개 (2개 가능)</span>
-                    </div>
-                    <div class="option-grid space-grid">
-                        <button class="option-btn space-btn" data-value="living">거실</button>
-                        <button class="option-btn space-btn" data-value="master">안방</button>
-                        <button class="option-btn space-btn" data-value="room1">침실1</button>
-                        <button class="option-btn space-btn" data-value="room2">침실2</button>
-                        <button class="option-btn space-btn" data-value="alpha">알파룸</button>
-                        <button class="option-btn space-btn" data-value="kitchen">주방</button>
-                        <button class="option-btn space-btn" data-value="utility">다용도실</button>
-                    </div>
+                    <p class="step-subdescription">선택하신 평형에 맞는 공간을 선택해주세요.</p>
+                    <!-- 공간 리스트는 JavaScript renderStep3()에서 동적으로 생성됩니다 -->
                     <button class="next-btn" disabled>Next</button>
                 </div>
 
@@ -165,19 +153,19 @@
                     <h2 class="result-heading">고객님의 창·작품 SYNC 결과입니다.</h2>
                     <p class="result-info">#<span id="result-size">30</span>평대 #아파트 #확장형</p>
 
-                    <div class="result-product">
-                        <div class="product-check">✓</div>
-                        <img src="/Users/zart/.gemini/antigravity/brain/8172420a-c471-42fa-bade-6edd62222086/product_result_1769038643644.png"
-                            alt="선택한 제품" class="result-image">
-                        <p class="result-product-name">자동환기기</p>
-                    </div>
+                    <!-- 선택 내역 테이블 및 가격 요약은 JavaScript에서 동적으로 생성 -->
 
                     <div class="price-section">
-                        <div class="price-label">예상 가격</div>
+                        <div class="price-label">총 예상 가격</div>
                         <div class="price-amount">3,319,000원</div>
                     </div>
 
-                    <button class="estimate-btn">예상 금액</button>
+                    <!-- PDF 저장 및 공유 버튼 -->
+                    <div class="action-buttons">
+                        <button class="pdf-btn" onclick="generatePDF()">PDF 저장</button>
+                        <button class="share-btn" onclick="generateShareLink()">공유하기</button>
+                    </div>
+
                     <p class="price-note">* 현장 여건에 따라 금액이 달라질 수 있으며, 견적서를 통해 정확한 금액을 안내드립니다.</p>
 
                     <div class="consultation-banner">
@@ -209,6 +197,10 @@
             </div>
         </footer>
     </div>
+
+    <!-- jsPDF 라이브러리 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
     <script src="direct-sync.js"></script>
 </body>
