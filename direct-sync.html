@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나만의 창·작품 SYNC - Hugreen</title>
+    <link rel="stylesheet" href="direct-sync.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">Hugreen®</div>
+            <nav class="nav">
+                <a href="#product">PRODUCT</a>
+                <a href="#brand">BRAND</a>
+                <a href="#cs">CS CENTER</a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Progress Indicator -->
+            <div class="progress-bar">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-number">01</div>
+                    <div class="step-label">주거형태</div>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-number">02</div>
+                    <div class="step-label">평형</div>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-number">03</div>
+                    <div class="step-label">공간</div>
+                </div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-number">04</div>
+                    <div class="step-label">제품</div>
+                </div>
+            </div>
+
+            <!-- Form Container -->
+            <div class="form-container">
+                <div class="form-title">나만의 창·작품 SYNC</div>
+
+                <!-- Step 1: Housing Type -->
+                <div class="step-content active" id="step1">
+                    <h2 class="step-heading">STEP. 01</h2>
+                    <p class="step-description">주거형태를 선택해 주세요.</p>
+                    <div class="option-grid">
+                        <button class="option-btn" data-value="apartment">아파트</button>
+                        <button class="option-btn" data-value="villa">빌라</button>
+                        <button class="option-btn" data-value="house">주택</button>
+                        <button class="option-btn" data-value="other">기타</button>
+                    </div>
+                    <button class="next-btn" disabled>Next</button>
+                </div>
+
+                <!-- Step 2: Size Type -->
+                <div class="step-content" id="step2">
+                    <h2 class="step-heading">STEP. 02</h2>
+                    <p class="step-description">평형을 선택해 주세요.</p>
+                    <div class="option-grid">
+                        <button class="option-btn" data-value="20">20평대</button>
+                        <button class="option-btn" data-value="30">30평대</button>
+                        <button class="option-btn" data-value="40">40평대</button>
+                    </div>
+                    <div class="sub-options">
+                        <button class="sub-option-btn" data-value="expanded">확장형</button>
+                        <button class="sub-option-btn" data-value="non-expanded">비확장형</button>
+                    </div>
+                    <button class="next-btn" disabled>Next</button>
+                </div>
+
+                <!-- Step 3: Space Selection -->
+                <div class="step-content" id="step3">
+                    <h2 class="step-heading">STEP. 03</h2>
+                    <p class="step-description">공간을 선택해 주세요.</p>
+                    <div class="space-info">
+                        <span class="icon-check">✓</span>
+                        <span class="space-label">전체선택</span>
+                        <span class="space-count">총 0개 (2개 가능)</span>
+                    </div>
+                    <div class="option-grid space-grid">
+                        <button class="option-btn space-btn" data-value="living">거실</button>
+                        <button class="option-btn space-btn" data-value="master">안방</button>
+                        <button class="option-btn space-btn" data-value="room1">침실1</button>
+                        <button class="option-btn space-btn" data-value="room2">침실2</button>
+                        <button class="option-btn space-btn" data-value="alpha">알파룸</button>
+                        <button class="option-btn space-btn" data-value="kitchen">주방</button>
+                        <button class="option-btn space-btn" data-value="utility">다용도실</button>
+                    </div>
+                    <button class="next-btn" disabled>Next</button>
+                </div>
+
+                <!-- Step 4: Product Selection -->
+                <div class="step-content" id="step4">
+                    <h2 class="step-heading">STEP. 04</h2>
+
+                    <!-- 공간 탭 네비게이션 -->
+                    <div class="space-tabs" id="spaceTabs">
+                        <!-- 동적으로 생성될 공간 탭들 -->
+                    </div>
+
+                    <!-- 현재 공간 표시 -->
+                    <p class="step-description" id="currentSpaceTitle">거실의 창호를 선택해주세요.</p>
+                    <p class="step-subdescription">공간에 맞게 원하는 창호를 골라보세요.</p>
+
+                    <!-- 제품 선택 영역 -->
+                    <div class="product-grid">
+                        <div class="product-card" data-product="auto-ventilation">
+                            <div class="product-badge">BEST</div>
+                            <img src="/Users/zart/.gemini/antigravity/brain/8172420a-c471-42fa-bade-6edd62222086/product1_1769038575316.png"
+                                alt="창호 제품 1" class="product-image">
+                            <p class="product-name">침실용 창+발코니 이중창+거실 이중창</p>
+                        </div>
+                        <div class="product-card" data-product="sliding-door">
+                            <div class="product-badge">BEST</div>
+                            <img src="/Users/zart/.gemini/antigravity/brain/8172420a-c471-42fa-bade-6edd62222086/product2_1769038592891.png"
+                                alt="창호 제품 2" class="product-image">
+                            <p class="product-name">복도 창+거실 가벽 슬라이딩</p>
+                        </div>
+                        <div class="product-card" data-product="double-window">
+                            <img src="/Users/zart/.gemini/antigravity/brain/8172420a-c471-42fa-bade-6edd62222086/product3_1769038609811.png"
+                                alt="창호 제품 3" class="product-image">
+                            <p class="product-name">안방+거실+발코니 이중창+발코니</p>
+                        </div>
+                        <div class="product-card" data-product="folding-door">
+                            <img src="/Users/zart/.gemini/antigravity/brain/8172420a-c471-42fa-bade-6edd62222086/product4_1769038628703.png"
+                                alt="창호 제품 4" class="product-image">
+                            <p class="product-name">거실용 폴딩도어 스마트발코니</p>
+                        </div>
+                    </div>
+
+                    <!-- 사이즈 입력 폼 (제품 선택 후 활성화) -->
+                    <div class="size-input-section" id="sizeInputSection" style="display: none;">
+                        <h3 class="size-input-heading">사이즈를 입력해 주세요</h3>
+                        <div class="size-input-grid">
+                            <div class="size-input-group">
+                                <label for="windowWidth" class="size-label">가로 (W)</label>
+                                <div class="size-input-wrapper">
+                                    <input type="number" id="windowWidth" class="size-input" placeholder="3000" min="500" max="10000">
+                                    <span class="size-unit">mm</span>
+                                </div>
+                            </div>
+                            <div class="size-input-group">
+                                <label for="windowHeight" class="size-label">세로 (H)</label>
+                                <div class="size-input-wrapper">
+                                    <input type="number" id="windowHeight" class="size-input" placeholder="2000" min="500" max="5000">
+                                    <span class="size-unit">mm</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="next-btn" id="nextSpaceBtn" disabled>다음 공간</button>
+                </div>
+
+                <!-- Result Page -->
+                <div class="step-content" id="result">
+                    <div class="result-title">나만의 창·작품 SYNC</div>
+                    <h2 class="result-heading">고객님의 창·작품 SYNC 결과입니다.</h2>
+                    <p class="result-info">#<span id="result-size">30</span>평대 #아파트 #확장형</p>
+
+                    <div class="result-product">
+                        <div class="product-check">✓</div>
+                        <img src="/Users/zart/.gemini/antigravity/brain/8172420a-c471-42fa-bade-6edd62222086/product_result_1769038643644.png"
+                            alt="선택한 제품" class="result-image">
+                        <p class="result-product-name">자동환기기</p>
+                    </div>
+
+                    <div class="price-section">
+                        <div class="price-label">예상 가격</div>
+                        <div class="price-amount">3,319,000원</div>
+                    </div>
+
+                    <button class="estimate-btn">예상 금액</button>
+                    <p class="price-note">* 현장 여건에 따라 금액이 달라질 수 있으며, 견적서를 통해 정확한 금액을 안내드립니다.</p>
+
+                    <div class="consultation-banner">
+                        <img src="/Users/zart/.gemini/antigravity/brain/8172420a-c471-42fa-bade-6edd62222086/consultant_1769038658937.png"
+                            alt="상담사" class="consultant-image">
+                        <div class="consultation-text">
+                            <h3>전문가상담을 통해</h3>
+                            <h3>정확한 견적을 확인해 보세요!</h3>
+                            <p>전문가 상담을 통해 고객님의 상황에 맞는 정확한 견적을 안내해 드립니다.</p>
+                            <button class="consultation-btn">전문 상담 신청</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#">개인정보취급방침</a>
+                    <a href="#">이용약관</a>
+                    <a href="#">사이트맵</a>
+                </div>
+                <div class="footer-info">
+                    <p>고객센터 1668-3142</p>
+                    <p>평일 09:00~17:30 / 주말 및 공휴일 휴무</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="direct-sync.js"></script>
+</body>
+
+</html>

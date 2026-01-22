@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/zart/Documents/창호/.agent/skills/skills/senior-fullstack/references/**)",
+      "Read(//Users/zart/Documents/창호/.agent/skills/skills/senior-fullstack/references/**)",
+      "Read(//Users/zart/Documents/창호/.agent/skills/skills/senior-architect/references/**)",
+      "Read(//Users/zart/Documents/창호/.agent/skills/skills/senior-architect/references/**)"
+    ]
+  }
+}
