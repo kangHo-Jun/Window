@@ -1,0 +1,4 @@
+brand,base_margin_rate,min_margin_rate,max_margin_rate,installation_rate,install_min_price,discount_threshold,discount_rate,note
+LX지인,0.30,0.20,0.40,0.20,300000,5000000,0.05,500만 이상 시 5% 추가 할인 가능
+KCC글라스,0.25,0.15,0.35,0.20,300000,4000000,0.03,400만 이상 시 3% 할인
+기타,0.20,0.10,0.30,0.18,250000,3000000,0.00,할인 없음
