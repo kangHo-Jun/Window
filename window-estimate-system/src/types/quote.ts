@@ -1,5 +1,15 @@
 export type BrandName = 'LX지인' | 'KCC글라스' | '기타' | 'KCC';
 
+export type BrandCompareItem = {
+  brand: BrandName;
+  rawTotal: number;
+  marginAmount: number;
+  installAmount: number;
+  discountAmount: number;
+  finalTotal: number;
+  isRecommended: boolean;
+};
+
 export type Configuration = {
   config_id: string;
   pyeong: string;
@@ -22,6 +32,20 @@ export type ChatQuoteData = {
   };
 };
 
+export type AIQuoteData = {
+  type: 'ai';
+  data: {
+    housingType: string;
+    pyeong: string;
+    expansion: string;
+    space: string;
+    budget: string;
+    count: string;
+    comparison: BrandCompareItem[];
+    recommendedBrand: BrandName;
+  };
+};
+
 export type SmartLegoQuoteData = {
   type: 'smart-lego' | 'lego';
   data: {
@@ -32,7 +56,7 @@ export type SmartLegoQuoteData = {
   };
 };
 
-export type QuoteData = ChatQuoteData | SmartLegoQuoteData;
+export type QuoteData = ChatQuoteData | AIQuoteData | SmartLegoQuoteData;
 
 export type QuoteCompleteHandler = (quoteData: QuoteData) => void;
 
@@ -40,15 +64,9 @@ export function isLegoQuoteData(quoteData: QuoteData): quoteData is SmartLegoQuo
   return quoteData.type === 'smart-lego' || quoteData.type === 'lego';
 }
 
-export type BrandCompareItem = {
-  brand: BrandName;
-  rawTotal: number;
-  marginAmount: number;
-  installAmount: number;
-  discountAmount: number;
-  finalTotal: number;
-  isRecommended: boolean;
-};
+export function isAIQuoteData(quoteData: QuoteData): quoteData is AIQuoteData {
+  return quoteData.type === 'ai';
+}
 
 export type ConsultationCustomer = {
   name: string;

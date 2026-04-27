@@ -3,7 +3,7 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, PDFDownloadLink } from '@react-pdf/renderer';
 import { Button } from '@/components/ui/button';
-import { isLegoQuoteData, type QuoteData } from '@/types/quote';
+import { isAIQuoteData, isLegoQuoteData, type QuoteData } from '@/types/quote';
 
 // 로컬 폰트 레지스터 (서버 내장 폰트 다운로드 기반)
 Font.register({
@@ -43,14 +43,16 @@ const OutputDocument = ({ quoteData }: { quoteData: QuoteData }) => {
           <Text style={styles.sectionTitle}>1. 고객 입력 사항 요약</Text>
           <View style={styles.textRow}>
              <Text style={styles.label}>견적 방식</Text>
-             <Text style={styles.value}>{isLegoQuoteData(quoteData) ? '스마트 상세 구성' : '대화형 간편 견적'}</Text>
+             <Text style={styles.value}>{isLegoQuoteData(quoteData) ? '스마트 상세 구성' : isAIQuoteData(quoteData) ? 'RAG AI 상담 견적' : '대화형 간편 견적'}</Text>
           </View>
           <View style={styles.textRow}>
              <Text style={styles.label}>주거 및 공간 정보</Text>
              <Text style={styles.value}>
                {isLegoQuoteData(quoteData)
                   ? `${quoteData.data.housingType || '아파트'} | ${quoteData.data.pyeong || '30'}평대 | ${quoteData.data.expansion || '비확장형'}`
-                  : `공간: ${quoteData.data.space || '-'}, 수량: ${quoteData.data.count || '-'}`
+                  : isAIQuoteData(quoteData)
+                    ? `${quoteData.data.housingType} | ${quoteData.data.pyeong}평 | ${quoteData.data.space} | ${quoteData.data.expansion}`
+                    : `공간: ${quoteData.data.space || '-'}, 수량: ${quoteData.data.count || '-'}`
                 }
              </Text>
           </View>

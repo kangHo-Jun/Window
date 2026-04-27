@@ -3,7 +3,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { isLegoQuoteData, type QuoteData } from '@/types/quote';
+import { isAIQuoteData, isLegoQuoteData, type QuoteData } from '@/types/quote';
 
 export default function SavingsCalculator({ quoteData }: { quoteData: QuoteData }) {
   let savings = 120000;
@@ -11,6 +11,10 @@ export default function SavingsCalculator({ quoteData }: { quoteData: QuoteData 
   if (isLegoQuoteData(quoteData)) {
     const qty = quoteData.data.configurations?.reduce((sum, config) => sum + (config.quantity || 0), 0) || 0;
     savings = qty * 40000;
+  } else if (isAIQuoteData(quoteData)) {
+    if (quoteData.data.comparison[0]) {
+      savings = Math.round(quoteData.data.comparison[0].finalTotal * 0.04);
+    }
   } else if (quoteData.data.budget?.includes("500")) {
     savings = 180000;
   }

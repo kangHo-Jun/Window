@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { isLegoQuoteData, type QuoteData } from '@/types/quote';
+import { isAIQuoteData, isLegoQuoteData, type QuoteData } from '@/types/quote';
 
 export default function ConsultingReport({ quoteData }: { quoteData: QuoteData }) {
   return (
@@ -24,7 +24,7 @@ export default function ConsultingReport({ quoteData }: { quoteData: QuoteData }
               <div>
                 <span className="block font-semibold text-slate-400 mb-1">견적 산출 방식</span>
                 <span className="font-medium text-slate-800">
-                  {isLegoQuoteData(quoteData) ? '스마트 레고식 (상세 선택)' : '대화형 챗봇식 (간편 입력)'}
+                  {isLegoQuoteData(quoteData) ? '스마트 레고식 (상세 선택)' : isAIQuoteData(quoteData) ? 'RAG AI 챗봇식' : '대화형 챗봇식 (간편 입력)'}
                 </span>
               </div>
               <div>
@@ -32,7 +32,9 @@ export default function ConsultingReport({ quoteData }: { quoteData: QuoteData }
                 <span className="font-medium text-slate-800">
                   {isLegoQuoteData(quoteData)
                     ? `${quoteData.data.housingType || '아파트'} | ${quoteData.data.pyeong || '30'}평대 | ${quoteData.data.expansion || '비확장형'}`
-                    : `공간: ${quoteData.data.space || '-'} / 창 갯수: ${quoteData.data.count || '-'}`
+                    : isAIQuoteData(quoteData)
+                      ? `${quoteData.data.housingType} | ${quoteData.data.pyeong}평 | ${quoteData.data.space} | ${quoteData.data.expansion} | 예산: ${quoteData.data.budget}`
+                      : `공간: ${quoteData.data.space || '-'} / 창 갯수: ${quoteData.data.count || '-'}`
                   }
                 </span>
               </div>

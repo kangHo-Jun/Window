@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import type { BrandCompareItem, QuoteData } from '@/types/quote';
+import { isAIQuoteData, type BrandCompareItem, type QuoteData } from '@/types/quote';
 
 const SAMPLE_RESULTS: BrandCompareItem[] = [
   {
@@ -39,6 +39,8 @@ export default function BrandCompareTable({ quoteData }: { quoteData: QuoteData 
     return <div className="text-center p-8 text-slate-500 font-medium">가견적 산출 중... (룰 엔진 가동)</div>;
   }
 
+  const results = isAIQuoteData(quoteData) ? quoteData.data.comparison : SAMPLE_RESULTS;
+
   return (
     <Card className="border-none shadow-sm bg-white overflow-hidden rounded-2xl w-full">
       <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
@@ -46,7 +48,7 @@ export default function BrandCompareTable({ quoteData }: { quoteData: QuoteData 
       </CardHeader>
       <CardContent className="p-0">
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100">
-          {SAMPLE_RESULTS.map((res) => (
+          {results.map((res) => (
             <div key={res.brand} className={`p-6 relative transition-colors ${res.isRecommended ? 'bg-[#f0f9ff]' : 'hover:bg-slate-50'}`}>
               {res.isRecommended && (
                 <span className="absolute top-0 right-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
