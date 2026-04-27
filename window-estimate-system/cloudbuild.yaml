@@ -1,3 +1,6 @@
+options:
+  default_logs_bucket_behavior: REGIONAL_USER_OWNED_BUCKET
+
 steps:
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
@@ -11,3 +14,5 @@ steps:
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
+      - '--project'
+      - 'stacking-492708'
