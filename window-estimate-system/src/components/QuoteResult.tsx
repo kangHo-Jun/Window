@@ -9,8 +9,9 @@ import ConsultationForm from './ConsultationForm';
 import ConsultationSuccess from './ConsultationSuccess';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import type { QuoteData } from '@/types/quote';
 
-export default function QuoteResult({ data, onReset }: { data: any, onReset: () => void }) {
+export default function QuoteResult({ data, onReset }: { data: QuoteData | null; onReset: () => void }) {
   const [showForm, setShowForm] = React.useState(false);
   const [isSuccess, setIsSuccess] = React.useState(false);
 

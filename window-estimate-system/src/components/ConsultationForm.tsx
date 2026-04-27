@@ -8,9 +8,10 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import type { QuoteData } from '@/types/quote';
 
 interface ConsultationFormProps {
-  quoteData: any;
+  quoteData: QuoteData;
   onSuccess: () => void;
   onCancel: () => void;
 }
@@ -53,9 +54,10 @@ export default function ConsultationForm({ quoteData, onSuccess, onCancel }: Con
       }
       
       onSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || "전송 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+      const message = err instanceof Error ? err.message : "전송 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
+      setError(message);
     } finally {
       setLoading(false);
     }

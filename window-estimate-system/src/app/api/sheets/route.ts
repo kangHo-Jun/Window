@@ -1,12 +1,42 @@
 import { google } from 'googleapis';
 import { NextResponse } from 'next/server';
+import type { ConsultationSubmission, QuoteData } from '@/types/quote';
+
+/**
+ * 견적 데이터를 시트에서 바로 읽을 수 있는 한 줄 요약으로 변환
+ */
+function formatQuoteSummary(quoteData?: QuoteData) {
+  if (!quoteData || typeof quoteData !== 'object') {
+    return '견적 정보 없음';
+  }
+
+  if (quoteData.type === 'chat') {
+    return [
+      '대화형',
+      `공간: ${quoteData.data?.space || '-'}`,
+      `창 개수: ${quoteData.data?.count || '-'}`,
+      `예산: ${quoteData.data?.budget || '-'}`,
+    ].join(' | ');
+  }
+
+  if (quoteData.type === 'smart-lego' || quoteData.type === 'lego') {
+    return [
+      '레고식',
+      `주거: ${quoteData.data?.housingType || '-'}`,
+      `평형: ${quoteData.data?.pyeong ? `${quoteData.data.pyeong}평` : '-'}`,
+      `확장: ${quoteData.data?.expansion || '-'}`,
+    ].join(' | ');
+  }
+
+  return '알 수 없는 견적 형식';
+}
 
 /**
  * Google Sheets API를 통한 데이터 전송 라우트
  */
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const body = (await req.json()) as ConsultationSubmission;
     const { customer, quoteData, finalConsulting } = body;
 
     // 환경변수 확인
@@ -36,7 +66,7 @@ export async function POST(req: Request) {
         customer.phone,                     // 연락처
         customer.address,                   // 주소
         customer.preferredDate,             // 상담 희망일
-        JSON.stringify(quoteData),          // 견적 원본 데이터 (JSON)
+        formatQuoteSummary(quoteData),      // 사람이 읽기 쉬운 견적 요약
         finalConsulting?.recommendedBrand || 'LX지인' // 추천 브랜드
       ]
     ];
@@ -50,8 +80,9 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true, data: response.data });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Google Sheets API Error:", error);
-    return NextResponse.json({ error: error.message || "Failed to submit" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Failed to submit";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

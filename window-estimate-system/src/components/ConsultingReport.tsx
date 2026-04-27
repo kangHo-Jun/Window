@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { isLegoQuoteData, type QuoteData } from '@/types/quote';
 
-export default function ConsultingReport({ quoteData }: { quoteData: any }) {
-
+export default function ConsultingReport({ quoteData }: { quoteData: QuoteData }) {
   return (
     <Card className="border border-slate-200 shadow-md bg-white overflow-hidden rounded-2xl w-full mt-8">
       <CardHeader className="bg-blue-50 border-b border-blue-100 pb-4">
@@ -24,16 +24,15 @@ export default function ConsultingReport({ quoteData }: { quoteData: any }) {
               <div>
                 <span className="block font-semibold text-slate-400 mb-1">견적 산출 방식</span>
                 <span className="font-medium text-slate-800">
-                  {quoteData?.type === 'smart-lego' ? '스마트 레고식 (상세 선택)' : '대화형 챗봇식 (간편 입력)'}
+                  {isLegoQuoteData(quoteData) ? '스마트 레고식 (상세 선택)' : '대화형 챗봇식 (간편 입력)'}
                 </span>
               </div>
               <div>
                 <span className="block font-semibold text-slate-400 mb-1">입력된 공간 상태</span>
                 <span className="font-medium text-slate-800">
-                  {quoteData?.type === 'smart-lego' ? 
-                     `${quoteData.data?.housingType || '아파트'} | ${quoteData.data?.pyeong || '30'}평대 | ${quoteData.data?.expansion || '비확장형'}` 
-                     : 
-                     `공간: ${quoteData.data?.space || '-'} / 창 갯수: ${quoteData.data?.count || '-'}`
+                  {isLegoQuoteData(quoteData)
+                    ? `${quoteData.data.housingType || '아파트'} | ${quoteData.data.pyeong || '30'}평대 | ${quoteData.data.expansion || '비확장형'}`
+                    : `공간: ${quoteData.data.space || '-'} / 창 갯수: ${quoteData.data.count || '-'}`
                   }
                 </span>
               </div>

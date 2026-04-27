@@ -5,25 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Plus, Minus, Building2, Home, Building } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-type Configuration = {
-  config_id: string;
-  pyeong: string;
-  expansion: string;
-  space_name: string;
-  space_order: string;
-  window_type: string;
-  std_width: string;
-  std_height: string;
-  quantity: number;
-  recommend_product_id: string;
-};
+import type { Configuration, QuoteCompleteHandler, SmartLegoQuoteData } from '@/types/quote';
 
 /**
  * 스마트 레고식 입력 폼 (전면 개편)
  * 평형과 확장여부만 선택하면 db_configurations_v2.csv에서 공간을 자동 매핑함
  */
-export default function QuoteFormLego({ onComplete }: { onComplete: (json: any) => void }) {
+export default function QuoteFormLego({ onComplete }: { onComplete: QuoteCompleteHandler }) {
   const [step, setStep] = useState(1);
   const [housingType, setHousingType] = useState<string>("아파트");
   const [pyeong, setPyeong] = useState<string>("30");
@@ -48,14 +36,24 @@ export default function QuoteFormLego({ onComplete }: { onComplete: (json: any) 
           if (!line) continue;
           
           const cols = line.split(',');
-          const obj: any = {};
+          const obj = {} as Record<string, string>;
           
           headers.forEach((header, index) => {
             obj[header] = cols[index] ? cols[index].trim() : '';
           });
-          
-          obj.quantity = parseInt(obj.quantity || "1", 10);
-          parsed.push(obj as Configuration);
+
+          parsed.push({
+            config_id: obj.config_id || '',
+            pyeong: obj.pyeong || '',
+            expansion: obj.expansion || '',
+            space_name: obj.space_name || '',
+            space_order: obj.space_order || '',
+            window_type: obj.window_type || '',
+            std_width: obj.std_width || '',
+            std_height: obj.std_height || '',
+            quantity: parseInt(obj.quantity || "1", 10),
+            recommend_product_id: obj.recommend_product_id || '',
+          });
         }
         setAllConfigs(parsed);
       })
@@ -87,7 +85,7 @@ export default function QuoteFormLego({ onComplete }: { onComplete: (json: any) 
   };
 
   const handleSubmit = () => {
-    const resultJson = {
+    const resultJson: SmartLegoQuoteData = {
       type: "smart-lego",
       data: {
         housingType,

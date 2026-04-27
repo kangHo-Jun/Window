@@ -1,62 +1,42 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import type { BrandCompareItem, QuoteData } from '@/types/quote';
 
-export default function BrandCompareTable({ quoteData }: { quoteData: any }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  // 정적 샘플 데이터 구조
-  const [results, setResults] = useState<any[]>([
-    {
-      brand: 'LX지인',
-      rawTotal: 12000000,
-      marginAmount: 3600000,
-      installAmount: 2400000,
-      discountAmount: 900000,
-      finalTotal: 17100000,
-      isRecommended: true
-    },
-    {
-      brand: 'KCC글라스',
-      rawTotal: 9000000,
-      marginAmount: 2250000,
-      installAmount: 1800000,
-      discountAmount: 391500,
-      finalTotal: 12658500,
-      isRecommended: false
-    },
-    {
-      brand: '기타',
-      rawTotal: 7000000,
-      marginAmount: 1400000,
-      installAmount: 1260000,
-      discountAmount: 0,
-      finalTotal: 9660000,
-      isRecommended: false
-    }
-  ]);
+const SAMPLE_RESULTS: BrandCompareItem[] = [
+  {
+    brand: 'LX지인',
+    rawTotal: 12000000,
+    marginAmount: 3600000,
+    installAmount: 2400000,
+    discountAmount: 900000,
+    finalTotal: 17100000,
+    isRecommended: true,
+  },
+  {
+    brand: 'KCC글라스',
+    rawTotal: 9000000,
+    marginAmount: 2250000,
+    installAmount: 1800000,
+    discountAmount: 391500,
+    finalTotal: 12658500,
+    isRecommended: false,
+  },
+  {
+    brand: '기타',
+    rawTotal: 7000000,
+    marginAmount: 1400000,
+    installAmount: 1260000,
+    discountAmount: 0,
+    finalTotal: 9660000,
+    isRecommended: false,
+  },
+];
 
-  useEffect(() => {
-    // 렌더링 무한 에러 방지용 임시 데이터 로직
-    if (quoteData) {
-      setLoading(false);
-      setError(null);
-    }
-  }, [quoteData]);
-
-  if (loading) {
+export default function BrandCompareTable({ quoteData }: { quoteData: QuoteData }) {
+  if (!quoteData) {
     return <div className="text-center p-8 text-slate-500 font-medium">가견적 산출 중... (룰 엔진 가동)</div>;
-  }
-
-  if (error) {
-    return (
-      <Card className="border-red-200 bg-red-50 p-6 text-center">
-        <div className="text-red-600 font-bold mb-2">계산 실패</div>
-        <p className="text-red-500 text-sm">{error}</p>
-      </Card>
-    );
   }
 
   return (
@@ -66,7 +46,7 @@ export default function BrandCompareTable({ quoteData }: { quoteData: any }) {
       </CardHeader>
       <CardContent className="p-0">
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100">
-          {results.map((res, idx) => (
+          {SAMPLE_RESULTS.map((res) => (
             <div key={res.brand} className={`p-6 relative transition-colors ${res.isRecommended ? 'bg-[#f0f9ff]' : 'hover:bg-slate-50'}`}>
               {res.isRecommended && (
                 <span className="absolute top-0 right-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">

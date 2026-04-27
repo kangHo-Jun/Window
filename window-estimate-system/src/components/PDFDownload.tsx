@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, PDFDownloadLink } from '@react-pdf/renderer';
 import { Button } from '@/components/ui/button';
+import { isLegoQuoteData, type QuoteData } from '@/types/quote';
 
 // 로컬 폰트 레지스터 (서버 내장 폰트 다운로드 기반)
 Font.register({
@@ -28,7 +29,7 @@ const styles = StyleSheet.create({
 });
 
 // PDF 문서 컴포넌트 
-const OutputDocument = ({ quoteData }: { quoteData: any }) => {
+const OutputDocument = ({ quoteData }: { quoteData: QuoteData }) => {
   // 하드코딩 문서 컨텐츠 (Phase 3 범위)
   return (
     <Document>
@@ -42,15 +43,15 @@ const OutputDocument = ({ quoteData }: { quoteData: any }) => {
           <Text style={styles.sectionTitle}>1. 고객 입력 사항 요약</Text>
           <View style={styles.textRow}>
              <Text style={styles.label}>견적 방식</Text>
-             <Text style={styles.value}>{quoteData.type === 'smart-lego' ? '스마트 상세 구성' : '대화형 간편 견적'}</Text>
+             <Text style={styles.value}>{isLegoQuoteData(quoteData) ? '스마트 상세 구성' : '대화형 간편 견적'}</Text>
           </View>
           <View style={styles.textRow}>
              <Text style={styles.label}>주거 및 공간 정보</Text>
              <Text style={styles.value}>
-               {quoteData.type === 'smart-lego' ? 
-                  `${quoteData.data.housingType || '아파트'} | ${quoteData.data.pyeong || '30'}평대 | ${quoteData.data.expansion || '비확장형'}` : 
-                  `공간: ${quoteData.data.space || '-'}, 수량: ${quoteData.data.count || '-'}`
-               }
+               {isLegoQuoteData(quoteData)
+                  ? `${quoteData.data.housingType || '아파트'} | ${quoteData.data.pyeong || '30'}평대 | ${quoteData.data.expansion || '비확장형'}`
+                  : `공간: ${quoteData.data.space || '-'}, 수량: ${quoteData.data.count || '-'}`
+                }
              </Text>
           </View>
         </View>
@@ -89,22 +90,14 @@ const OutputDocument = ({ quoteData }: { quoteData: any }) => {
   );
 };
 
-export default function PDFDownload({ quoteData }: { quoteData: any }) {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  if (!isClient) return null;
-
+export default function PDFDownload({ quoteData }: { quoteData: QuoteData }) {
   return (
     <div className="w-full">
       <PDFDownloadLink
         document={<OutputDocument quoteData={quoteData} />}
         fileName="window_estimate_report.pdf"
       >
-        {({ blob, url, loading, error }) => (
+        {({ loading }) => (
            <Button 
               size="lg" 
               className={`w-full ${loading ? 'bg-slate-400' : 'bg-blue-600 hover:bg-blue-700'} text-white font-bold py-6 rounded-xl transition-all shadow-md`}

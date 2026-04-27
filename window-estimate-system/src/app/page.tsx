@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import FormSelector from '@/components/FormSelector';
 import QuoteResult from '@/components/QuoteResult';
+import type { QuoteData } from '@/types/quote';
 
 /**
  * 창호 견적 시스템 메인 페이지
@@ -11,7 +12,7 @@ import QuoteResult from '@/components/QuoteResult';
  * 2. FormSelector 컴포넌트: 레고식(상세) / 채팅형(간편) 폼 중 선택 제공
  */
 export default function HomePage() {
-  const [resultData, setResultData] = useState<any>(null);
+  const [resultData, setResultData] = useState<QuoteData | null>(null);
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center p-4 md:p-8">

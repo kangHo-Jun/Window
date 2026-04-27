@@ -1,39 +1,19 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { isLegoQuoteData, type QuoteData } from '@/types/quote';
 
-export default function SavingsCalculator({ quoteData }: { quoteData: any }) {
-  const [savings, setSavings] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
+export default function SavingsCalculator({ quoteData }: { quoteData: QuoteData }) {
+  let savings = 120000;
 
-  useEffect(() => {
-    // db_margins.csv의 discount_rate 평균치 등을 임시 기반으로 사용할 수 있으나 
-    // 요구사항에 맞춰 시각적 단순 애니메이션 구현 (db_margins값 기반 연동으로 가정)
-    
-    // 단순 시연을 위한 절감액 도출
-    let estimatedSavings = 120000; // 기본 연간 절감액
-    if (quoteData.type === 'smart-lego') {
-       const qty = quoteData.data.configurations.reduce((a:number, b:any) => a + (b.quantity || 0), 0);
-       estimatedSavings = qty * 40000;
-    } else if (quoteData.type === 'chat') {
-       if (quoteData.data.budget?.includes("500")) {
-         estimatedSavings = 180000;
-       }
-    }
-
-    setSavings(estimatedSavings);
-    
-    // 애니메이션 트리거
-    const timer = setTimeout(() => {
-      setIsLoaded(true);
-      setProgress(75); // 75% 효율 향상 시각화
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [quoteData]);
+  if (isLegoQuoteData(quoteData)) {
+    const qty = quoteData.data.configurations?.reduce((sum, config) => sum + (config.quantity || 0), 0) || 0;
+    savings = qty * 40000;
+  } else if (quoteData.data.budget?.includes("500")) {
+    savings = 180000;
+  }
 
   return (
     <Card className="border-none shadow-sm rounded-2xl w-full bg-[#f8fafc]">
@@ -47,14 +27,14 @@ export default function SavingsCalculator({ quoteData }: { quoteData: any }) {
           <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center">
              <div className="text-slate-500 text-sm mb-2 font-medium">연간 예상 절약액</div>
              <div className="text-3xl font-extrabold text-green-600 transition-all duration-1000 opacity-100">
-               {isLoaded ? savings.toLocaleString() : "0"}원
+               {savings.toLocaleString()}원
              </div>
              
              <div className="border-t border-slate-100 my-4" />
              
              <div className="text-slate-500 text-sm mb-2 font-medium">10년 누적 절약액</div>
              <div className="text-2xl font-bold text-slate-800 transition-all duration-1000">
-               {isLoaded ? (savings * 10).toLocaleString() : "0"}원
+               {(savings * 10).toLocaleString()}원
              </div>
           </div>
           
@@ -74,7 +54,7 @@ export default function SavingsCalculator({ quoteData }: { quoteData: any }) {
                      <span className="text-blue-700 font-bold">LX지인 뷰프레임 교체 후 (1등급)</span>
                      <span className="text-blue-600 font-bold">최상옵</span>
                    </div>
-                   <Progress value={progress} className="h-3 bg-slate-100 transition-all duration-1000 ease-out" />
+                   <Progress value={75} className="h-3 bg-slate-100 transition-all duration-1000 ease-out" />
                 </div>
                 
                 <p className="text-xs text-slate-400 leading-relaxed mt-4">
