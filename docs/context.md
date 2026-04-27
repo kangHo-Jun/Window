@@ -58,6 +58,42 @@ LX지인 창호 대리점을 위한 **창호 가견적 자동화 사이트** 구
 | Google Sheets 실제 연동 | `window-estimate-system/` | ✅ 완료 |
 | Cloud Run 배포 | `window-estimate-system/` | ✅ 완료 |
 | Cloud Build 배포 설정 문서화 | `docs/구글런설정.md` | ✅ 완료 |
+| Cloud Build 서비스 계정 로그 권한 부여 | GCP IAM | ✅ 완료 |
+| `loading-sheet` Artifact Registry 조회 권한 부여 | GCP IAM | ✅ 완료 |
+| 구글런설정.md 최신 권한 이슈 반영 | `docs/구글런설정.md` | ✅ 완료 |
+| ver20 RAG 챗봇 1차 구현 | `window-estimate-system/` | ✅ 완료 |
+| AIChatBot 상호작용 버그 수정 | `window-estimate-system/` | ✅ 완료 |
+| Gemini 모델 `gemini-2.0-flash` 교체 | `window-estimate-system/` | ✅ 완료 |
+| AI 챗봇 평형 중복 안내 문구 수정 | `window-estimate-system/` | ✅ 완료 |
+| AI 챗봇 대화 내용 세로 스크롤 수정 | `window-estimate-system/` | ✅ 완료 |
+| AI 챗봇 `route.ts` 상태 주입형 프롬프트 구조 개편 | `window-estimate-system/` | ✅ 완료 |
+| AI 챗봇 클라이언트 `fields` API 전달 및 프롬프트 주입 보강 | `window-estimate-system/` | ✅ 완료 |
+| AI 챗봇 최소 정보 3개 기반 빠른 가견적 버튼 추가 | `window-estimate-system/` | ✅ 완료 |
+| AI 챗봇 빠른 가견적 버튼 헤더 우측 고정으로 이동 | `window-estimate-system/` | ✅ 완료 |
+| AI 챗봇 견적 레벨 시스템 1~3단계 및 출력 분기 구현 | `window-estimate-system/` | ✅ 완료 |
+| AI 챗봇 Sentiment Detection 및 Fallback Handling 추가 | `window-estimate-system/` | ✅ 완료 |
+| AI 챗봇 지역명 오입력(`한국` 등) fallback 보강 | `window-estimate-system/` | ✅ 완료 |
+| AI 챗봇 `통과/패스` 스킵 처리 및 동적 오차율 반영 | `window-estimate-system/` | ✅ 완료 |
+| AI 챗봇 이름 수집 / 상시 헤더 버튼 / 상담필요 시트 플래그 추가 | `window-estimate-system/` | ✅ 완료 |
+| AI 챗봇 history 중복 전송 제거 및 이름/숫자 문맥 처리 보정 | `window-estimate-system/` | ✅ 완료 |
+| AI 챗봇 이름 단독 입력 정규식 보정 | `window-estimate-system/` | ✅ 완료 |
+| Gemini 모델 `gemini-2.5-flash` 교체 | `window-estimate-system/` | ✅ 완료 |
+| SmartOptions OPTION_MAP 허용값 불일치 수정 | `window-estimate-system/` | ✅ 완료 |
+| SmartOptions → Gemini `currentQuestionField` 동기화 | `window-estimate-system/` | ✅ 완료 |
+| pyeong 저장 형식 `'30평대'` 통일 | `window-estimate-system/` | ✅ 완료 |
+| `quoteLevel >= 1` 시 SmartOptions 버튼 숨김 | `window-estimate-system/` | ✅ 완료 |
+| `route.ts` 전면 재설계 — Gemini 대화 주도 구조 | `window-estimate-system/` | ✅ 완료 |
+| ragEngine `customerName` 오추출 차단 | `window-estimate-system/` | ✅ 완료 |
+| SmartOptions → Gemini JSON `options` 기반으로 전환 | `window-estimate-system/` | ✅ 완료 |
+| PRD_v2.0_봇고도화_final.md | `docs/` | ✅ 완료 |
+| brand_voice_지인이.md | `docs/` | ✅ 완료 |
+| sentimentDetector.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
+| intentClassifier.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
+| personaEngine.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
+| dynamicQuestion.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
+| skipDetector.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
+| quoteLevelEngine.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
+| Gemini `gemini-2.5-flash` 연결 교체 | `window-estimate-system/` | ✅ 완료 |
 
 ### ui.md 완성 섹션 목록
 1. UI 개요 및 목표
@@ -86,16 +122,20 @@ LX지인 창호 대리점을 위한 **창호 가견적 자동화 사이트** 구
 ---
 
 ## 진행 중인 것
-- Phase 5 (RAG 웹 채팅봇) 준비 중
-- 운영 URL 기준 기능 검증
-- GitHub 저장소 Cloud Build repository mapping 연결 대기
+- ver20 Phase 2 완료 / Phase 3 준비 중
+- 대화 품질 안정화 작업 중
+- SmartOptions 버튼을 Gemini JSON 응답 기반으로 전환 완료
+- Cloud Run 배포 미완료 (로컬 빌드만 통과)
+- Gemini 연결 교체 완료, 실제 운영 응답 품질 최종 검증 필요
 
 ---
 
 ## 다음 할 일 (순서)
-1. Cloud Run 운영 URL 기준 기능 검증
-2. GitHub 저장소 Cloud Build 자동 배포 트리거 연결 완료
-3. Phase 5 - RAG 웹 채팅봇 개발
+1. 대화 품질 최종 검증
+2. Phase 3 - 가견적 인라인 카드
+3. Phase 3 - 소비자 그룹화
+4. Phase 4 - 운영자 지원
+5. ver20 Cloud Run 배포
 
 ---
 
