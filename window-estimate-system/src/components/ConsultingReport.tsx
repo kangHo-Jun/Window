@@ -33,11 +33,17 @@ export default function ConsultingReport({ quoteData }: { quoteData: QuoteData }
                   {isLegoQuoteData(quoteData)
                     ? `${quoteData.data.housingType || '아파트'} | ${quoteData.data.pyeong || '30'}평대 | ${quoteData.data.expansion || '비확장형'}`
                     : isAIQuoteData(quoteData)
-                      ? `${quoteData.data.housingType} | ${quoteData.data.pyeong}평 | ${quoteData.data.space} | ${quoteData.data.expansion} | 예산: ${quoteData.data.budget}`
+                      ? `${quoteData.data.housingType} | ${quoteData.data.pyeong}평 | ${quoteData.data.space} | ${quoteData.data.expansion} | 노후도: ${quoteData.data.age} | 시공: ${quoteData.data.timing}`
                       : `공간: ${quoteData.data.space || '-'} / 창 갯수: ${quoteData.data.count || '-'}`
                   }
                 </span>
               </div>
+              {isAIQuoteData(quoteData) && (
+                <div className="sm:col-span-2">
+                  <span className="block font-semibold text-slate-400 mb-1">고민 사항</span>
+                  <span className="font-medium text-slate-800">{quoteData.data.problem || '입력 없음'}</span>
+                </div>
+              )}
            </div>
         </div>
 

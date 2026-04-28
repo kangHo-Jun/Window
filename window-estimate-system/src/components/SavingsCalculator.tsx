@@ -15,8 +15,6 @@ export default function SavingsCalculator({ quoteData }: { quoteData: QuoteData 
     if (quoteData.data.comparison[0]) {
       savings = Math.round(quoteData.data.comparison[0].finalTotal * 0.04);
     }
-  } else if (quoteData.data.budget?.includes("500")) {
-    savings = 180000;
   }
 
   return (

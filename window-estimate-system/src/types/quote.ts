@@ -1,4 +1,5 @@
 export type BrandName = 'LX지인' | 'KCC글라스' | '기타' | 'KCC';
+export type QuoteLevel = 0 | 1 | 2 | 3;
 
 export type BrandCompareItem = {
   brand: BrandName;
@@ -28,21 +29,31 @@ export type ChatQuoteData = {
   data: {
     space: string;
     count: string;
-    budget: string;
   };
 };
 
 export type AIQuoteData = {
   type: 'ai';
   data: {
+    quoteLevel: QuoteLevel;
+    errorRange: string;
+    skippedCount?: number;
     housingType: string;
     pyeong: string;
     expansion: string;
     space: string;
-    budget: string;
     count: string;
+    age: string;
+    problem: string;
+    timing: string;
+    floor?: string;
+    brandPreference?: string;
+    priority?: string;
     comparison: BrandCompareItem[];
     recommendedBrand: BrandName;
+    // 운영자 전략 카드용 추가 필드
+    consultationNeeded?: boolean;
+    fallbackCount?: number;
   };
 };
 
@@ -78,6 +89,8 @@ export type ConsultationCustomer = {
 export type ConsultationSubmission = {
   customer: ConsultationCustomer;
   quoteData: QuoteData;
+  consultationNeeded?: boolean;
+  fallbackCount?: number;
   finalConsulting?: {
     recommendedBrand?: BrandName | string;
   };
