@@ -60,6 +60,7 @@ LX지인 창호 대리점을 위한 **창호 가견적 자동화 사이트** 구
 | Cloud Build 배포 설정 문서화 | `docs/구글런설정.md` | ✅ 완료 |
 | Cloud Build 서비스 계정 로그 권한 부여 | GCP IAM | ✅ 완료 |
 | `loading-sheet` Artifact Registry 조회 권한 부여 | GCP IAM | ✅ 완료 |
+| `GEMINI_API_KEY` Secret Manager 등록 | GCP Secret Manager | ✅ 완료 |
 | 구글런설정.md 최신 권한 이슈 반영 | `docs/구글런설정.md` | ✅ 완료 |
 | ver20 RAG 챗봇 1차 구현 | `window-estimate-system/` | ✅ 완료 |
 | AIChatBot 상호작용 버그 수정 | `window-estimate-system/` | ✅ 완료 |
@@ -87,6 +88,8 @@ LX지인 창호 대리점을 위한 **창호 가견적 자동화 사이트** 구
 | SmartOptions → Gemini JSON `options` 기반으로 전환 | `window-estimate-system/` | ✅ 완료 |
 | PRD_v2.0_봇고도화_final.md | `docs/` | ✅ 완료 |
 | brand_voice_지인이.md | `docs/` | ✅ 완료 |
+| AI 챗봇 raw JSON reply 노출 방지 및 오피스텔→아파트 매핑 보강 | `window-estimate-system/` | ✅ 완료 |
+| AI 챗봇 속도 최적화 1차 — 정규식 fast-path + 단일 Gemini 호출 + SSE 스트리밍 | `window-estimate-system/` | ✅ 완료 |
 | sentimentDetector.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
 | intentClassifier.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
 | personaEngine.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
@@ -94,6 +97,24 @@ LX지인 창호 대리점을 위한 **창호 가견적 자동화 사이트** 구
 | skipDetector.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
 | quoteLevelEngine.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
 | Gemini `gemini-2.5-flash` 연결 교체 | `window-estimate-system/` | ✅ 완료 |
+| AI 챗봇 속도 최적화 — 정규식 fast-path + 단일 Gemini 호출 + SSE 스트리밍 | `window-estimate-system/` | ✅ 완료 |
+| Phase 3 - QuoteCard.tsx 인라인 가견적 카드 (레벨 1/2/3 차별화) | `window-estimate-system/src/components/` | ✅ 완료 |
+| Phase 3 - consumerGrouping.ts 소비자 5그룹 자동 분류 | `window-estimate-system/src/lib/` | ✅ 완료 |
+| Phase 3 - AIChatBot 인라인 QuoteCard 표시 연동 | `window-estimate-system/src/components/` | ✅ 완료 |
+| Phase 4 - OperatorReport.tsx 운영자 전략 카드 | `window-estimate-system/src/components/` | ✅ 완료 |
+| Phase 4 - sheets/route.ts 운영자 데이터 20컬럼 고도화 | `window-estimate-system/src/app/api/sheets/` | ✅ 완료 |
+| Phase 4 - fallbackCount 실제 추적 + Human-in-the-Loop 플래그 | `window-estimate-system/src/app/api/chat/` | ✅ 완료 |
+| homewindow.kr 벤치마킹 분석 문서 | docs/ | ✅ 완료 |
+| homewindow.kr 벤치마킹 분석 | docs/ | ✅ 완료 |
+| benchmarking_homewindow.md 저장 | `docs/benchmarking_homewindow.md` | ✅ 완료 |
+| Hugreen SYNC + homewindow.kr 재분석 문서 | `docs/benchmarking_hugreen.md` | ✅ 완료 |
+| hugreen.kr 벤치마킹 분석 | docs/ | ✅ 완료 |
+| 전체 구현 로드맵 확정 (Phase1~5) | docs/ | ✅ 완료 |
+| Gemini 2.5-flash 모델 교체 | window-estimate-system/ | ✅ 완료 |
+| Gemini 주도 대화 flow 재설계 | window-estimate-system/ | ✅ 완료 |
+| AIChatBot 반응형 실시간 견적 레이아웃 재설계 (데스크탑 60/40, 태블릿 접이식, 모바일 바텀시트/FAB) | `window-estimate-system/src/components/` | ✅ 완료 |
+| AIChatBot 헤더 액션/실시간 견적 패널 톤다운 리디자인 | `window-estimate-system/src/components/` | ✅ 완료 |
+| AIChatBot 헤더 액션 버튼 오버플로우/잘림 보정 | `window-estimate-system/src/components/` | ✅ 완료 |
 
 ### ui.md 완성 섹션 목록
 1. UI 개요 및 목표
@@ -122,20 +143,23 @@ LX지인 창호 대리점을 위한 **창호 가견적 자동화 사이트** 구
 ---
 
 ## 진행 중인 것
-- ver20 Phase 2 완료 / Phase 3 준비 중
-- 대화 품질 안정화 작업 중
-- SmartOptions 버튼을 Gemini JSON 응답 기반으로 전환 완료
+- Phase 3~4 구현 완료, 브라우저 실환경 테스트 미완료
 - Cloud Run 배포 미완료 (로컬 빌드만 통과)
-- Gemini 연결 교체 완료, 실제 운영 응답 품질 최종 검증 필요
 
 ---
 
 ## 다음 할 일 (순서)
-1. 대화 품질 최종 검증
-2. Phase 3 - 가견적 인라인 카드
-3. Phase 3 - 소비자 그룹화
-4. Phase 4 - 운영자 지원
-5. ver20 Cloud Run 배포
+[PHASE 1 - DB 보강]
+1. 공간별 소/중/대 규격 DB
+2. 선호 포인트 룰 DB
+3. 제품 성능 태그 DB
+4. 공간별 후보 제품 매핑 DB
+5. 옵션/부자재 DB
+
+[PHASE 2] 대화 Flow 재설계 (레벨1/2/3)
+[PHASE 3] UI 재설계 (공간카드/사이드바/반응형)
+[PHASE 4] AI 추천 고도화
+[PHASE 5] ver20 Cloud Run 배포
 
 ---
 
@@ -152,6 +176,7 @@ project/
     ├── task.md
     ├── implementation_plan.md
     ├── ui.md             # UI 개발 문서
+    ├── benchmarking_homewindow.md # 홈윈도우 분석
     ├── PRD_창호견적시스템_v1.md
     ├── price_db_sample.csv
     └── products_db_sample.csv
