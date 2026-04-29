@@ -115,6 +115,9 @@ LX지인 창호 대리점을 위한 **창호 가견적 자동화 사이트** 구
 | AIChatBot 반응형 실시간 견적 레이아웃 재설계 (데스크탑 60/40, 태블릿 접이식, 모바일 바텀시트/FAB) | `window-estimate-system/src/components/` | ✅ 완료 |
 | AIChatBot 헤더 액션/실시간 견적 패널 톤다운 리디자인 | `window-estimate-system/src/components/` | ✅ 완료 |
 | AIChatBot 헤더 액션 버튼 오버플로우/잘림 보정 | `window-estimate-system/src/components/` | ✅ 완료 |
+| AI 챗봇 공간별 창 크기 범주 선택 및 공간 규격 연동 | `window-estimate-system/`, `docs/db_space_size.csv` | ✅ 완료 |
+| AI 챗봇 공간 카드 인라인 크기 선택 통합 | `window-estimate-system/src/components/AIChatBot.tsx` | ✅ 완료 |
+| AI 추천 고도화 1차 (선호 규칙/맥락 멘트/난방비 절감/결과 카드 강화) | `window-estimate-system/`, `docs/db_preference_rules.csv` | ✅ 완료 |
 
 ### ui.md 완성 섹션 목록
 1. UI 개요 및 목표
@@ -143,23 +146,19 @@ LX지인 창호 대리점을 위한 **창호 가견적 자동화 사이트** 구
 ---
 
 ## 진행 중인 것
-- Phase 3~4 구현 완료, 브라우저 실환경 테스트 미완료
-- Cloud Run 배포 미완료 (로컬 빌드만 통과)
+- 로컬 빌드 통과 상태에서 브라우저 실환경 검증 및 최종 UI 안정화 진행 중
+- Phase 5 재배포 전, 대화형 Flow 마무리 점검 진행 중
+- `부분확장` 공간 구성은 현재 `비확장형` fallback으로 동작하며, DB 원본 보강 여부 검토 진행 중
 
 ---
 
-## 다음 할 일 (순서)
-[PHASE 1 - DB 보강]
-1. 공간별 소/중/대 규격 DB
-2. 선호 포인트 룰 DB
-3. 제품 성능 태그 DB
-4. 공간별 후보 제품 매핑 DB
-5. 옵션/부자재 DB
-
-[PHASE 2] 대화 Flow 재설계 (레벨1/2/3)
-[PHASE 3] UI 재설계 (공간카드/사이드바/반응형)
-[PHASE 4] AI 추천 고도화
-[PHASE 5] ver20 Cloud Run 배포
+## 다음 할 일 (현재버그 정의 포함)
+[다음 작업 순서]
+1. `부분확장` 포함 전체 확장 옵션별 공간 카드 노출 브라우저 실환경 재검증
+2. 공간 선택 완료 후 연식 → 불편사항 → 시공시기 흐름 재검증
+3. 추천 이유/난방비 절감이 결과 카드에 실제 노출되는지 UI 검증
+4. `부분확장` 전용 공간 구성 DB를 `db_configurations_v2.csv`에 보강할지 결정
+5. Cloud Run `ver20` 재배포
 
 ---
 
