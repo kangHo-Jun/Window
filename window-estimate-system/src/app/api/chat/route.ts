@@ -5,11 +5,13 @@ import {
   GEMINI_MODEL,
   getRagContext,
   needsGeminiAssistance,
+  normalizePyeongValue,
   shouldShowResult,
 } from '@/lib/ragEngine';
 import { getNextQuestion } from '@/lib/dynamicQuestion';
 import { getQuoteLevel } from '@/lib/quoteLevelEngine';
 import { classifyConsumer } from '@/lib/consumerGrouping';
+import { loadConfigurationRows, preloadDbCache } from '@/lib/dbLoader';
 import { appendConsultationSheetRow } from '@/app/api/sheets/route';
 import type {
   ChatApiResponse,
@@ -25,26 +27,45 @@ const CONV_LABELS: Partial<Record<keyof ExtractedChatFields, string>> = {
   housingType: '주거형태',
   pyeong: '평형',
   expansion: '확장여부',
-  space: '교체공간',
+  spaces: '교체공간',
   age: '창호연식',
   problem: '불편사항',
   timing: '시공시기',
 };
 
+const CONSUMER_VISIBLE_SPACES = ['거실', '안방', '침실1', '침실2', '알파룸', '주방', '다용도실'] as const;
+
 function createEmptyFields(): ExtractedChatFields {
   return {
     customerName: '', housingType: '', pyeong: '', expansion: '',
-    space: '', count: '1개', age: '', problem: '', timing: '',
+    spaces: [], spaceSizes: {}, count: '1개', age: '', problem: '', timing: '',
     floor: '', corner: '', brandPreference: '', lifestyle: '',
     noiseSensitive: '', priority: '',
   };
 }
 
-function isFilled(value: string) {
+function isFilled(value: string | string[] | Record<string, '소' | '중' | '대' | '모름'>) {
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
   return Boolean(value && value !== 'null' && value !== '');
 }
 
-function normalizeFieldValue(key: keyof ExtractedChatFields, value: string): string {
+function normalizeFieldValue(
+  key: keyof ExtractedChatFields,
+  value: string | string[] | Record<string, '소' | '중' | '대' | '모름'>,
+): string | string[] | Record<string, '소' | '중' | '대' | '모름'> {
+  if (key === 'spaces') {
+    if (!Array.isArray(value)) return [];
+    return value.filter(Boolean).map((item) => item === '발코니' ? '거실' : item);
+  }
+  if (key === 'spaceSizes') {
+    if (Array.isArray(value) || typeof value !== 'object' || value === null) return {};
+    return Object.fromEntries(
+      Object.entries(value).filter(([, size]) => ['소', '중', '대', '모름'].includes(size)),
+    );
+  }
+  if (Array.isArray(value)) return '';
+  if (typeof value === 'object') return {};
   if (!value || value === 'null') return '';
 
   if (key === 'housingType') {
@@ -56,7 +77,6 @@ function normalizeFieldValue(key: keyof ExtractedChatFields, value: string): str
     return /^[가-힣]{2,5}$/.test(normalized) ? normalized : '';
   }
   if (key === 'expansion') return ['확장형', '비확장형', '부분확장'].includes(value) ? value : '';
-  if (key === 'space') return ['전체', '거실', '일부', '안방', '발코니', '침실'].includes(value) ? value : '';
   if (key === 'age') return ['10년이하', '10~20년', '20년이상'].includes(value) ? value : '';
   if (key === 'problem') return ['단열', '소음', '결로', '바람'].includes(value) ? value : '';
   if (key === 'timing') return ['즉시', '1~3개월', '6개월이후', '미정'].includes(value) ? value : '';
@@ -78,10 +98,27 @@ function normalizeFieldValue(key: keyof ExtractedChatFields, value: string): str
 function mergeFields(base: ExtractedChatFields, overrides?: Partial<ExtractedChatFields>) {
   const merged = { ...base };
   if (!overrides) return merged;
-  (Object.entries(overrides) as Array<[keyof ExtractedChatFields, string | undefined]>).forEach(([key, value]) => {
+  (Object.entries(overrides) as Array<[
+    keyof ExtractedChatFields,
+    string | string[] | Record<string, '소' | '중' | '대' | '모름'> | undefined
+  ]>).forEach(([key, value]) => {
+    if (key === 'spaceSizes' && value && typeof value === 'object' && !Array.isArray(value)) {
+      merged.spaceSizes = {
+        ...merged.spaceSizes,
+        ...(normalizeFieldValue(key, value) as Record<string, '소' | '중' | '대' | '모름'>),
+      };
+      return;
+    }
+    if (Array.isArray(value)) {
+      const normalized = normalizeFieldValue(key, value) as string[];
+      if (normalized.length > 0) {
+        merged[key] = normalized as never;
+      }
+      return;
+    }
     if (value && value !== 'null' && value !== '') {
       const normalized = normalizeFieldValue(key, value);
-      if (normalized) merged[key] = normalized;
+      if (Array.isArray(normalized) ? normalized.length > 0 : normalized) merged[key] = normalized as never;
     }
   });
   return merged;
@@ -92,7 +129,7 @@ function getOptionsForField(field: keyof ExtractedChatFields | null) {
     case 'housingType': return ['아파트', '빌라', '단독주택'];
     case 'pyeong': return ['20평대', '30평대', '40평대'];
     case 'expansion': return ['확장형', '비확장형', '부분확장'];
-    case 'space': return ['전체', '거실', '안방', '발코니'];
+    case 'spaces': return [];
     case 'age': return ['10년이하', '10~20년', '20년이상'];
     case 'problem': return ['단열', '소음', '결로'];
     case 'timing': return ['즉시', '1~3개월', '6개월이후'];
@@ -127,13 +164,41 @@ function buildLocalReply(previousFields: ExtractedChatFields, fields: ExtractedC
   return { reply, options: getOptionsForField(currentQuestionField), currentQuestionField };
 }
 
+async function getSpaceOptions(fields: ExtractedChatFields) {
+  if (!fields.pyeong || !fields.expansion) return [];
+  const rows = await loadConfigurationRows();
+  const normalizedPyeong = normalizePyeongValue(fields.pyeong);
+  const matchedRows = rows.filter((row) => normalizePyeongValue(row.pyeong) === normalizedPyeong && row.expansion === fields.expansion);
+  const fallbackRows =
+    fields.expansion === '부분확장' && matchedRows.length === 0
+      ? rows.filter((row) => normalizePyeongValue(row.pyeong) === normalizedPyeong && row.expansion === '비확장형')
+      : matchedRows;
+
+  return fallbackRows
+    .sort((left, right) => Number(left.space_order) - Number(right.space_order))
+    .map((row) => row.space_name)
+    .filter((space) => CONSUMER_VISIBLE_SPACES.includes(space as typeof CONSUMER_VISIBLE_SPACES[number]))
+    .filter((space, index, array) => array.indexOf(space) === index);
+}
+
+function getNextSpaceForSizing(fields: ExtractedChatFields) {
+  return fields.spaces.find((space) => !fields.spaceSizes[space]) || null;
+}
+
+function hasCompletedSpaceSizes(fields: ExtractedChatFields) {
+  return fields.spaces.length > 0 && fields.spaces.every((space) => Boolean(fields.spaceSizes[space]));
+}
+
 function buildSystemPrompt(fields: ExtractedChatFields, history: ChatMessage[], userMessage: string) {
   const name = isFilled(fields.customerName) ? `${fields.customerName}님` : '고객님';
   const nextQuestion = getNextQuestion(fields);
+  const memoryCue = fields.problem || fields.priority
+    ? `- 이미 들은 핵심 맥락은 "${fields.problem || fields.priority}" 이다.\n- "아까 ${fields.problem || fields.priority} 때문이라고 하셨잖아요"처럼 자연스럽게 연결해도 된다.`
+    : '- 맥락 연결 멘트는 실제로 수집된 정보가 있을 때만 사용해라.';
 
   const collected = (Object.keys(CONV_LABELS) as Array<keyof ExtractedChatFields>)
     .filter((key) => isFilled(fields[key]))
-    .map((key) => `${CONV_LABELS[key]}: ${fields[key]}`)
+    .map((key) => `${CONV_LABELS[key]}: ${Array.isArray(fields[key]) ? fields[key].join(', ') : fields[key]}`)
     .join(', ') || '없음';
 
   const missing = (Object.keys(CONV_LABELS) as Array<keyof ExtractedChatFields>)
@@ -163,6 +228,7 @@ ${userMessage}
 
 [핵심 규칙]
 - 모든 답변은 2~3문장 이내
+- 문장을 반드시 완성해서 끝낼 것. 절대 중간에 자르지 말 것.
 - 한 번에 하나의 질문만
 - 이미 파악한 정보는 절대 다시 묻지 마라
 - 오피스텔은 아파트 기준으로 판단
@@ -170,6 +236,7 @@ ${userMessage}
 - 이번 입력에서 새로 확정한 값만 fieldUpdates에 넣어라
 - 명확하지 않은 값은 절대 추측하지 말고 fieldUpdates에서 제외해라
 - 다음 질문이 필요하면 ${nextQuestion?.key ?? 'null'} 기준으로 자연스럽게 이어가라
+${memoryCue}
 
 [출력 형식]
 첫 줄부터 고객에게 보여줄 답변만 먼저 출력
@@ -178,8 +245,9 @@ ${userMessage}
 }
 
 function parseGeminiEnvelope(raw: string) {
+  const jsonStart = raw.indexOf('<json>');
+  const reply = (jsonStart === -1 ? raw : raw.slice(0, jsonStart)).trim();
   const jsonMatch = raw.match(/<json>([\s\S]*?)<\/json>/);
-  const reply = raw.replace(/<json>[\s\S]*?<\/json>/, '').trim();
 
   if (!jsonMatch) {
     return {
@@ -221,7 +289,7 @@ async function streamGeminiReply(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.35, maxOutputTokens: 800 },
+      generationConfig: { temperature: 0.35, maxOutputTokens: 2000 },
     }),
   });
 
@@ -276,6 +344,7 @@ export async function POST(req: Request) {
     const body = (await req.json()) as ChatRequest;
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return Response.json({ error: 'API Key missing' }, { status: 500 });
+    await preloadDbCache();
 
     const history = (body.history ?? []).slice(-6);
     const previousFields = mergeFields(createEmptyFields(), body.fields ?? createEmptyFields());
@@ -294,7 +363,8 @@ export async function POST(req: Request) {
           let streamedReply = '';
           let suggestedReplies: string[] = [];
           let currentQuestionField: keyof ExtractedChatFields | null = null;
-
+          let triggerSpaceSelection = false;
+          let spaceOptions: string[] = [];
           // STEP 2: Gemini 단일 호출 (추출 + 대화 통합) — 모호한 경우만
           if (shouldUseGemini) {
             try {
@@ -318,10 +388,26 @@ export async function POST(req: Request) {
           mergedFields = mergeFields(ragBundle.fields, mergedFields);
           ragBundle.fields = mergedFields;
 
+          const hasCompletedSelections = hasCompletedSpaceSizes(mergedFields);
+
+          if (mergedFields.pyeong && mergedFields.expansion && (!mergedFields.spaces.length || !hasCompletedSelections)) {
+            triggerSpaceSelection = true;
+            currentQuestionField = 'spaces';
+            spaceOptions = await getSpaceOptions(mergedFields);
+            if (!streamedReply) {
+              streamedReply = '교체를 원하시는 공간과 각 공간의 창 크기를 함께 선택해 주세요. 체크하면 기본값은 보통 크기로 적용됩니다.';
+              controller.enqueue(encodeSse('reply', { chunk: streamedReply }));
+            }
+          } else if (hasCompletedSelections) {
+            triggerSpaceSelection = false;
+            spaceOptions = [];
+          }
+
           const quoteLevel = getQuoteLevel(mergedFields);
           const showResult = shouldShowResult(mergedFields);
-          const quoteData = quoteLevel >= 2 ? buildQuoteData(ragBundle, quoteLevel) : null;
-          const quickQuoteData = quoteLevel >= 1 ? buildQuickQuoteData(ragBundle, quoteLevel) : null;
+          const canCalculateQuote = hasCompletedSelections;
+          const quoteData = quoteLevel >= 2 && canCalculateQuote ? buildQuoteData(ragBundle, quoteLevel) : null;
+          const quickQuoteData = quoteLevel >= 1 && canCalculateQuote ? buildQuickQuoteData(ragBundle, quoteLevel) : null;
 
           // fallbackCount 추적: Gemini 호출했지만 응답 없으면 +1
           const prevFallbackCount = body.fallbackCount ?? 0;
@@ -375,7 +461,7 @@ export async function POST(req: Request) {
             quoteData,
             quickQuoteData,
             showResult,
-            canShowQuickQuote: quoteLevel >= 1,
+            canShowQuickQuote: quoteLevel >= 1 && canCalculateQuote,
             quoteLevel,
             fallbackCount: newFallbackCount,
             sentiment: 'NEUTRAL',
@@ -387,6 +473,11 @@ export async function POST(req: Request) {
             extractedFields: mergedFields,
             currentQuestionField,
             consumerGroup,
+            triggerSpaceSelection,
+            spaceOptions,
+            triggerSizeSelection: false,
+            currentSpace: null,
+            sizeOptions: [],
           };
 
           console.log(`[chat] ${Date.now() - startedAt}ms gemini=${shouldUseGemini}`);

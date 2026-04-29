@@ -15,7 +15,8 @@ const FIELD_LABELS: Record<keyof ExtractedChatFields, string> = {
   housingType: '주거형태',
   pyeong: '평형',
   expansion: '확장여부',
-  space: '공간',
+  spaces: '공간',
+  spaceSizes: '공간크기',
   count: '창개수',
   age: '노후도',
   problem: '불편사항',
@@ -70,7 +71,12 @@ export default function ChatProgress({ fields, skippedFields = {} }: ChatProgres
       
       <div className="flex flex-wrap gap-1 mt-2 overflow-x-auto no-scrollbar">
         {PROGRESS_KEYS.map((key) => {
-          const isCollected = !!fields[key];
+          const value = fields[key];
+          const isCollected = Array.isArray(value)
+            ? value.length > 0
+            : typeof value === 'object' && value !== null
+              ? Object.keys(value).length > 0
+              : !!value;
           const isSkipped = !!skippedFields[key];
           return (
             <div 

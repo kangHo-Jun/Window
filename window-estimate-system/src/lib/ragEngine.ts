@@ -1,52 +1,37 @@
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
 import type {
   ChatMessage,
   ExtractedChatFields,
   RagConfigurationRow,
   RagContextBundle,
+  RagPreferenceRuleRow,
   RagPriceRow,
   RagProductRow,
+  RagSpaceSizeRow,
   SkipFieldMap,
 } from '@/types/chat';
 import type { AIQuoteData, BrandCompareItem, BrandName, QuoteLevel } from '@/types/quote';
 import { getQuoteErrorLabel, getQuoteLevel } from './quoteLevelEngine';
 import { getNextQuestion } from './dynamicQuestion';
+import { loadConfigurationRows, loadPreferenceRuleRows, loadPriceRows, loadProductRows, loadSpaceSizeRows } from './dbLoader';
 
 export const GEMINI_MODEL = 'gemini-2.5-flash';
 
 const SPACE_KEYWORDS = ['거실', '안방', '침실1', '침실2', '침실', '발코니', '주방', '다용도실', '안방발코니', '앞발코니', '뒷발코니', '전체'] as const;
-const CSV_CACHE = new Map<string, Promise<Record<string, string>[]>>();
 const AMBIGUOUS_HINTS = ['좀', '약간', '대충', '아마', '오래됐', '넓', '작', '비슷', '애매', '모르', '그냥'] as const;
-
-function getPublicFilePath(fileName: string) {
-  return path.join(process.cwd(), 'public', fileName);
-}
-
-async function readCsv(fileName: string) {
-  if (!CSV_CACHE.has(fileName)) {
-    CSV_CACHE.set(fileName, (async () => {
-      const raw = await readFile(getPublicFilePath(fileName), 'utf8');
-      const lines = raw.trim().split('\n');
-      const headers = lines[0].split(',').map((header) => header.trim());
-
-      return lines.slice(1).map((line) => {
-        const values = line.split(',').map((value) => value.trim());
-        const row: Record<string, string> = {};
-        headers.forEach((header, index) => {
-          row[header] = values[index] || '';
-        });
-        return row;
-      });
-    })());
-  }
-
-  return CSV_CACHE.get(fileName)!;
-}
+const PREFERENCE_HINTS = ['단열', '소음', '환기', '결로', '뷰', '조망'] as const;
+const RECOMMENDATION_HINTS = ['추천', '어떤게', '뭐가 좋'] as const;
+const DISCOMFORT_HINTS = ['춥다', '덥다', '시끄럽다', '결로', '바람', '추위', '소음'] as const;
+const SIMPLE_SELECTIONS = [
+  '아파트', '빌라', '단독주택', '단독', '오피스텔',
+  '확장형', '비확장형', '부분확장',
+  '거실', '안방', '발코니', '침실', '전체',
+  '예', '아니오', '네', '아니요',
+] as const;
 
 function normalizeSpace(space: string) {
   if (!space) return '';
-  if (space.includes('침실')) return '침실';
+  if (space === '발코니' || space === '안방발코니' || space === '앞발코니' || space === '뒷발코니') return '거실';
+  if (space === '침실') return '침실1';
   return space;
 }
 
@@ -55,6 +40,14 @@ function normalizePyeongBucket(value: number) {
   if (value <= 35) return '30평대';
   if (value <= 45) return '40평대';
   return '50평대+';
+}
+
+export function normalizePyeongValue(value: string) {
+  if (!value) return '';
+  if (value.includes('평대')) return value;
+  const digits = Number.parseInt(value.replace(/\D/g, ''), 10);
+  if (Number.isNaN(digits)) return value;
+  return normalizePyeongBucket(digits);
 }
 
 function normalizeAgeBucket(years: number) {
@@ -67,9 +60,29 @@ function mergeDetectedFields(base: ExtractedChatFields, overrides?: Partial<Extr
   const merged = { ...base };
   if (!overrides) return merged;
 
-  (Object.entries(overrides) as Array<[keyof ExtractedChatFields, string | undefined]>).forEach(([key, value]) => {
-    if (value && value !== 'null' && value !== '') {
-      merged[key] = value;
+  (Object.entries(overrides) as Array<[
+    keyof ExtractedChatFields,
+    string | string[] | Record<string, '소' | '중' | '대' | '모름'> | undefined
+  ]>).forEach(([key, value]) => {
+    if (key === 'spaces' && Array.isArray(value)) {
+      merged.spaces = value.filter(Boolean).map(normalizeSpace);
+      return;
+    }
+
+    if (key === 'spaceSizes' && value && typeof value === 'object' && !Array.isArray(value)) {
+      merged.spaceSizes = {
+        ...merged.spaceSizes,
+        ...Object.fromEntries(
+          Object.entries(value)
+            .filter(([, size]) => ['소', '중', '대', '모름'].includes(size))
+            .map(([space, size]) => [normalizeSpace(space), size]),
+        ),
+      };
+      return;
+    }
+
+    if (typeof value === 'string' && value && value !== 'null' && value !== '') {
+      merged[key] = value as never;
     }
   });
 
@@ -129,7 +142,7 @@ export function extractDeterministicFields(message: string, history: ChatMessage
       trimmedMessage.includes('부분확장') ? '부분확장' :
       trimmedMessage.includes('확장') ? '확장형' :
       '',
-    space: matchedSpace,
+    spaces: matchedSpace ? [normalizeSpace(matchedSpace)] : [],
     count: countMatch ? `${countMatch[1]}개` : '',
     age: ageMatch ? normalizeAgeBucket(parseInt(ageMatch[1], 10)) : '',
     problem:
@@ -144,10 +157,45 @@ export function needsGeminiAssistance(message: string, detectedFields: Partial<E
   const trimmed = message.trim();
   if (!trimmed) return false;
 
-  const hasDetectedField = Object.values(detectedFields).some((value) => Boolean(value));
+  const normalized = trimmed.replace(/\s+/g, ' ').trim();
+  const wordCount = normalized.split(/\s+/).filter(Boolean).length;
+
+  const isSimplePyeongInput = /^(\d+\s*평대?|\d+\s*평)$/.test(normalized);
+  const isSimpleNumericInput = /^\d+$/.test(normalized);
+  const isSimpleNameInput =
+    /^(?:저는|전|제 이름은|이름은)\s*[가-힣]{2,5}$/.test(normalized) ||
+    /^[가-힣]{2,5}$/.test(normalized);
+  const isSimpleYesNo = /^(예|아니오|네|아니요)$/.test(normalized);
+  const isSimpleSelection = SIMPLE_SELECTIONS.includes(normalized as typeof SIMPLE_SELECTIONS[number]);
+
+  if (isSimplePyeongInput || isSimpleNumericInput || isSimpleNameInput || isSimpleYesNo || isSimpleSelection) {
+    return false;
+  }
+
+  if (PREFERENCE_HINTS.some((hint) => normalized.includes(hint))) {
+    return true;
+  }
+
+  if (AMBIGUOUS_HINTS.some((hint) => normalized.includes(hint))) {
+    return true;
+  }
+
+  if (RECOMMENDATION_HINTS.some((hint) => normalized.includes(hint))) {
+    return true;
+  }
+
+  if (DISCOMFORT_HINTS.some((hint) => normalized.includes(hint))) {
+    return true;
+  }
+
+  if (wordCount >= 5) {
+    return true;
+  }
+
+  const hasDetectedField = Object.values(detectedFields).some((value) => Array.isArray(value) ? value.length > 0 : Boolean(value));
   if (!hasDetectedField) return true;
 
-  return AMBIGUOUS_HINTS.some((hint) => trimmed.includes(hint));
+  return false;
 }
 
 // parseBudgetValue 함수 제거됨 (v2.0 예산 질문 제외)
@@ -160,7 +208,8 @@ export function extractChatFields(message: string, history: ChatMessage[]): Extr
     housingType: detected.housingType || '',
     pyeong: detected.pyeong || '',
     expansion: detected.expansion || '',
-    space: detected.space || '',
+    spaces: detected.spaces || [],
+    spaceSizes: {},
     count: detected.count || '1개',
     age: detected.age || '',
     problem: detected.problem || '',
@@ -205,54 +254,185 @@ function chooseRecommendedBrand(comparison: BrandCompareItem[]) {
   return comparison.find((item) => item.brand === 'LX지인')?.brand || comparison[0]?.brand || 'LX지인';
 }
 
+function getBrandScore(rule: RagPreferenceRuleRow | null, brand: BrandName) {
+  if (!rule) return 0;
+  if (brand === 'LX지인') return Number.parseInt(rule.lx_score || '0', 10);
+  if (brand === 'KCC글라스' || brand === 'KCC') return Number.parseInt(rule.kcc_score || '0', 10);
+  return Number.parseInt(rule.etc_score || '0', 10);
+}
+
+function getPreferenceRule(fields: ExtractedChatFields, message: string, rules: RagPreferenceRuleRow[]) {
+  const source = [fields.problem, fields.priority, message]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  return rules.find((rule) =>
+    rule.trigger_keywords
+      .split('|')
+      .map((keyword) => keyword.trim().toLowerCase())
+      .some((keyword) => keyword && source.includes(keyword)),
+  ) || null;
+}
+
+function getHeatingSavingRate(age: string) {
+  if (age === '20년이상') return 0.32;
+  if (age === '10~20년') return 0.22;
+  return 0.12;
+}
+
+function getPyeongHeatingBase(pyeong: string) {
+  if (pyeong === '20평대') return 480000;
+  if (pyeong === '40평대') return 680000;
+  if (pyeong === '50평대+') return 820000;
+  return 560000;
+}
+
+function buildHeatingSaving(fields: ExtractedChatFields) {
+  const amount = Math.round(getPyeongHeatingBase(fields.pyeong) * getHeatingSavingRate(fields.age || '10년이하'));
+  const ageLabel = fields.age === '20년이상' ? '20년 이상 된' : fields.age === '10~20년' ? '10~20년 된' : '10년 이하';
+  const pyeongLabel = fields.pyeong || '30평대';
+  return {
+    amount,
+    text: `${ageLabel} ${pyeongLabel} 기준 연 ${Math.round(amount / 10000)}만원 절감 예상`,
+  };
+}
+
+function resolveSpaceSizeErrorRange(fields: ExtractedChatFields, fallbackLabel: string) {
+  if (fields.spaces.length === 0) return fallbackLabel;
+  const selections = fields.spaces.map((space) => fields.spaceSizes[space]).filter(Boolean);
+  if (selections.length !== fields.spaces.length) return fallbackLabel;
+  return selections.includes('모름') ? '±20%' : '±10%';
+}
+
+function applySpaceSize(configuration: RagConfigurationRow, fields: ExtractedChatFields, sizeRows: RagSpaceSizeRow[]) {
+  const selected = fields.spaceSizes[configuration.space_name];
+  if (!selected || selected === '모름' || selected === '중') {
+    return configuration;
+  }
+
+  const sizeRow = sizeRows.find((row) => row.space_name === configuration.space_name && row.size_code === selected);
+  if (!sizeRow) return configuration;
+
+  const width = Math.round(toNumber(configuration.std_width) * Number.parseFloat(sizeRow.width_factor || '1'));
+  const height = Math.round(toNumber(configuration.std_height) * Number.parseFloat(sizeRow.height_factor || '1'));
+
+  return {
+    ...configuration,
+    std_width: String(width),
+    std_height: String(height),
+  };
+}
+
 export async function getRagContext(message: string, history: ChatMessage[], seedFields?: Partial<ExtractedChatFields>): Promise<RagContextBundle> {
   const fields = mergeDetectedFields(extractChatFields(message, history), seedFields);
-  const configurationRows = (await readCsv('db_configurations_v2.csv')) as RagConfigurationRow[];
-  const productRows = (await readCsv('db_products_v2.csv')) as RagProductRow[];
-  const priceRows = (await readCsv('db_prices_v2.csv')) as RagPriceRow[];
+  const [configurationRows, productRows, priceRows, spaceSizeRows, preferenceRuleRows] = await Promise.all([
+    loadConfigurationRows(),
+    loadProductRows(),
+    loadPriceRows(),
+    loadSpaceSizeRows(),
+    loadPreferenceRuleRows(),
+  ]);
 
-  const matchedConfiguration =
-    configurationRows.find((row) =>
-      row.pyeong === fields.pyeong &&
+  const selectedSpaces = fields.spaces.map(normalizeSpace);
+  const matchedConfigurations = configurationRows.filter((row) =>
+      normalizePyeongValue(row.pyeong) === normalizePyeongValue(fields.pyeong) &&
       row.expansion === fields.expansion &&
-      normalizeSpace(row.space_name) === normalizeSpace(fields.space)
-    ) || null;
+      selectedSpaces.includes(normalizeSpace(row.space_name))
+  ).map((row) => applySpaceSize(row, fields, spaceSizeRows));
+  const matchedConfiguration = matchedConfigurations[0] || null;
 
-  const matchedProducts = matchedConfiguration
-    ? productRows.filter((row) =>
-        row.category === matchedConfiguration.window_type &&
-        toNumber(row.width_min) <= toNumber(matchedConfiguration.std_width) &&
-        toNumber(row.width_max) >= toNumber(matchedConfiguration.std_width) &&
-        toNumber(row.height_min) <= toNumber(matchedConfiguration.std_height) &&
-        toNumber(row.height_max) >= toNumber(matchedConfiguration.std_height)
+  const matchedProducts = matchedConfigurations.flatMap((configuration) =>
+    productRows
+      .filter((row) =>
+        row.category === configuration.window_type &&
+        toNumber(row.width_min) <= toNumber(configuration.std_width) &&
+        toNumber(row.width_max) >= toNumber(configuration.std_width) &&
+        toNumber(row.height_min) <= toNumber(configuration.std_height) &&
+        toNumber(row.height_max) >= toNumber(configuration.std_height)
       )
-    : [];
+      .sort((left, right) => {
+        const recommendedId = configuration.recommend_product_id;
+        const leftScore = left.product_id.startsWith(recommendedId) ? 1 : 0;
+        const rightScore = right.product_id.startsWith(recommendedId) ? 1 : 0;
+        return rightScore - leftScore;
+      })
+  );
 
-  const matchedPrices = matchedConfiguration
-    ? priceRows.filter((row) =>
-        toNumber(row.width_min) <= toNumber(matchedConfiguration.std_width) &&
-        toNumber(row.width_max) >= toNumber(matchedConfiguration.std_width) &&
-        toNumber(row.height_min) <= toNumber(matchedConfiguration.std_height) &&
-        toNumber(row.height_max) >= toNumber(matchedConfiguration.std_height)
-      )
-    : [];
+  const matchedPrices = matchedConfigurations.flatMap((configuration) =>
+    priceRows.filter((row) =>
+      toNumber(row.width_min) <= toNumber(configuration.std_width) &&
+      toNumber(row.width_max) >= toNumber(configuration.std_width) &&
+      toNumber(row.height_min) <= toNumber(configuration.std_height) &&
+      toNumber(row.height_max) >= toNumber(configuration.std_height)
+    )
+  );
+
+  const activePreferenceRule = getPreferenceRule(fields, message, preferenceRuleRows);
 
   const comparisonBrands: BrandName[] = ['LX지인', 'KCC글라스', '기타'];
   const quantity = Number.parseInt(fields.count.replace(/\D/g, ''), 10) || 1;
   const comparison = comparisonBrands.map((brand) => {
-    const matchedProduct = matchedProducts.find((row) => row.brand === brand);
-    const matchedPrice = matchedPrices.find((row) => row.brand === brand);
-    const rawTotal = (matchedProduct ? toNumber(matchedProduct.price) : matchedPrice ? toNumber(matchedPrice.price) : 0) * quantity;
-    return buildComparisonItem(brand, rawTotal || 500000);
+    const brandProducts = matchedProducts.filter((row) => row.brand === brand);
+    const preferredProduct = brandProducts.find((row) =>
+      !activePreferenceRule ||
+      !activePreferenceRule.preferred_category ||
+      row.category === activePreferenceRule.preferred_category ||
+      row.description.includes(activePreferenceRule.preferred_category),
+    ) || brandProducts[0];
+
+    const rawTotal = matchedConfigurations.reduce((sum, configuration) => {
+      const matchedProduct = productRows.find((row) =>
+        row.brand === brand &&
+        row.category === configuration.window_type &&
+        toNumber(row.width_min) <= toNumber(configuration.std_width) &&
+        toNumber(row.width_max) >= toNumber(configuration.std_width) &&
+        toNumber(row.height_min) <= toNumber(configuration.std_height) &&
+        toNumber(row.height_max) >= toNumber(configuration.std_height)
+      );
+      const matchedPrice = priceRows.find((row) =>
+        row.brand === brand &&
+        toNumber(row.width_min) <= toNumber(configuration.std_width) &&
+        toNumber(row.width_max) >= toNumber(configuration.std_width) &&
+        toNumber(row.height_min) <= toNumber(configuration.std_height) &&
+        toNumber(row.height_max) >= toNumber(configuration.std_height)
+      );
+      const price = matchedProduct ? toNumber(matchedProduct.price) : matchedPrice ? toNumber(matchedPrice.price) : 500000;
+      return sum + (price * quantity);
+    }, 0);
+    const item = buildComparisonItem(brand, rawTotal || 500000);
+    item.productName = preferredProduct?.product_name || '';
+    return item;
   });
+
+  const recommendedBrand = activePreferenceRule
+    ? [...comparison].sort((left, right) => {
+        const scoreDiff = getBrandScore(activePreferenceRule, right.brand) - getBrandScore(activePreferenceRule, left.brand);
+        if (scoreDiff !== 0) return scoreDiff;
+        return left.finalTotal - right.finalTotal;
+      })[0]?.brand || chooseRecommendedBrand(comparison)
+    : chooseRecommendedBrand(comparison);
+
+  const recommendedReason = activePreferenceRule?.recommend_reason
+    || `${fields.problem || '현재 조건'} 기준으로는 장기 효율과 성능 안정성이 높은 ${recommendedBrand} 쪽이 더 잘 맞아요.`;
+
+  const heatingSaving = buildHeatingSaving(fields);
+  const comparisonWithReasons = comparison.map((item) => ({
+    ...item,
+    isRecommended: item.brand === recommendedBrand,
+    recommendReason: item.brand === recommendedBrand ? recommendedReason : '',
+  }));
 
   return {
     fields,
     matchedConfiguration,
     matchedProducts: matchedProducts.slice(0, 9),
     matchedPrices: matchedPrices.slice(0, 9),
-    comparison,
-    recommendedBrand: chooseRecommendedBrand(comparison),
+    comparison: comparisonWithReasons,
+    recommendedBrand,
+    recommendedReason,
+    heatingSavingAmount: heatingSaving.amount,
+    heatingSavingText: heatingSaving.text,
   };
 }
 
@@ -263,7 +443,7 @@ export function shouldShowResult(fields: ExtractedChatFields) {
     isComplete(fields.housingType) && 
     isComplete(fields.pyeong) && 
     isComplete(fields.expansion) && 
-    isComplete(fields.space) && 
+    fields.spaces.length > 0 && 
     isComplete(fields.age) && 
     isComplete(fields.problem) && 
     isComplete(fields.timing)
@@ -272,11 +452,15 @@ export function shouldShowResult(fields: ExtractedChatFields) {
 
 export function canShowQuickQuote(fields: ExtractedChatFields) {
   const isComplete = (val: string) => !!val && val !== 'null' && val !== '';
+  const hasCompletedSpaceSizes =
+    fields.spaces.length > 0 &&
+    fields.spaces.every((space) => Boolean(fields.spaceSizes[space]));
 
   return (
     isComplete(fields.housingType) &&
     isComplete(fields.pyeong) &&
-    isComplete(fields.expansion)
+    isComplete(fields.expansion) &&
+    hasCompletedSpaceSizes
   );
 }
 
@@ -286,12 +470,12 @@ export function buildQuoteData(bundle: RagContextBundle, quoteLevel?: QuoteLevel
     type: 'ai',
     data: {
       quoteLevel: resolvedLevel,
-      errorRange: getQuoteErrorLabel(resolvedLevel, skippedFields),
+      errorRange: resolveSpaceSizeErrorRange(bundle.fields, getQuoteErrorLabel(resolvedLevel, skippedFields)),
       skippedCount: Object.values(skippedFields || {}).filter(Boolean).length,
       housingType: bundle.fields.housingType,
       pyeong: bundle.fields.pyeong,
       expansion: bundle.fields.expansion,
-      space: bundle.fields.space,
+      space: bundle.fields.spaces.join(', '),
       count: bundle.fields.count,
       age: bundle.fields.age,
       problem: bundle.fields.problem,
@@ -301,6 +485,9 @@ export function buildQuoteData(bundle: RagContextBundle, quoteLevel?: QuoteLevel
       priority: bundle.fields.priority,
       comparison: bundle.comparison,
       recommendedBrand: bundle.recommendedBrand,
+      recommendedReason: bundle.recommendedReason,
+      heatingSavingAmount: bundle.heatingSavingAmount,
+      heatingSavingText: bundle.heatingSavingText,
     },
   };
 }
@@ -311,12 +498,12 @@ export function buildQuickQuoteData(bundle: RagContextBundle, quoteLevel?: Quote
     type: 'ai',
     data: {
       quoteLevel: resolvedLevel,
-      errorRange: getQuoteErrorLabel(resolvedLevel, skippedFields),
+      errorRange: resolveSpaceSizeErrorRange(bundle.fields, getQuoteErrorLabel(resolvedLevel, skippedFields)),
       skippedCount: Object.values(skippedFields || {}).filter(Boolean).length,
       housingType: bundle.fields.housingType,
       pyeong: bundle.fields.pyeong,
       expansion: bundle.fields.expansion,
-      space: bundle.fields.space || '미정',
+      space: bundle.fields.spaces.join(', ') || '미정',
       count: bundle.fields.count || '1개',
       age: bundle.fields.age || '미정',
       problem: bundle.fields.problem || '미정',
@@ -326,6 +513,9 @@ export function buildQuickQuoteData(bundle: RagContextBundle, quoteLevel?: Quote
       priority: bundle.fields.priority || '미정',
       comparison: bundle.comparison,
       recommendedBrand: bundle.recommendedBrand,
+      recommendedReason: bundle.recommendedReason,
+      heatingSavingAmount: bundle.heatingSavingAmount,
+      heatingSavingText: bundle.heatingSavingText,
     },
   };
 }
@@ -369,7 +559,7 @@ export function buildRagPrompt(bundle: RagContextBundle, history: ChatMessage[],
 - 주거형태: ${bundle.fields.housingType || '미정'}
 - 평형: ${bundle.fields.pyeong ? bundle.fields.pyeong + '평' : '미정'}
 - 확장형태: ${bundle.fields.expansion || '미정'}
-- 공간: ${bundle.fields.space || '미정'}
+- 공간: ${bundle.fields.spaces.join(', ') || '미정'}
 - 창 개수: ${bundle.fields.count || '미정'}
 - 노후도: ${bundle.fields.age || '미정'}
 - 불편사항: ${bundle.fields.problem || '미정'}
@@ -394,11 +584,18 @@ ${historySummary || '없음'}
 예상 비교 견적:
 ${comparisonSummary}
 
+추천 포인트:
+${bundle.recommendedReason}
+
+난방비 절감 예상:
+${bundle.heatingSavingText}
+
 응답 규칙:
 - 한국어 3문장 이내
 - showResult=${showResult ? 'true' : 'false'}
 - showResult가 false면 ${nextQuestion ? nextQuestion.label : '다음 단계'}에 대해 질문
 - 이미 수집된 정보(${Object.entries(bundle.fields).filter(([_, v]) => !!v && v !== 'null').map(([k, _]) => k).join(', ')})는 절대 다시 묻지 말 것
+- 불편사항이나 우선순위가 이미 있으면 "아까 ${bundle.fields.problem || bundle.fields.priority} 때문이라고 하셨잖아요"처럼 맥락을 자연스럽게 이어라
 - showResult가 true면 3사 비교를 짧게 요약하고 LX지인 추천 이유를 한 문장 포함
 - JSON, 코드블록, 마크다운 표 금지
 `.trim();
@@ -408,8 +605,8 @@ export function buildFallbackReply(bundle: RagContextBundle, showResult: boolean
   if (!bundle.fields.pyeong) {
     return '몇 평대 아파트인지 알려주시면 표준 구성 기준으로 바로 가견적을 잡아드릴게요.';
   }
-  if (!bundle.fields.space) {
-    return '어느 공간 창호를 교체하실지 알려주세요. 예를 들면 거실, 안방, 발코니처럼 말씀하시면 됩니다.';
+  if (bundle.fields.spaces.length === 0) {
+    return '교체를 원하시는 공간을 먼저 선택해 주세요. 거실, 안방, 침실, 주방처럼 여러 개도 가능합니다.';
   }
   if (!bundle.fields.expansion) {
     return '확장형인가요, 아니면 비확장형인가요?';
@@ -423,5 +620,5 @@ export function buildFallbackReply(bundle: RagContextBundle, showResult: boolean
     .map((item) => `${item.brand} ${item.finalTotal.toLocaleString()}원`)
     .join(', ');
 
-  return `${bundle.fields.pyeong}평 ${bundle.fields.space} ${bundle.fields.expansion} 기준 가견적입니다. ${summary} 정도로 보시면 되고, 단열과 장기 효율 기준으로는 LX지인을 가장 추천드립니다.`;
+  return `${bundle.fields.pyeong}평 ${bundle.fields.spaces.join(', ')} ${bundle.fields.expansion} 기준 가견적입니다. ${summary} 정도로 보시면 되고, 단열과 장기 효율 기준으로는 LX지인을 가장 추천드립니다.`;
 }

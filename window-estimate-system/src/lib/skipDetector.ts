@@ -7,7 +7,7 @@ export const SKIP_KEYWORDS = [
 ] as const;
 
 export const CORE_FIELDS: Array<keyof ExtractedChatFields> = ['housingType', 'pyeong', 'expansion'];
-export const SUB_FIELDS: Array<keyof ExtractedChatFields> = ['space', 'age', 'problem', 'timing'];
+export const SUB_FIELDS: Array<keyof ExtractedChatFields> = ['spaces', 'age', 'problem', 'timing'];
 
 const CORE_DEFAULTS: Record<string, string> = {
   housingType: '아파트',

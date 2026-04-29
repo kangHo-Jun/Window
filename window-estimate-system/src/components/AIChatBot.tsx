@@ -21,17 +21,28 @@ function sanitizeAssistantReply(reply: string): string {
   }
 
   const trimmed = reply.trim();
-  if (!trimmed.startsWith('{') || !trimmed.includes('"reply"')) {
-    return trimmed;
+  const withoutEnvelope = trimmed.includes('<json>')
+    ? trimmed.slice(0, trimmed.indexOf('<json>')).trim()
+    : trimmed;
+
+  if (withoutEnvelope) {
+    if (!withoutEnvelope.startsWith('{') || !withoutEnvelope.includes('"reply"')) {
+      return withoutEnvelope;
+    }
+  }
+
+  const sanitizedTarget = withoutEnvelope || trimmed;
+  if (!sanitizedTarget.startsWith('{') || !sanitizedTarget.includes('"reply"')) {
+    return sanitizedTarget;
   }
 
   try {
-    const parsed = JSON.parse(trimmed) as { reply?: unknown };
+    const parsed = JSON.parse(sanitizedTarget) as { reply?: unknown };
     return typeof parsed.reply === 'string' && parsed.reply
       ? parsed.reply
       : '답변 형식을 정리하는 중에 잠깐 꼬였어요. 한 번만 더 말씀해 주시면 바로 이어서 도와드릴게요 😊';
   } catch {
-    const match = trimmed.match(/"reply"\s*:\s*"((?:\\.|[^"\\])*)"/);
+    const match = sanitizedTarget.match(/"reply"\s*:\s*"((?:\\.|[^"\\])*)"/);
     if (match) {
       return JSON.parse(`"${match[1]}"`) as string;
     }
@@ -40,13 +51,34 @@ function sanitizeAssistantReply(reply: string): string {
   }
 }
 
+function isCollectedValue(value: string | string[] | Record<string, '소' | '중' | '대' | '모름'>) {
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
+  return Boolean(value);
+}
+
+function toDisplayValue(value: string | string[] | Record<string, '소' | '중' | '대' | '모름'>) {
+  if (Array.isArray(value)) return value.join(', ');
+  if (typeof value === 'object' && value !== null) {
+    return Object.entries(value)
+      .map(([space, size]) => `${space} ${size}`)
+      .join(', ');
+  }
+  return value;
+}
+
+function hasCompletedSpaceSelections(fields: ExtractedChatFields) {
+  return fields.spaces.length > 0 && fields.spaces.every((space) => Boolean(fields.spaceSizes[space]));
+}
+
 // 초기 빈 필드 상태
 const INITIAL_FIELDS: ExtractedChatFields = {
   customerName: '',
   housingType: '',
   pyeong: '',
   expansion: '',
-  space: '',
+  spaces: [],
+  spaceSizes: {},
   count: '1개',
   age: '',
   problem: '',
@@ -86,6 +118,9 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
   const [streamingReplyId, setStreamingReplyId] = useState<number | null>(null);
   const [inlineQuoteData, setInlineQuoteData] = useState<AIQuoteData | null>(null);
   const [consumerGroupInfo, setConsumerGroupInfo] = useState<ConsumerGroupInfo | null>(null);
+  const [spaceOptions, setSpaceOptions] = useState<string[]>([]);
+  const [selectedSpaces, setSelectedSpaces] = useState<string[]>([]);
+  const [selectedSpaceSizes, setSelectedSpaceSizes] = useState<ExtractedChatFields['spaceSizes']>({});
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showTabletSidebar, setShowTabletSidebar] = useState(true);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
@@ -96,6 +131,30 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
   const createMessage = (role: UIMessage['role'], content: string): UIMessage => {
     messageIdRef.current += 1;
     return { id: messageIdRef.current, role, content };
+  };
+
+  const handleReset = () => {
+    setSpaceOptions([]);
+    setSelectedSpaces([]);
+    setSelectedSpaceSizes({});
+    onReset();
+  };
+
+  const handleSpaceComplete = () => {
+    const nextSpaceSizes = Object.fromEntries(
+      selectedSpaces.map((space) => [space, selectedSpaceSizes[space] ?? '중']),
+    ) as ExtractedChatFields['spaceSizes'];
+    const nextFields = {
+      ...fields,
+      spaces: selectedSpaces,
+      spaceSizes: nextSpaceSizes,
+    };
+
+    setFields(nextFields);
+    setSelectedSpaceSizes(nextSpaceSizes);
+    setSpaceOptions([]);
+    setCurrentQuestionField(null);
+    void sendMessage(`${selectedSpaces.join(', ')} 선택 완료`, nextFields);
   };
 
   useEffect(() => {
@@ -114,6 +173,8 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
   const applyChatResponse = (data: ChatApiResponse) => {
     if (data.extractedFields) {
       setFields(data.extractedFields);
+      setSelectedSpaces(data.extractedFields.spaces ?? []);
+      setSelectedSpaceSizes(data.extractedFields.spaceSizes ?? {});
     }
 
     setCanShowQuickQuote(data.canShowQuickQuote);
@@ -129,6 +190,7 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
     setCurrentQuestionField(data.currentQuestionField);
     if (data.quickQuoteData) setInlineQuoteData(data.quickQuoteData);
     if (data.consumerGroup) setConsumerGroupInfo(data.consumerGroup);
+    setSpaceOptions(data.spaceOptions ?? []);
 
     if (data.showResult && data.quoteData) {
       window.setTimeout(() => {
@@ -137,7 +199,7 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
     }
   };
 
-  const sendMessage = async (nextInput: string) => {
+  const sendMessage = async (nextInput: string, overrideFields?: ExtractedChatFields) => {
     const trimmed = nextInput.trim();
     if (!trimmed || loading) return;
 
@@ -158,7 +220,7 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
         body: JSON.stringify({
           message: trimmed,
           history: buildHistory(messages),
-          fields,
+          fields: overrideFields ?? fields,
           fallbackCount,
           skippedFields,
           pendingSkip,
@@ -269,20 +331,24 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
     { key: 'housingType', label: '주거형태' },
     { key: 'pyeong', label: '평형' },
     { key: 'expansion', label: '확장' },
-    { key: 'space', label: '공간' },
+    { key: 'spaces', label: '공간' },
     { key: 'age', label: '연식' },
     { key: 'problem', label: '불편사항' },
     { key: 'timing', label: '시공시기' },
   ];
 
-  const collectedCount = sidebarFields.filter(({ key }) => Boolean(fields[key])).length;
+  const collectedCount = sidebarFields.filter(({ key }) => {
+    const value = fields[key];
+    return isCollectedValue(value);
+  }).length;
 
   const sidebarContent = (
     <div className="space-y-4 overflow-y-auto p-4">
       <div className="grid grid-cols-2 gap-2">
         {sidebarFields.map(({ key, label }) => {
           const value = fields[key];
-          const filled = Boolean(value);
+          const filled = isCollectedValue(value);
+          const displayValue = toDisplayValue(value);
 
           return (
             <div
@@ -295,7 +361,7 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
             >
               <p className="text-[10px] font-semibold tracking-[0.08em] text-slate-400">{label}</p>
               <p className={`mt-1 text-sm font-bold ${filled ? 'text-[#204537]' : 'text-slate-400'}`}>
-                {filled ? value : '대기중'}
+                {filled ? displayValue : '대기중'}
               </p>
             </div>
           );
@@ -350,6 +416,12 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
     </div>
   );
 
+  const shouldShowSpaceSelectionCard =
+    fields.pyeong !== '' &&
+    fields.expansion !== '' &&
+    !hasCompletedSpaceSelections(fields) &&
+    spaceOptions.length > 0;
+
   return (
     <div className="space-y-4">
       <Card className="hidden rounded-2xl border border-slate-200 bg-white shadow-md md:block lg:hidden">
@@ -389,7 +461,7 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
           <div className="flex max-w-full flex-wrap items-center gap-2 sm:justify-end">
             <button
               type="button"
-              onClick={onReset}
+              onClick={handleReset}
               className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
             >
               🔄 처음부터
@@ -462,6 +534,101 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
         </div>
 
         <div className="p-4 bg-white border-t space-y-4">
+          {shouldShowSpaceSelectionCard && (
+            <div className="flex max-h-[320px] flex-col overflow-hidden rounded-2xl border border-blue-100 bg-blue-50/60 p-4">
+              <div>
+                <p className="text-sm font-bold text-slate-900">교체 공간과 창 크기를 선택해 주세요</p>
+                <p className="mt-1 text-xs text-slate-500">체크하면 기본값은 보통 크기입니다. 선택하지 않은 공간은 비활성화됩니다.</p>
+              </div>
+              <div className="mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+                {spaceOptions.map((space) => {
+                  const active = selectedSpaces.includes(space);
+                  const selectedSize = selectedSpaceSizes[space] ?? '중';
+                  const sizeButtons: Array<{ code: '소' | '중' | '대'; label: string }> = [
+                    { code: '소', label: '소' },
+                    { code: '중', label: '중' },
+                    { code: '대', label: '대' },
+                  ];
+
+                  return (
+                    <div
+                      key={space}
+                      className={`rounded-2xl border px-3 py-3 transition-colors ${
+                        active ? 'border-blue-200 bg-white shadow-sm' : 'border-slate-200 bg-slate-50/80'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (active) {
+                              setSelectedSpaces((prev) => prev.filter((item) => item !== space));
+                              setSelectedSpaceSizes((prev) => {
+                                const next = { ...prev };
+                                delete next[space];
+                                return next;
+                              });
+                              return;
+                            }
+
+                            setSelectedSpaces((prev) => [...prev, space]);
+                            setSelectedSpaceSizes((prev) => ({
+                              ...prev,
+                              [space]: prev[space] ?? '중',
+                            }));
+                          }}
+                          className={`flex min-w-[92px] items-center gap-2 rounded-xl px-2 py-2 text-left text-sm font-bold ${
+                            active ? 'text-blue-700' : 'text-slate-500'
+                          }`}
+                        >
+                          <span>{active ? '☑' : '☐'}</span>
+                          <span>{space}</span>
+                        </button>
+
+                        <div className="ml-auto flex gap-1">
+                          {sizeButtons.map((size) => {
+                            const selected = active && selectedSize === size.code;
+                            return (
+                              <button
+                                key={size.code}
+                                type="button"
+                                disabled={!active || loading}
+                                onClick={() => {
+                                  setSelectedSpaceSizes((prev) => ({
+                                    ...prev,
+                                    [space]: size.code,
+                                  }));
+                                }}
+                                className={`min-w-10 rounded-lg border px-3 py-1.5 text-xs font-bold transition-colors ${
+                                  !active
+                                    ? 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-300'
+                                    : selected
+                                      ? 'border-blue-500 bg-blue-600 text-white'
+                                      : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-700'
+                                }`}
+                              >
+                                {size.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-3 border-t border-blue-100 bg-blue-50/90 pt-3">
+                <button
+                  type="button"
+                  disabled={loading || selectedSpaces.length === 0}
+                  onClick={handleSpaceComplete}
+                  className="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-blue-700 disabled:bg-slate-300"
+                >
+                  선택 완료
+                </button>
+              </div>
+            </div>
+          )}
           <SmartOptions
             currentQuestionField={currentQuestionField}
             onSelect={sendMessage}

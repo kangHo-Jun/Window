@@ -121,7 +121,7 @@ function buildSheetValues(input: SheetAppendInput) {
     f.housingType || '-',                  // L: 주거형태
     f.pyeong || '-',                       // M: 평형
     f.expansion || '-',                    // N: 확장여부
-    f.space || '-',                        // O: 교체공간
+    f.spaces?.join(', ') || '-',          // O: 교체공간
     f.age || '-',                          // P: 창호연식
     f.problem || '-',                      // Q: 불편사항
     f.timing || '-',                       // R: 시공시기

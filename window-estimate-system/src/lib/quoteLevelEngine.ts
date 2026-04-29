@@ -2,13 +2,15 @@ import type { ExtractedChatFields, SkipFieldMap } from '@/types/chat';
 import type { QuoteLevel } from '@/types/quote';
 import { CORE_FIELDS, SUB_FIELDS } from './skipDetector';
 
-export const LEVEL1_KEYS: Array<keyof ExtractedChatFields> = ['housingType', 'pyeong', 'expansion', 'space'];
+export const LEVEL1_KEYS: Array<keyof ExtractedChatFields> = ['housingType', 'pyeong', 'expansion', 'spaces'];
 export const LEVEL2_KEYS: Array<keyof ExtractedChatFields> = [...LEVEL1_KEYS, 'age', 'problem'];
 export const LEVEL3_KEYS: Array<keyof ExtractedChatFields> = [...LEVEL2_KEYS, 'timing', 'floor', 'brandPreference', 'priority'];
 
 export const PROGRESS_KEYS: Array<keyof ExtractedChatFields> = LEVEL3_KEYS;
 
-function isFilled(value: string) {
+function isFilled(value: string | string[] | Record<string, '소' | '중' | '대' | '모름'>) {
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
   return !!value && value !== 'null' && value !== '';
 }
 

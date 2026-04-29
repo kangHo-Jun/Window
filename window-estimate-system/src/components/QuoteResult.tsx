@@ -80,7 +80,10 @@ export default function QuoteResult({
                 ))}
               </div>
               <p className="font-medium text-amber-900">예상 오차 범위 {data.data.errorRange} 기준의 빠른 참고 견적입니다.</p>
-              <p className="text-slate-700">추천 브랜드는 {data.data.recommendedBrand}입니다. 단열 성능과 장기 효율 기준에서 가장 안정적입니다.</p>
+              <p className="text-slate-700">추천 브랜드는 {data.data.recommendedBrand}입니다. {data.data.recommendedReason || '현재 조건에서 성능과 장기 효율 기준으로 가장 안정적입니다.'}</p>
+              {data.data.heatingSavingText && (
+                <p className="text-emerald-700 font-medium">{data.data.heatingSavingText}</p>
+              )}
             </CardContent>
           </Card>
           {/* 운영자 전략 카드 — 레벨 1에서도 표시 */}
@@ -110,7 +113,11 @@ export default function QuoteResult({
                   <p className="text-slate-500">고객 상황 진단</p>
                   <p className="mt-2 font-semibold text-slate-900">노후도: {data.data.age || '미정'}</p>
                   <p className="mt-1">주요 고민: {data.data.problem || '미정'}</p>
+                  <p className="mt-1">추천 이유: {data.data.recommendedReason || '현재 조건 기준 성능 균형 우수'}</p>
                   <p className="mt-1 text-blue-700">예상 오차 범위 {data.data.errorRange}</p>
+                  {data.data.heatingSavingText && (
+                    <p className="mt-1 text-emerald-700">{data.data.heatingSavingText}</p>
+                  )}
                 </div>
               </CardContent>
             </Card>

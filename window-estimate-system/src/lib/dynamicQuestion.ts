@@ -23,7 +23,7 @@ export const QUESTION_STEPS: QuestionStep[] = [
   { key: 'housingType', label: '주거형태', stage: 'BASIC', question: '어떤 형태의 집인가요? (아파트, 빌라, 단독주택 등)' },
   { key: 'pyeong', label: '평형', stage: 'BASIC', question: '몇 평형인지 알려주실 수 있나요?' },
   { key: 'expansion', label: '확장여부', stage: 'BASIC', question: '확장형인가요, 아니면 비확장형인가요?' },
-  { key: 'space', label: '공간', stage: 'BASIC', question: '교체를 원하시는 공간은 어디인가요? (거실, 안방, 전체 등)' },
+  { key: 'spaces', label: '공간', stage: 'BASIC', question: '교체를 원하시는 공간을 모두 선택해 주세요.' },
   { key: 'age', label: '노후도', stage: 'BASIC', question: '현재 창호가 설치된 지 얼마나 되었나요? (예: 15년 정도)' },
   { key: 'problem', label: '불편사항', stage: 'BASIC', question: '기존 창호를 쓰시면서 가장 불편한 점은 무엇인가요? (단열, 소음 등)' },
   { key: 'timing', label: '시공시기', stage: 'BASIC', question: '언제쯤 시공을 계획하고 계신가요?' },
@@ -45,7 +45,9 @@ export const QUESTION_STEPS: QuestionStep[] = [
  */
 export function getNextQuestion(fields: ExtractedChatFields): QuestionStep | null {
   for (const step of QUESTION_STEPS) {
-    if (!fields[step.key] || fields[step.key] === 'null' || fields[step.key] === '') {
+    const value = fields[step.key];
+    const isEmpty = Array.isArray(value) ? value.length === 0 : !value || value === 'null' || value === '';
+    if (isEmpty) {
       return step;
     }
   }
@@ -58,12 +60,18 @@ export function getNextQuestion(fields: ExtractedChatFields): QuestionStep | nul
 export function isStageCollected(fields: ExtractedChatFields, stage: StepStage): boolean {
   return QUESTION_STEPS
     .filter(step => step.stage === stage)
-    .every(step => !!fields[step.key] && fields[step.key] !== 'null' && fields[step.key] !== '');
+    .every(step => {
+      const value = fields[step.key];
+      return Array.isArray(value) ? value.length > 0 : !!value && value !== 'null' && value !== '';
+    });
 }
 
 /**
  * 모든 필수 정보가 수집되었는지 확인
  */
 export function isAllInfoCollected(fields: ExtractedChatFields): boolean {
-  return QUESTION_STEPS.every(step => !!fields[step.key] && fields[step.key] !== 'null' && fields[step.key] !== '');
+  return QUESTION_STEPS.every(step => {
+    const value = fields[step.key];
+    return Array.isArray(value) ? value.length > 0 : !!value && value !== 'null' && value !== '';
+  });
 }

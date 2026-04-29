@@ -44,7 +44,8 @@ export type ExtractedChatFields = {
   housingType: string;
   pyeong: string;
   expansion: string;
-  space: string;
+  spaces: string[];
+  spaceSizes: Record<string, '소' | '중' | '대' | '모름'>;
   count: string;
   age: string;      
   problem: string;  
@@ -100,6 +101,26 @@ export type RagPriceRow = {
   price: string;
 };
 
+export type RagSpaceSizeRow = {
+  space_name: string;
+  size_code: '소' | '중' | '대';
+  width_factor: string;
+  height_factor: string;
+  note?: string;
+};
+
+export type RagPreferenceRuleRow = {
+  preference_code: string;
+  trigger_keywords: string;
+  preferred_brand: string;
+  preferred_category: string;
+  lx_score: string;
+  kcc_score: string;
+  etc_score: string;
+  recommend_reason: string;
+  context_line: string;
+};
+
 export type RagContextBundle = {
   fields: ExtractedChatFields;
   matchedConfiguration: RagConfigurationRow | null;
@@ -107,6 +128,9 @@ export type RagContextBundle = {
   matchedPrices: RagPriceRow[];
   comparison: BrandCompareItem[];
   recommendedBrand: BrandCompareItem['brand'];
+  recommendedReason: string;
+  heatingSavingAmount: number;
+  heatingSavingText: string;
 };
 
 export type ChatApiResponse = {
@@ -126,4 +150,9 @@ export type ChatApiResponse = {
   extractedFields: ExtractedChatFields;
   currentQuestionField: keyof ExtractedChatFields | null;
   consumerGroup: ConsumerGroupInfo;
+  triggerSpaceSelection?: boolean;
+  spaceOptions?: string[];
+  triggerSizeSelection?: boolean;
+  currentSpace?: string | null;
+  sizeOptions?: string[];
 };

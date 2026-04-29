@@ -9,6 +9,8 @@ export type BrandCompareItem = {
   discountAmount: number;
   finalTotal: number;
   isRecommended: boolean;
+  productName?: string;
+  recommendReason?: string;
 };
 
 export type Configuration = {
@@ -51,6 +53,9 @@ export type AIQuoteData = {
     priority?: string;
     comparison: BrandCompareItem[];
     recommendedBrand: BrandName;
+    recommendedReason?: string;
+    heatingSavingAmount?: number;
+    heatingSavingText?: string;
     // 운영자 전략 카드용 추가 필드
     consultationNeeded?: boolean;
     fallbackCount?: number;

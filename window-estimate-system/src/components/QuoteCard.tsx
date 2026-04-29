@@ -15,7 +15,7 @@ type Props = {
 };
 
 export default function QuoteCard({ data, consumerGroup, onViewFull, onCallConsult }: Props) {
-  const { quoteLevel, comparison, recommendedBrand, errorRange } = data.data;
+  const { quoteLevel, comparison, recommendedBrand, errorRange, recommendedReason, heatingSavingText } = data.data;
   const levelLabel = getQuoteLevelLabel(quoteLevel);
   const minPrice = comparison.length > 0 ? Math.min(...comparison.map((i) => i.finalTotal)) : 0;
   const maxPrice = comparison.length > 0 ? Math.max(...comparison.map((i) => i.finalTotal)) : 0;
@@ -68,7 +68,11 @@ export default function QuoteCard({ data, consumerGroup, onViewFull, onCallConsu
               <p className="text-[10px] font-medium truncate">{item.brand}</p>
               <p className="text-xs font-bold mt-0.5">{Math.round(item.finalTotal / 10000)}만원</p>
               {item.brand === recommendedBrand && (
-                <p className="text-[9px] mt-0.5 opacity-80">⭐ 추천</p>
+                <>
+                  <p className="text-[9px] mt-0.5 opacity-80">⭐ 추천</p>
+                  {item.productName && <p className="mt-1 text-[9px] leading-relaxed opacity-90">{item.productName}</p>}
+                  <p className="mt-1 text-[9px] leading-relaxed opacity-90">{item.recommendReason || recommendedReason}</p>
+                </>
               )}
             </div>
           ))}
@@ -81,6 +85,13 @@ export default function QuoteCard({ data, consumerGroup, onViewFull, onCallConsu
             {Math.round(minPrice / 10000)}만 ~ {Math.round(maxPrice / 10000)}만원
           </p>
         </div>
+
+        {(recommendedReason || heatingSavingText) && (
+          <div className="rounded-xl bg-white border border-slate-100 px-3 py-2 text-[11px] text-slate-600 space-y-1">
+            {recommendedReason && <p>추천 이유: <span className="font-semibold text-slate-800">{recommendedReason}</span></p>}
+            {heatingSavingText && <p>난방비 절감: <span className="font-semibold text-emerald-700">{heatingSavingText}</span></p>}
+          </div>
+        )}
 
         {/* 레벨 2+ 공간·상태 정보 */}
         {quoteLevel >= 2 && (
