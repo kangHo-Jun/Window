@@ -1,10 +1,10 @@
 "use client";
 
 import React from 'react';
-import type { ExtractedChatFields } from '@/types/chat';
+import type { CurrentQuestionField } from '@/types/chat';
 
 interface SmartOptionsProps {
-  currentQuestionField: keyof ExtractedChatFields | null;
+  currentQuestionField: CurrentQuestionField;
   onSelect: (option: string) => void;
   loading: boolean;
   emphasize?: boolean;
@@ -16,8 +16,12 @@ const OPTION_MAP: Record<string, string[]> = {
   pyeong: ['20평대', '30평대', '40평대', '50평대+'],
   expansion: ['확장형', '비확장형', '부분확장'],
   spaces: [],
+  diagnosisStep0: [],
+  diagnosisStep1: [],
+  diagnosisStep2: [],
+  diagnosisDetail: [],
   age: ['10년 이하', '10~20년', '20년 이상'],
-  problem: ['단열/추위', '소음 차단', '결로/곰팡이', '노후/미관'],
+  problem: [],
   timing: ['즉시', '1~3개월', '6개월 이후', '미정'],
 };
 

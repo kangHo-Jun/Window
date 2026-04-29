@@ -26,3 +26,7 @@
 - Phase 3: High-fidelity UI Styling (Tailwind CSS)
 - Phase 4: PDF Generation (jsPDF) & Sharing Logic
 - Phase 5: Testing & Mobile Optimization
+
+모든 작업 완료 시:
+1. docs/context.md 업데이트
+2. 완료된 것 / 진행 중 / 다음 할 일 갱신

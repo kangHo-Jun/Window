@@ -24,8 +24,8 @@ export const QUESTION_STEPS: QuestionStep[] = [
   { key: 'pyeong', label: '평형', stage: 'BASIC', question: '몇 평형인지 알려주실 수 있나요?' },
   { key: 'expansion', label: '확장여부', stage: 'BASIC', question: '확장형인가요, 아니면 비확장형인가요?' },
   { key: 'spaces', label: '공간', stage: 'BASIC', question: '교체를 원하시는 공간을 모두 선택해 주세요.' },
-  { key: 'age', label: '노후도', stage: 'BASIC', question: '현재 창호가 설치된 지 얼마나 되었나요? (예: 15년 정도)' },
   { key: 'problem', label: '불편사항', stage: 'BASIC', question: '기존 창호를 쓰시면서 가장 불편한 점은 무엇인가요? (단열, 소음 등)' },
+  { key: 'age', label: '노후도', stage: 'BASIC', question: '현재 창호가 설치된 지 얼마나 되었나요? (예: 15년 정도)' },
   { key: 'timing', label: '시공시기', stage: 'BASIC', question: '언제쯤 시공을 계획하고 계신가요?' },
 
   // 2단계 (DEEP - 정밀 견적)

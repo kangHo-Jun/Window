@@ -1,8 +1,28 @@
 # Google Sheets API 설정 (개인 API 키 포함)
 config.js
 
+# 의존성
+node_modules/
+.pnp
+.pnp.js
+
+# 빌드 결과물
+.next/
+out/
+build/
+
+# 환경변수 (절대 커밋 금지)
+.env
+.env.local
+.env.*.local
+
 # macOS 시스템 파일
 .DS_Store
+Thumbs.db
+
+# iCloud
+*.icloud
+*.dmg
 
 # 에디터 설정
 .vscode/
@@ -10,6 +30,7 @@ config.js
 
 # 로그 파일
 *.log
+npm-debug.log*
 
 # 임시 파일
 *.tmp
@@ -17,7 +38,6 @@ config.js
 *~
 
 # Node.js (필요 시)
-node_modules/
 package-lock.json
 
 # Python (로컬 서버용)

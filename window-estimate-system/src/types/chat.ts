@@ -30,6 +30,14 @@ export type ChatMessage = {
   content: string;
 };
 
+export type DiagnosisStep = '' | '0' | '1' | '2';
+export type CurrentQuestionField =
+  | keyof ExtractedChatFields
+  | 'diagnosisStep0'
+  | 'diagnosisStep1'
+  | 'diagnosisStep2'
+  | null;
+
 export type ChatRequest = {
   message: string;
   history: ChatMessage[];
@@ -48,7 +56,10 @@ export type ExtractedChatFields = {
   spaceSizes: Record<string, '소' | '중' | '대' | '모름'>;
   count: string;
   age: string;      
-  problem: string;  
+  problem: string;
+  problems: string[];
+  diagnosisStep: DiagnosisStep;
+  diagnosisDetail: string;
   timing: string;   
   
   // 2단계 (Deep)
@@ -148,7 +159,7 @@ export type ChatApiResponse = {
   pendingSkip: PendingSkip | null;
   consultationNeeded: boolean;
   extractedFields: ExtractedChatFields;
-  currentQuestionField: keyof ExtractedChatFields | null;
+  currentQuestionField: CurrentQuestionField;
   consumerGroup: ConsumerGroupInfo;
   triggerSpaceSelection?: boolean;
   spaceOptions?: string[];

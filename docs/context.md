@@ -118,6 +118,13 @@ LX지인 창호 대리점을 위한 **창호 가견적 자동화 사이트** 구
 | AI 챗봇 공간별 창 크기 범주 선택 및 공간 규격 연동 | `window-estimate-system/`, `docs/db_space_size.csv` | ✅ 완료 |
 | AI 챗봇 공간 카드 인라인 크기 선택 통합 | `window-estimate-system/src/components/AIChatBot.tsx` | ✅ 완료 |
 | AI 추천 고도화 1차 (선호 규칙/맥락 멘트/난방비 절감/결과 카드 강화) | `window-estimate-system/`, `docs/db_preference_rules.csv` | ✅ 완료 |
+| 창호 진단 지식DB 문서화 및 프롬프트 주입 | `docs/창호_진단_지식DB.md`, `window-estimate-system/public/` | ✅ 완료 |
+| 불편사항 심층진단 flow (복수선택/연식/맞춤질문/진단결과) | `window-estimate-system/` | ✅ 완료 |
+| 불편사항 심층진단 flow 구현 | `window-estimate-system/` | ✅ 완료 |
+| 창호 진단 지식DB 작성 및 Gemini 프롬프트 주입 | `docs/` | ✅ 완료 |
+| 불편사항 복수선택 → 즉시 심층진단 진입 | `window-estimate-system/` | ✅ 완료 |
+| isSelectionCommitMessage 제어 메시지 분리 | `window-estimate-system/` | ✅ 완료 |
+| diagnosisStep 0→1→2 진단 흐름 완성 | `window-estimate-system/` | ✅ 완료 |
 
 ### ui.md 완성 섹션 목록
 1. UI 개요 및 목표

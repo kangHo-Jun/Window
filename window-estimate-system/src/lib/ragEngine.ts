@@ -69,6 +69,11 @@ function mergeDetectedFields(base: ExtractedChatFields, overrides?: Partial<Extr
       return;
     }
 
+    if (key === 'problems' && Array.isArray(value)) {
+      merged.problems = value.filter(Boolean);
+      return;
+    }
+
     if (key === 'spaceSizes' && value && typeof value === 'object' && !Array.isArray(value)) {
       merged.spaceSizes = {
         ...merged.spaceSizes,
@@ -111,7 +116,7 @@ export function extractDeterministicFields(message: string, history: ChatMessage
   const ageMatch = trimmedMessage.match(/(\d+)\s*년/);
   const matchedSpace = SPACE_KEYWORDS.find((space) => trimmedMessage.includes(space)) || '';
   const countMatch = trimmedMessage.match(/([1-9])\s*개/);
-  const problemKeyword = ['단열', '추위', '바람', '소음', '결로', '물방울', '작동', '안열림', '부식', '낡음']
+  const problemKeyword = ['단열', '추위', '바람', '소음', '결로', '물방울', '환기', '미세먼지', '작동', '안열림', '부식', '낡음']
     .find((keyword) => trimmedMessage.includes(keyword)) || '';
   const timingKeyword = ['즉시', '바로', '내일', '이번달', '다음달', '올해', '다음주', '1~3개월', '6개월']
     .find((keyword) => trimmedMessage.includes(keyword)) || '';
@@ -148,7 +153,14 @@ export function extractDeterministicFields(message: string, history: ChatMessage
     problem:
       problemKeyword === '추위' || problemKeyword === '바람' ? '단열' :
       problemKeyword === '물방울' ? '결로' :
+      problemKeyword === '미세먼지' ? '환기' :
       problemKeyword || '',
+    problems: problemKeyword ? [
+      problemKeyword === '추위' || problemKeyword === '바람' ? '단열' :
+      problemKeyword === '물방울' ? '결로' :
+      problemKeyword === '미세먼지' ? '환기' :
+      problemKeyword,
+    ] : [],
     timing,
   };
 }
@@ -213,6 +225,9 @@ export function extractChatFields(message: string, history: ChatMessage[]): Extr
     count: detected.count || '1개',
     age: detected.age || '',
     problem: detected.problem || '',
+    problems: detected.problems || [],
+    diagnosisStep: '',
+    diagnosisDetail: '',
     timing: detected.timing || '',
     floor: '',
     corner: '',

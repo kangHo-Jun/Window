@@ -6,7 +6,7 @@ import ChatProgress from './ChatProgress';
 import SmartOptions from './SmartOptions';
 import { getQuoteLevelButtonLabel } from '@/lib/quoteLevelEngine';
 import QuoteCard from './QuoteCard';
-import type { ChatApiResponse, ChatMessage, ConsumerGroupInfo, ExtractedChatFields, PendingSkip, SentimentType, SkipFieldMap } from '@/types/chat';
+import type { ChatApiResponse, ChatMessage, ConsumerGroupInfo, CurrentQuestionField, ExtractedChatFields, PendingSkip, SentimentType, SkipFieldMap } from '@/types/chat';
 import type { AIQuoteData, QuoteCompleteHandler, QuoteLevel } from '@/types/quote';
 
 type UIMessage = {
@@ -82,6 +82,9 @@ const INITIAL_FIELDS: ExtractedChatFields = {
   count: '1개',
   age: '',
   problem: '',
+  problems: [],
+  diagnosisStep: '',
+  diagnosisDetail: '',
   timing: '',
   floor: '',
   corner: '',
@@ -114,7 +117,7 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
   const [pendingSkip, setPendingSkip] = useState<PendingSkip | null>(null);
   const [consultationNeeded, setConsultationNeeded] = useState(false);
   // 초기값 housingType: 첫 인사 후 즉시 주거형태 버튼 표시
-  const [currentQuestionField, setCurrentQuestionField] = useState<keyof ExtractedChatFields | null>('housingType');
+  const [currentQuestionField, setCurrentQuestionField] = useState<CurrentQuestionField>('housingType');
   const [streamingReplyId, setStreamingReplyId] = useState<number | null>(null);
   const [inlineQuoteData, setInlineQuoteData] = useState<AIQuoteData | null>(null);
   const [consumerGroupInfo, setConsumerGroupInfo] = useState<ConsumerGroupInfo | null>(null);
@@ -421,7 +424,6 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
     fields.expansion !== '' &&
     !hasCompletedSpaceSelections(fields) &&
     spaceOptions.length > 0;
-
   return (
     <div className="space-y-4">
       <Card className="hidden rounded-2xl border border-slate-200 bg-white shadow-md md:block lg:hidden">
