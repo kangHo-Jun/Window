@@ -125,6 +125,19 @@ LX지인 창호 대리점을 위한 **창호 가견적 자동화 사이트** 구
 | 불편사항 복수선택 → 즉시 심층진단 진입 | `window-estimate-system/` | ✅ 완료 |
 | isSelectionCommitMessage 제어 메시지 분리 | `window-estimate-system/` | ✅ 완료 |
 | diagnosisStep 0→1→2 진단 흐름 완성 | `window-estimate-system/` | ✅ 완료 |
+| PDF Markdown 청크 분할 스크립트 작성 | `window-estimate-system/scripts/chunk.py` | ✅ 완료 |
+| PDF 임베딩 + Firestore 적재 스크립트 작성 | `window-estimate-system/scripts/embed_upload.py` | ✅ 완료 |
+| PDF 지식DB 32개 청크 Firestore 적재 완료 | `window-estimate-system/scripts/embed_upload.py`, Firestore `window_knowledge` | ✅ 완료 |
+| Firestore 설정 가이드 문서 작성 | `window-estimate-system/docs/firestore_setup.md` | ✅ 완료 |
+| PDF 파싱 스크립트 (parse_pdf.py) | `window-estimate-system/scripts/` | ✅ 완료 |
+| 청크 분할 스크립트 (chunk.py) | `window-estimate-system/scripts/` | ✅ 완료 |
+| 임베딩 + Firestore 적재 스크립트 (embed_upload.py) | `window-estimate-system/scripts/` | ✅ 완료 |
+| Firestore window_knowledge 컬렉션 32개 청크 적재 | GCP stacking-492708 | ✅ 완료 |
+| 벡터 검색 품질 테스트 (10개 쿼리 정확도 상) | `scripts/test_search.py` | ✅ 완료 |
+| ragEngine.ts HybridRetriever 구현 | `window-estimate-system/src/lib/` | ✅ 완료 |
+| route.ts knowledge_query 라우팅 연결 | `window-estimate-system/src/app/api/chat/` | ✅ 완료 |
+| knowledge_mode 답변 3문장 이내 최적화 | `window-estimate-system/src/app/api/chat/` | ✅ 완료 |
+| Firestore 설정 가이드 문서화 | `docs/firestore_setup.md` | ✅ 완료 |
 
 ### ui.md 완성 섹션 목록
 1. UI 개요 및 목표
@@ -153,19 +166,23 @@ LX지인 창호 대리점을 위한 **창호 가견적 자동화 사이트** 구
 ---
 
 ## 진행 중인 것
-- 로컬 빌드 통과 상태에서 브라우저 실환경 검증 및 최종 UI 안정화 진행 중
-- Phase 5 재배포 전, 대화형 Flow 마무리 점검 진행 중
-- `부분확장` 공간 구성은 현재 `비확장형` fallback으로 동작하며, DB 원본 보강 여부 검토 진행 중
+- `feature/pdf-knowledge-rag` 브랜치 로컬 검증 완료
+- knowledge_mode 호칭 제거 및 견적 유도 문구 마무리 미완
+- ver20 머지 및 Cloud Run 재배포 대기 중
 
 ---
 
-## 다음 할 일 (현재버그 정의 포함)
-[다음 작업 순서]
-1. `부분확장` 포함 전체 확장 옵션별 공간 카드 노출 브라우저 실환경 재검증
-2. 공간 선택 완료 후 연식 → 불편사항 → 시공시기 흐름 재검증
-3. 추천 이유/난방비 절감이 결과 카드에 실제 노출되는지 UI 검증
-4. `부분확장` 전용 공간 구성 DB를 `db_configurations_v2.csv`에 보강할지 결정
-5. Cloud Run `ver20` 재배포
+## 다음 할 일
+1. knowledge_mode 호칭("고객님") 제거 마무리
+2. knowledge_mode 마지막 문장 견적 유도 문구 고정
+3. `feature/pdf-knowledge-rag` → `ver20` 머지
+4. Cloud Run 재배포
+5. RAG 개입 시점 UX 설계 반영
+   - 견적 카드 직후 "왜 이 제품인가?" RAG 유도 버튼 구현
+   - 불편사항 진단 후 자동 RAG 개입 구현
+   - 브랜드 망설임 감지 후 RAG 자동 개입 구현
+6. PRD v4.0 RAG 개입 시점 UX 내용 업데이트
+7. PDF 추가 적재 (카탈로그 외 기술사양서 등)
 
 ---
 
