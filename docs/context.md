@@ -104,40 +104,17 @@ LX지인 창호 대리점을 위한 **창호 가견적 자동화 사이트** 구
 | Phase 4 - OperatorReport.tsx 운영자 전략 카드 | `window-estimate-system/src/components/` | ✅ 완료 |
 | Phase 4 - sheets/route.ts 운영자 데이터 20컬럼 고도화 | `window-estimate-system/src/app/api/sheets/` | ✅ 완료 |
 | Phase 4 - fallbackCount 실제 추적 + Human-in-the-Loop 플래그 | `window-estimate-system/src/app/api/chat/` | ✅ 완료 |
-| homewindow.kr 벤치마킹 분석 문서 | docs/ | ✅ 완료 |
-| homewindow.kr 벤치마킹 분석 | docs/ | ✅ 완료 |
-| benchmarking_homewindow.md 저장 | `docs/benchmarking_homewindow.md` | ✅ 완료 |
-| Hugreen SYNC + homewindow.kr 재분석 문서 | `docs/benchmarking_hugreen.md` | ✅ 완료 |
-| hugreen.kr 벤치마킹 분석 | docs/ | ✅ 완료 |
-| 전체 구현 로드맵 확정 (Phase1~5) | docs/ | ✅ 완료 |
-| Gemini 2.5-flash 모델 교체 | window-estimate-system/ | ✅ 완료 |
-| Gemini 주도 대화 flow 재설계 | window-estimate-system/ | ✅ 완료 |
-| AIChatBot 반응형 실시간 견적 레이아웃 재설계 (데스크탑 60/40, 태블릿 접이식, 모바일 바텀시트/FAB) | `window-estimate-system/src/components/` | ✅ 완료 |
-| AIChatBot 헤더 액션/실시간 견적 패널 톤다운 리디자인 | `window-estimate-system/src/components/` | ✅ 완료 |
-| AIChatBot 헤더 액션 버튼 오버플로우/잘림 보정 | `window-estimate-system/src/components/` | ✅ 완료 |
-| AI 챗봇 공간별 창 크기 범주 선택 및 공간 규격 연동 | `window-estimate-system/`, `docs/db_space_size.csv` | ✅ 완료 |
-| AI 챗봇 공간 카드 인라인 크기 선택 통합 | `window-estimate-system/src/components/AIChatBot.tsx` | ✅ 완료 |
-| AI 추천 고도화 1차 (선호 규칙/맥락 멘트/난방비 절감/결과 카드 강화) | `window-estimate-system/`, `docs/db_preference_rules.csv` | ✅ 완료 |
-| 창호 진단 지식DB 문서화 및 프롬프트 주입 | `docs/창호_진단_지식DB.md`, `window-estimate-system/public/` | ✅ 완료 |
-| 불편사항 심층진단 flow (복수선택/연식/맞춤질문/진단결과) | `window-estimate-system/` | ✅ 완료 |
-| 불편사항 심층진단 flow 구현 | `window-estimate-system/` | ✅ 완료 |
-| 창호 진단 지식DB 작성 및 Gemini 프롬프트 주입 | `docs/` | ✅ 완료 |
-| 불편사항 복수선택 → 즉시 심층진단 진입 | `window-estimate-system/` | ✅ 완료 |
-| isSelectionCommitMessage 제어 메시지 분리 | `window-estimate-system/` | ✅ 완료 |
-| diagnosisStep 0→1→2 진단 흐름 완성 | `window-estimate-system/` | ✅ 완료 |
-| PDF Markdown 청크 분할 스크립트 작성 | `window-estimate-system/scripts/chunk.py` | ✅ 완료 |
-| PDF 임베딩 + Firestore 적재 스크립트 작성 | `window-estimate-system/scripts/embed_upload.py` | ✅ 완료 |
-| PDF 지식DB 32개 청크 Firestore 적재 완료 | `window-estimate-system/scripts/embed_upload.py`, Firestore `window_knowledge` | ✅ 완료 |
-| Firestore 설정 가이드 문서 작성 | `window-estimate-system/docs/firestore_setup.md` | ✅ 완료 |
-| PDF 파싱 스크립트 (parse_pdf.py) | `window-estimate-system/scripts/` | ✅ 완료 |
-| 청크 분할 스크립트 (chunk.py) | `window-estimate-system/scripts/` | ✅ 완료 |
-| 임베딩 + Firestore 적재 스크립트 (embed_upload.py) | `window-estimate-system/scripts/` | ✅ 완료 |
+| Conversational RAG UX 설계 및 구현 | `docs/PRD_v4.0_PDF_RAG_Integration.md`, `window-estimate-system/` | ✅ 완료 |
+| knowledge_mode 호칭 제거 및 간결한 말투 적용 | `window-estimate-system/src/app/api/chat/route.ts` | ✅ 완료 |
+| RAG -> 견적 전환 트리거(triggerQuote) 로직 구현 | `window-estimate-system/` | ✅ 완료 |
+| 추천 질문(related_questions) 버튼 렌더링 구현 | `window-estimate-system/src/components/AIChatBot.tsx` | ✅ 완료 |
 | Firestore window_knowledge 컬렉션 32개 청크 적재 | GCP stacking-492708 | ✅ 완료 |
 | 벡터 검색 품질 테스트 (10개 쿼리 정확도 상) | `scripts/test_search.py` | ✅ 완료 |
 | ragEngine.ts HybridRetriever 구현 | `window-estimate-system/src/lib/` | ✅ 완료 |
 | route.ts knowledge_query 라우팅 연결 | `window-estimate-system/src/app/api/chat/` | ✅ 완료 |
 | knowledge_mode 답변 3문장 이내 최적화 | `window-estimate-system/src/app/api/chat/` | ✅ 완료 |
 | Firestore 설정 가이드 문서화 | `docs/firestore_setup.md` | ✅ 완료 |
+| PRD v4.0 섹션8 연구 기반 UX 설계 전략 추가 | `docs/PRD_v4.0_PDF_RAG_Integration.md` | ✅ 완료 |
 
 ### ui.md 완성 섹션 목록
 1. UI 개요 및 목표
@@ -166,23 +143,19 @@ LX지인 창호 대리점을 위한 **창호 가견적 자동화 사이트** 구
 ---
 
 ## 진행 중인 것
-- `feature/pdf-knowledge-rag` 브랜치 로컬 검증 완료
-- knowledge_mode 호칭 제거 및 견적 유도 문구 마무리 미완
-- ver20 머지 및 Cloud Run 재배포 대기 중
+- `feature/pdf-knowledge-rag` 통합 구현 및 빌드 검증 완료
+- 추천 질문 버튼 기반 능동적 UX 흐름 테스트 중
 
 ---
 
 ## 다음 할 일
-1. knowledge_mode 호칭("고객님") 제거 마무리
-2. knowledge_mode 마지막 문장 견적 유도 문구 고정
-3. `feature/pdf-knowledge-rag` → `ver20` 머지
-4. Cloud Run 재배포
-5. RAG 개입 시점 UX 설계 반영
+1. `feature/pdf-knowledge-rag` → `ver20` 머지
+2. Cloud Run 재배포
+3. RAG 개입 시점 UX 설계 반영
    - 견적 카드 직후 "왜 이 제품인가?" RAG 유도 버튼 구현
    - 불편사항 진단 후 자동 RAG 개입 구현
    - 브랜드 망설임 감지 후 RAG 자동 개입 구현
-6. PRD v4.0 RAG 개입 시점 UX 내용 업데이트
-7. PDF 추가 적재 (카탈로그 외 기술사양서 등)
+4. PDF 추가 적재 (카탈로그 외 기술사양서 등)
 
 ---
 
