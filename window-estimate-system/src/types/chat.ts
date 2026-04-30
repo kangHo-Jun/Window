@@ -166,4 +166,5 @@ export type ChatApiResponse = {
   triggerSizeSelection?: boolean;
   currentSpace?: string | null;
   sizeOptions?: string[];
+  triggerQuote?: boolean;
 };

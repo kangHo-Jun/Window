@@ -195,6 +195,12 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
     if (data.consumerGroup) setConsumerGroupInfo(data.consumerGroup);
     setSpaceOptions(data.spaceOptions ?? []);
 
+    // RAG -> 견적 전환 트리거 발생 시 처리
+    if (data.triggerQuote && !data.currentQuestionField) {
+      // 주거 형태부터 시작하도록 강제 유도 (이미 있다면 다음 필드로)
+      setCurrentQuestionField('housingType');
+    }
+
     if (data.showResult && data.quoteData) {
       window.setTimeout(() => {
         onComplete(data.quoteData!);

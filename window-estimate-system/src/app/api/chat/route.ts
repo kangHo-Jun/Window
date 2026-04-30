@@ -6,6 +6,7 @@ import {
   getRagContext,
   needsGeminiAssistance,
   normalizePyeongValue,
+  searchKnowledge,
   shouldShowResult,
 } from '@/lib/ragEngine';
 import { getNextQuestion } from '@/lib/dynamicQuestion';
@@ -289,6 +290,32 @@ function isSelectionCommitMessage(message: string) {
   return message.includes('선택 완료');
 }
 
+const KNOWLEDGE_QUERY_PATTERNS: (string | RegExp)[] = [
+  // 의문/설명 요청
+  '뭐예요', '뭔가요', '어떤 건가요', '설명해', '알려줘', '알려주세요', '가르쳐',
+  // 비교/차이
+  '차이가', '차이점', '차이는', '비교해', '어떻게 달라', '뭐가 좋',
+  // 성능/스펙 용어
+  '5대 성능', '열관류율', '에너지등급', '에너지 등급',
+  '로이유리', '아르곤', '수퍼로이', '수퍼더블로이',
+  '이중창', '단창', '외창', '내창', '방충망',
+  'F-', '발코니창', '창호 종류', '시공방법', '주문모형',
+  // 추가 regex 패턴
+  /가장 좋은/,
+  /성능.*창호/,
+  /창호.*성능/,
+  /단열.*뭐/,
+  /추천.*이유/,
+  /왜.*좋/,
+  /어떤.*좋/,
+];
+
+function isKnowledgeQuery(message: string): boolean {
+  return KNOWLEDGE_QUERY_PATTERNS.some((pattern) =>
+    typeof pattern === 'string' ? message.includes(pattern) : pattern.test(message),
+  );
+}
+
 function buildLocalReply(previousFields: ExtractedChatFields, fields: ExtractedChatFields, officeTelDetected: boolean) {
   const name = isFilled(fields.customerName) ? `${fields.customerName}님` : '고객님';
   const nextQuestion = getNextQuestion(fields);
@@ -434,16 +461,20 @@ function parseGeminiEnvelope(raw: string) {
     const parsed = JSON.parse(jsonMatch[1]) as {
       fieldUpdates?: Partial<ExtractedChatFields>;
       options?: string[];
+      related_questions?: string[];
       currentQuestionField?: CurrentQuestionField;
+      answer?: string;
+      trigger_quote?: boolean;
     };
     return {
-      reply,
-      options: Array.isArray(parsed.options) ? parsed.options : [],
+      reply: parsed.answer || reply,
+      options: (parsed.related_questions || parsed.options || []),
       currentQuestionField: parsed.currentQuestionField ?? null,
       fieldUpdates: parsed.fieldUpdates ?? {},
+      triggerQuote: parsed.trigger_quote ?? false,
     };
   } catch {
-    return { reply, options: [], currentQuestionField: null, fieldUpdates: {} as Partial<ExtractedChatFields> };
+    return { reply, options: [], currentQuestionField: null, fieldUpdates: {}, triggerQuote: false };
   }
 }
 
@@ -537,7 +568,14 @@ export async function POST(req: Request) {
     }
     const officeTelDetected = body.message.includes('오피스텔');
     const isDiagnosisFlowMessage = previousFields.diagnosisStep === '0' || previousFields.diagnosisStep === '1';
-    const shouldUseGemini = !isDiagnosisFlowMessage && !isCommitMessage && needsGeminiAssistance(body.message, deterministicFields);
+    // isKnowledgeMode: 지식 쿼리면 견적/진단 flow 우선순위보다 먼저 처리
+    const isKnowledgeMode = !isCommitMessage && !isDiagnosisFlowMessage && isKnowledgeQuery(body.message);
+    if (isKnowledgeMode) {
+      // 지식 쿼리에서 '단열' 등 키워드가 견적 필드로 오추출되지 않도록 차단
+      deterministicFields.problem = '';
+      deterministicFields.problems = [];
+    }
+    const shouldUseGemini = isKnowledgeMode || (!isDiagnosisFlowMessage && !isCommitMessage && needsGeminiAssistance(body.message, deterministicFields));
 
     let mergedFields = ensureProblems(mergeFields(previousFields, deterministicFields));
 
@@ -553,12 +591,25 @@ export async function POST(req: Request) {
           let streamedReply = '';
           let suggestedReplies: string[] = [];
           let currentQuestionField: CurrentQuestionField = null;
+          let triggerQuote = false;
           let triggerSpaceSelection = false;
           let spaceOptions: string[] = [];
           // STEP 2: Gemini 단일 호출 (추출 + 대화 통합) — 모호한 경우만
           if (shouldUseGemini) {
             try {
-              const prompt = buildSystemPrompt(mergedFields, history, body.message);
+              let prompt = buildSystemPrompt(mergedFields, history, body.message);
+              if (isKnowledgeMode) {
+                // 호칭 지시 완전히 제거 및 상담사 페르소나 최소화
+                prompt = prompt.replace(/너는 .+?상담사 "지인이"야\./g, '너는 창호 지식 전문가야.');
+                prompt = prompt.replace(/고객 호칭은 .+?이고,\s*/g, '');
+                prompt = prompt.replace(/말투는 친근하지만 전문적이어야 해\./g, '말투는 간결하고 객관적이어야 해.');
+                
+                const chunks = await searchKnowledge(body.message);
+                if (chunks.length > 0) {
+                  const context = chunks.map((c) => c.chunk_text).join('\n\n---\n\n');
+                  prompt += `\n\n[창호 지식 DB]\n${context}\n\n[출력 형식]\n반드시 아래 JSON 형식으로만 답변한다:\n\`\`\`json\n{\n  "answer": "답변 텍스트 (3문장 이내)",\n  "related_questions": ["질문1", "질문2", "견적 유도 질문"],\n  "trigger_quote": boolean\n}\n\`\`\`\n\n[답변 규칙]\n- "고객님", "님" 등 모든 호칭을 절대 사용하지 않는다\n- "아, 그렇군요" 등 불필요한 감탄사를 절대 사용하지 않는다\n- 답변은 반드시 \`answer\` 필드에 3문장 이내로 작성한다\n- 핵심 수치 1~2개만 포함한다\n- \`related_questions\`는 반드시 소비자 언어(상황/감각)로 2~3개 생성한다 (예: "우리집은 얼마나 절감될까요?")\n- 마지막 \`related_questions\`는 항상 견적과 관련된 질문이어야 한다 (예: "우리집에 맞는 견적 보고 싶어요")\n- 사용자가 견적 의사를 명확히 보이면 \`trigger_quote\`를 true로 설정한다\n- 주거 형태, 평형, 연식 등 추가 정보를 묻지 않는다\n- 가격은 절대 직접 생성하지 않는다`;
+                }
+              }
               const raw = await streamGeminiReply(prompt, apiKey, (chunk) => {
                 streamedReply += chunk;
                 controller.enqueue(encodeSse('reply', { chunk }));
@@ -568,6 +619,7 @@ export async function POST(req: Request) {
               suggestedReplies = parsed.options;
               currentQuestionField = parsed.currentQuestionField;
               mergedFields = mergeFields(mergedFields, parsed.fieldUpdates);
+              triggerQuote = parsed.triggerQuote || false;
             } catch (error) {
               console.error('Gemini 호출 실패:', error);
             }
@@ -616,7 +668,8 @@ export async function POST(req: Request) {
             spaceOptions = [];
           }
 
-          const diagnosisFlow = getDiagnosisFlowResponse(mergedFields);
+          // 지식 쿼리는 진단 flow 스킵 — Gemini RAG 응답이 최종
+          const diagnosisFlow = isKnowledgeMode ? null : getDiagnosisFlowResponse(mergedFields);
           if (diagnosisFlow) {
             mergedFields = diagnosisFlow.fields;
             currentQuestionField = diagnosisFlow.currentQuestionField;
@@ -702,6 +755,7 @@ export async function POST(req: Request) {
             triggerSizeSelection: false,
             currentSpace: null,
             sizeOptions: [],
+            triggerQuote,
           };
 
           console.log(`[chat] ${Date.now() - startedAt}ms gemini=${shouldUseGemini}`);

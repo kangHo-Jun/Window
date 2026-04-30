@@ -13,6 +13,9 @@ import type { AIQuoteData, BrandCompareItem, BrandName, QuoteLevel } from '@/typ
 import { getQuoteErrorLabel, getQuoteLevel } from './quoteLevelEngine';
 import { getNextQuestion } from './dynamicQuestion';
 import { loadConfigurationRows, loadPreferenceRuleRows, loadPriceRows, loadProductRows, loadSpaceSizeRows } from './dbLoader';
+import { Firestore, FieldValue } from '@google-cloud/firestore';
+import { GoogleGenerativeAI, TaskType } from '@google/generative-ai';
+import path from 'path';
 
 export const GEMINI_MODEL = 'gemini-2.5-flash';
 
@@ -615,6 +618,99 @@ ${bundle.heatingSavingText}
 - JSON, 코드블록, 마크다운 표 금지
 `.trim();
 }
+
+// ─── Firestore Knowledge RAG ──────────────────────────────────────────────────
+
+export interface KnowledgeChunk {
+  chunk_id: string;
+  page: number;
+  source: string;
+  category: string;
+  chunk_text: string;
+  similarity?: number;
+}
+
+const KNOWLEDGE_COLLECTION = 'window_knowledge';
+const KNOWLEDGE_EMBEDDING_MODEL = 'models/gemini-embedding-001';
+
+let _firestoreDb: Firestore | null = null;
+
+function getFirestoreDb(): Firestore {
+  if (_firestoreDb) return _firestoreDb;
+  const projectId = process.env.FIRESTORE_PROJECT_ID ?? 'stacking-492708';
+  const credEnv = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  const keyFilename = credEnv
+    ? (path.isAbsolute(credEnv) ? credEnv : path.resolve(process.cwd(), credEnv))
+    : undefined;
+  // preferRest + databaseId: gRPC "(default)" vs "default" 불일치 방지 (Python REST 방식과 동일)
+  const opts = { projectId, databaseId: 'default', preferRest: true, ...(keyFilename ? { keyFilename } : {}) };
+  _firestoreDb = new Firestore(opts);
+  return _firestoreDb;
+}
+
+async function getQueryEmbedding(query: string): Promise<number[]> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('GEMINI_API_KEY missing');
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: KNOWLEDGE_EMBEDDING_MODEL });
+  const result = await model.embedContent({
+    content: { role: 'user', parts: [{ text: query }] },
+    config: {
+      taskType: TaskType.RETRIEVAL_QUERY,
+      outputDimensionality: 768, // Python 업로드 시 사용한 차원과 동일
+    },
+  } as any);
+  return result.embedding.values;
+}
+
+async function searchKnowledgeInternal(
+  query: string,
+  filters?: { category?: string },
+  topK = 3,
+): Promise<KnowledgeChunk[]> {
+  const db = getFirestoreDb();
+  const embedding = await getQueryEmbedding(query);
+  const baseRef = filters?.category
+    ? db.collection(KNOWLEDGE_COLLECTION).where('category', '==', filters.category)
+    : db.collection(KNOWLEDGE_COLLECTION);
+  const snapshot = await baseRef
+    .findNearest({
+      vectorField: 'embedding',
+      queryVector: FieldValue.vector(embedding),
+      limit: topK,
+      distanceMeasure: 'COSINE',
+    })
+    .get();
+  return snapshot.docs.map((doc) => {
+    const d = doc.data();
+    return {
+      chunk_id: d.chunk_id as string,
+      page: d.page as number,
+      source: d.source as string,
+      category: d.category as string,
+      chunk_text: d.chunk_text as string,
+    };
+  });
+}
+
+export async function searchKnowledge(
+  query: string,
+  filters?: { category?: string },
+  topK = 3,
+): Promise<KnowledgeChunk[]> {
+  try {
+    const timeout = new Promise<KnowledgeChunk[]>((_, reject) =>
+      setTimeout(() => reject(new Error('searchKnowledge timeout')), 3000),
+    );
+    return await Promise.race([searchKnowledgeInternal(query, filters, topK), timeout]);
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('[searchKnowledge] 실패:', msg);
+    return [];
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function buildFallbackReply(bundle: RagContextBundle, showResult: boolean) {
   if (!bundle.fields.pyeong) {

@@ -15,6 +15,10 @@ build/
 .env
 .env.local
 .env.*.local
+docs/firebase-credentials.json
+
+# 서비스 계정 키
+docs/stacking-492708*.json
 
 # macOS 시스템 파일
 .DS_Store
@@ -23,6 +27,12 @@ Thumbs.db
 # iCloud
 *.icloud
 *.dmg
+
+# 스크립트 출력물
+window-estimate-system/scripts/output/
+
+# 지식 문서 (민감 자료)
+docs/지식/
 
 # 에디터 설정
 .vscode/
