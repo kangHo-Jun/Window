@@ -25,163 +25,124 @@ LX지인 창호 대리점을 위한 **창호 가견적 자동화 사이트** 구
 | 항목 | 결정 |
 |------|------|
 | 벤치마킹 | 휴그린 SYNC (hugreen.kr/sync/creation) |
-| 입력 방식 | 옵션A(스마트 레고식: 평형→자동구성) + 옵션B(대화형 3문항 유지) 병렬 제공 |
+| 입력 방식 | 옵션A(스마트 레고식) + 옵션B(대화형 3문항) 병렬 제공 |
 | 브랜드 비교 | LX지인(프리미엄) / KCC(중간) / 기타(실속) |
 | 출력물 | 3사 비교표 + 절감액 계산기 + 컨설팅 레포트 + PDF + 상담연결 |
-| 개발 단계 | 1차: 폼 기반 / 2차: RAG 웹 채팅봇 |
-| 기술 스택 | Next.js + Tailwind + shadcn/ui + Google Sheets + Google Cloud Run |
-| DB 수집 | Gemini API로 크롤링 + Google Sheets 직접 입력 |
-| 아키텍처 | A2UI + JSON 중심 + json-rules-engine |
+| 개발 단계 | 1차: 폼 기반 / 2차: RAG 웹 채팅봇 / 4차: PDF 지식베이스 통합 |
+| 기술 스택 | Next.js + Tailwind + shadcn/ui + Firestore + Google Cloud Run |
+| Vector DB | Firestore Native Vector Search |
+| LLM | gemini-2.5-flash |
+
+---
+
+## 인프라
+
+| 항목 | 값 |
+|------|------|
+| GCP 프로젝트 | stacking-492708 |
+| Cloud Run 서비스 | window-estimate |
+| 운영 URL | https://window-estimate-747058361639.asia-northeast3.run.app |
+| GitHub | kangHo-Jun/Window |
+| 서비스 계정 | loading-sheet@stacking-492708.iam.gserviceaccount.com |
+| Firestore DB | stacking-492708 / default / window_knowledge |
+
+---
+
+## 브랜치 전략
+
+```text
+main                        ← ver10 운영 (건드리지 않음)
+ver20                       ← 봇고도화
+feature/pdf-knowledge-rag   ← v4.0 현재 개발 중
+```
 
 ---
 
 ## 현재까지 완료된 것
 
-| 문서/작업 | 위치 | 상태 |
-|------|------|------|
-| 개발개요.md | docs/ | ✅ 완료 |
-| PRD v1.1 | docs/ | ✅ 완료 |
-| ui.md | docs/ | ✅ 완료 (섹션 1~14 전체) |
-| db_structure.md | docs/ | ✅ 완료 |
-| db_products_v2.csv | docs/ | ✅ 완료 |
-| db_prices_v2.csv | docs/ | ✅ 완료 |
-| db_configurations_v2.csv | docs/ | ✅ 완료 |
-| db_margins.csv | docs/ | ✅ 완료 |
-| google_sheets_setup_guide.md | docs/ | ✅ 완료 |
-| CLAUDE.md | 루트 | ✅ 완료 |
-| AGENTS.md | 루트 | ✅ 완료 |
-| context.md | docs/ | ✅ 이 문서 |
-| Google Sheets DB 구축 | - | ✅ 완료 (구글시트연동 준비) |
-| 개발 Phase 1 (입력 폼) | - | ✅ 완료 (Smart Lego/Chat) |
-| 개발 Phase 2 (계산 엔진) | - | ✅ 완료 (3사 비교/절감액) |
-| 개발 Phase 3 (레포트/PDF) | - | ✅ 완료 (나눔고딕 PDF) |
-| Google Sheets 실제 연동 | `window-estimate-system/` | ✅ 완료 |
-| Cloud Run 배포 | `window-estimate-system/` | ✅ 완료 |
-| Cloud Build 배포 설정 문서화 | `docs/구글런설정.md` | ✅ 완료 |
-| Cloud Build 서비스 계정 로그 권한 부여 | GCP IAM | ✅ 완료 |
-| `loading-sheet` Artifact Registry 조회 권한 부여 | GCP IAM | ✅ 완료 |
-| `GEMINI_API_KEY` Secret Manager 등록 | GCP Secret Manager | ✅ 완료 |
-| 구글런설정.md 최신 권한 이슈 반영 | `docs/구글런설정.md` | ✅ 완료 |
-| ver20 RAG 챗봇 1차 구현 | `window-estimate-system/` | ✅ 완료 |
-| AIChatBot 상호작용 버그 수정 | `window-estimate-system/` | ✅ 완료 |
-| Gemini 모델 `gemini-2.0-flash` 교체 | `window-estimate-system/` | ✅ 완료 |
-| AI 챗봇 평형 중복 안내 문구 수정 | `window-estimate-system/` | ✅ 완료 |
-| AI 챗봇 대화 내용 세로 스크롤 수정 | `window-estimate-system/` | ✅ 완료 |
-| AI 챗봇 `route.ts` 상태 주입형 프롬프트 구조 개편 | `window-estimate-system/` | ✅ 완료 |
-| AI 챗봇 클라이언트 `fields` API 전달 및 프롬프트 주입 보강 | `window-estimate-system/` | ✅ 완료 |
-| AI 챗봇 최소 정보 3개 기반 빠른 가견적 버튼 추가 | `window-estimate-system/` | ✅ 완료 |
-| AI 챗봇 빠른 가견적 버튼 헤더 우측 고정으로 이동 | `window-estimate-system/` | ✅ 완료 |
-| AI 챗봇 견적 레벨 시스템 1~3단계 및 출력 분기 구현 | `window-estimate-system/` | ✅ 완료 |
-| AI 챗봇 Sentiment Detection 및 Fallback Handling 추가 | `window-estimate-system/` | ✅ 완료 |
-| AI 챗봇 지역명 오입력(`한국` 등) fallback 보강 | `window-estimate-system/` | ✅ 완료 |
-| AI 챗봇 `통과/패스` 스킵 처리 및 동적 오차율 반영 | `window-estimate-system/` | ✅ 완료 |
-| AI 챗봇 이름 수집 / 상시 헤더 버튼 / 상담필요 시트 플래그 추가 | `window-estimate-system/` | ✅ 완료 |
-| AI 챗봇 history 중복 전송 제거 및 이름/숫자 문맥 처리 보정 | `window-estimate-system/` | ✅ 완료 |
-| AI 챗봇 이름 단독 입력 정규식 보정 | `window-estimate-system/` | ✅ 완료 |
-| Gemini 모델 `gemini-2.5-flash` 교체 | `window-estimate-system/` | ✅ 완료 |
-| SmartOptions OPTION_MAP 허용값 불일치 수정 | `window-estimate-system/` | ✅ 완료 |
-| SmartOptions → Gemini `currentQuestionField` 동기화 | `window-estimate-system/` | ✅ 완료 |
-| pyeong 저장 형식 `'30평대'` 통일 | `window-estimate-system/` | ✅ 완료 |
-| `quoteLevel >= 1` 시 SmartOptions 버튼 숨김 | `window-estimate-system/` | ✅ 완료 |
-| `route.ts` 전면 재설계 — Gemini 대화 주도 구조 | `window-estimate-system/` | ✅ 완료 |
-| ragEngine `customerName` 오추출 차단 | `window-estimate-system/` | ✅ 완료 |
-| SmartOptions → Gemini JSON `options` 기반으로 전환 | `window-estimate-system/` | ✅ 완료 |
-| PRD_v2.0_봇고도화_final.md | `docs/` | ✅ 완료 |
-| brand_voice_지인이.md | `docs/` | ✅ 완료 |
-| AI 챗봇 raw JSON reply 노출 방지 및 오피스텔→아파트 매핑 보강 | `window-estimate-system/` | ✅ 완료 |
-| AI 챗봇 속도 최적화 1차 — 정규식 fast-path + 단일 Gemini 호출 + SSE 스트리밍 | `window-estimate-system/` | ✅ 완료 |
-| sentimentDetector.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
-| intentClassifier.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
-| personaEngine.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
-| dynamicQuestion.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
-| skipDetector.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
-| quoteLevelEngine.ts | `window-estimate-system/src/lib/` | ✅ 완료 |
-| Gemini `gemini-2.5-flash` 연결 교체 | `window-estimate-system/` | ✅ 완료 |
-| AI 챗봇 속도 최적화 — 정규식 fast-path + 단일 Gemini 호출 + SSE 스트리밍 | `window-estimate-system/` | ✅ 완료 |
-| Phase 3 - QuoteCard.tsx 인라인 가견적 카드 (레벨 1/2/3 차별화) | `window-estimate-system/src/components/` | ✅ 완료 |
-| Phase 3 - consumerGrouping.ts 소비자 5그룹 자동 분류 | `window-estimate-system/src/lib/` | ✅ 완료 |
-| Phase 3 - AIChatBot 인라인 QuoteCard 표시 연동 | `window-estimate-system/src/components/` | ✅ 완료 |
-| Phase 4 - OperatorReport.tsx 운영자 전략 카드 | `window-estimate-system/src/components/` | ✅ 완료 |
-| Phase 4 - sheets/route.ts 운영자 데이터 20컬럼 고도화 | `window-estimate-system/src/app/api/sheets/` | ✅ 완료 |
-| Phase 4 - fallbackCount 실제 추적 + Human-in-the-Loop 플래그 | `window-estimate-system/src/app/api/chat/` | ✅ 완료 |
-| Conversational RAG UX 설계 및 구현 | `docs/PRD_v4.0_PDF_RAG_Integration.md`, `window-estimate-system/` | ✅ 완료 |
-| knowledge_mode 호칭 제거 및 간결한 말투 적용 | `window-estimate-system/src/app/api/chat/route.ts` | ✅ 완료 |
-| RAG -> 견적 전환 트리거(triggerQuote) 로직 구현 | `window-estimate-system/` | ✅ 완료 |
-| 추천 질문(related_questions) 버튼 렌더링 구현 | `window-estimate-system/src/components/AIChatBot.tsx` | ✅ 완료 |
-| Firestore window_knowledge 컬렉션 32개 청크 적재 | GCP stacking-492708 | ✅ 완료 |
-| 벡터 검색 품질 테스트 (10개 쿼리 정확도 상) | `scripts/test_search.py` | ✅ 완료 |
-| ragEngine.ts HybridRetriever 구현 | `window-estimate-system/src/lib/` | ✅ 완료 |
-| route.ts knowledge_query 라우팅 연결 | `window-estimate-system/src/app/api/chat/` | ✅ 완료 |
-| knowledge_mode 답변 3문장 이내 최적화 | `window-estimate-system/src/app/api/chat/` | ✅ 완료 |
-| Firestore 설정 가이드 문서화 | `docs/firestore_setup.md` | ✅ 완료 |
-| PRD v4.0 섹션8 연구 기반 UX 설계 전략 추가 | `docs/PRD_v4.0_PDF_RAG_Integration.md` | ✅ 완료 |
+### ver20 (봇고도화)
+- Smart Lego 입력 + 대화형 챗봇 병렬 제공
+- 3사 비교표 + 절감액 계산기
+- PDF 컨설팅 레포트 (NotoSansKR)
+- Google Sheets 연동
+- Cloud Run 배포
+- Gemini 2.5-flash 연결
+- RAG 엔진 + intentClassifier + sentimentDetector 등 모듈 구현
+- QuoteCard 인라인 견적 카드 (레벨 1/2/3)
+- 불편사항 심층진단 flow
+- 공간별 창 크기 범주 선택
 
-### ui.md 완성 섹션 목록
-1. UI 개요 및 목표
-2. 페이지 구조
-3. 컴포넌트 목록
-4. 각 페이지별 상세 UI 스펙 (Step 1~4 + Result)
-5. 디자인 시스템 (색상/폰트/간격)
-6. 반응형 기준
-7. 동적 위젯 스펙
-8. 구현 순서 (Next.js 마이그레이션 기준)
-9. 옵션B 대화형 입력 UI 스펙
-10. 요구사항 폼 UI 스펙
-11. 3사 비교표 UI 스펙
-12. 난방비 절감 계산기 UI 스펙
-13. 메인 랜딩 페이지 UI 스펙
-14. 상담 신청 폼 + PDF 다운로드 흐름
-
----
-
-## 기존 프로토타입 현황
-- 파일: `direct-sync.html` / `direct-sync.js` / `direct-sync.css` / `config.js`
-- Phase 1~5 완료 (레고식 입력 → 가격계산 → PDF)
-- **Critical 버그**: 이미지 로컬 절대경로 깨짐, Google Sheets 미연결
-- **Minor 버그**: PDF 한글 깨짐, 총가격 하드코딩 잔존
+### feature/pdf-knowledge-rag (v4.0)
+| 작업 | 상태 |
+|------|------|
+| PRD v4.0 문서 작성 | ✅ |
+| Firestore 설정 가이드 | ✅ |
+| PDF 파싱 스크립트 (parse_pdf.py) | ✅ |
+| 청크 분할 스크립트 (chunk.py) | ✅ |
+| 임베딩 + Firestore 적재 (embed_upload.py) | ✅ |
+| Firestore window_knowledge 34개 청크 적재 | ✅ |
+| 벡터 검색 품질 테스트 (정확도 상) | ✅ |
+| ragEngine.ts HybridRetriever 구현 | ✅ |
+| route.ts knowledge_query 라우팅 연결 | ✅ |
+| knowledge_mode 답변 3문장 최적화 | ✅ |
+| related_questions JSON 반환 구조 구현 | ✅ |
+| AIChatBot.tsx suggestedReplies 상태 관리 | ✅ |
+| PRD v4.0 Conversational RAG UX 설계 | ✅ |
+| PRD v4.0 연구기반 UX 전략 (섹션8) | ✅ |
+| 연구 문서 (RAG 프로액티브 대화) | ✅ |
 
 ---
 
 ## 진행 중인 것
-- `feature/pdf-knowledge-rag` 통합 구현 및 빌드 검증 완료
-- 추천 질문 버튼 기반 능동적 UX 흐름 테스트 중
+- `feature/pdf-knowledge-rag` 브랜치 개발 중
+- 빌드 통과 / Firestore 연결 정상 / 환경변수 완비
 
 ---
 
 ## 다음 할 일
-1. `feature/pdf-knowledge-rag` → `ver20` 머지
-2. Cloud Run 재배포
-3. RAG 개입 시점 UX 설계 반영
-   - 견적 카드 직후 "왜 이 제품인가?" RAG 유도 버튼 구현
-   - 불편사항 진단 후 자동 RAG 개입 구현
-   - 브랜드 망설임 감지 후 RAG 자동 개입 구현
-4. PDF 추가 적재 (카탈로그 외 기술사양서 등)
+1. **연관 질문 버튼 동적 생성 구현 (ProMISe)** ← 다음 세션 시작점
+   - `route.ts` related_questions → AIChatBot.tsx 버튼 렌더링 연결
+   - SmartOptions 확장 또는 별도 RelatedQuestions 컴포넌트 신규 생성
+2. CHI 2024 타이밍 전략 — 입력 완료 직후 검증 멘트 삽입
+3. BANT Hot Lead 감지 → consumerGrouping.ts 확장
+4. Zero-step 예약 자동 입력
+5. feature/pdf-knowledge-rag → ver20 머지
+6. Cloud Run 재배포
+7. PDF 추가 적재 (기술사양서 등)
 
 ---
 
-## 주요 파일 목록
-```
-project/
-├── direct-sync.html      # 메인 HTML (프로토타입)
-├── direct-sync.js        # 메인 JS
-├── direct-sync.css       # 스타일
-├── config.js             # 설정 (API키 미입력)
+## 주요 파일 위치
+```text
+/Users/zart/Library/Mobile Documents/com~apple~CloudDocs/프로젝트/창호/
+├── window-estimate-system/         # Next.js 프로젝트
+│   ├── src/
+│   │   ├── app/api/chat/route.ts   # 챗봇 API (핵심)
+│   │   ├── components/
+│   │   │   ├── AIChatBot.tsx       # 챗봇 UI (핵심)
+│   │   │   ├── SmartOptions.tsx    # 버튼 옵션
+│   │   │   └── QuoteCard.tsx       # 견적 카드
+│   │   └── lib/
+│   │       ├── ragEngine.ts        # Firestore 벡터 검색
+│   │       ├── intentClassifier.ts
+│   │       ├── consumerGrouping.ts
+│   │       └── quoteLevelEngine.ts
+│   ├── scripts/                    # PDF 파이프라인
+│   │   ├── parse_pdf.py
+│   │   ├── chunk.py
+│   │   ├── embed_upload.py
+│   │   └── test_search.py
+│   └── .env.local                  # 환경변수
 └── docs/
-    ├── context.md        # 이 파일 (새 창 복원용)
-    ├── 개발개요.md
-    ├── task.md
-    ├── implementation_plan.md
-    ├── ui.md             # UI 개발 문서
-    ├── benchmarking_homewindow.md # 홈윈도우 분석
-    ├── PRD_창호견적시스템_v1.md
-    ├── price_db_sample.csv
-    └── products_db_sample.csv
+    ├── context.md                  # 이 파일
+    ├── PRD_v4.0_PDF_RAG_Integration.md
+    ├── firestore_setup.md
+    └── RAG_기반_프로액티브_대화_시스템_연구.md
 ```
 
 ---
 
 ## 참고 URL
-- 벤치마킹: https://www.hugreen.kr/sync/creation
-- PRD 전체: docs/PRD_창호견적시스템_v1.md
-- UI 문서: docs/ui.md
 - 운영 URL: https://window-estimate-747058361639.asia-northeast3.run.app
+- GitHub: https://github.com/kangHo-Jun/Window
+- Firestore: https://console.cloud.google.com/firestore?project=stacking-492708
