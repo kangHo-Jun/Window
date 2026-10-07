@@ -3,7 +3,7 @@
 
 실행 방법:
   python3 scripts/test_search.py \
-    --credentials "/Users/zart/Library/Mobile Documents/com~apple~CloudDocs/프로젝트/창호/docs/stacking-492708-5ea37291b3ae.json"
+    --credentials "../private/credentials/stacking-492708-5ea37291b3ae.json"
 
 embed_upload.py와 동일한 FirestoreClient(transport="rest") 방식 사용.
 32개 청크 전체 조회 → 코사인 유사도 계산 → TOP-3 반환.
@@ -16,14 +16,13 @@ import math
 import os
 import sys
 import warnings
+from pathlib import Path
 
 warnings.filterwarnings("ignore")
 
 from dotenv import load_dotenv
 
-load_dotenv(
-    dotenv_path="/Users/zart/Library/Mobile Documents/com~apple~CloudDocs/프로젝트/창호/window-estimate-system/.env.local"
-)
+load_dotenv(dotenv_path=Path(__file__).resolve().parents[1] / ".env.local")
 
 EMBEDDING_MODEL = "models/gemini-embedding-001"
 COLLECTION_NAME = "window_knowledge"

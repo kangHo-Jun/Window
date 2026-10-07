@@ -6,6 +6,7 @@ import ChatProgress from './ChatProgress';
 import SmartOptions from './SmartOptions';
 import { getQuoteLevelButtonLabel } from '@/lib/quoteLevelEngine';
 import QuoteCard from './QuoteCard';
+import { LoadingQuote } from './LoadingQuote';
 import type { ChatApiResponse, ChatMessage, ConsumerGroupInfo, CurrentQuestionField, ExtractedChatFields, PendingSkip, SentimentType, SkipFieldMap } from '@/types/chat';
 import type { AIQuoteData, QuoteCompleteHandler, QuoteLevel } from '@/types/quote';
 
@@ -14,6 +15,31 @@ type UIMessage = {
   role: 'user' | 'assistant';
   content: string;
 };
+
+interface RelatedQuestionsProps {
+  questions: string[];
+  onSelect: (question: string) => void;
+}
+
+function RelatedQuestions({ questions, onSelect }: RelatedQuestionsProps) {
+  if (!questions || questions.length === 0) return null;
+
+  return (
+    <div className="flex flex-col gap-2 px-4 py-2">
+      <p className="text-sm text-gray-500">👇 더 알고 싶으세요?</p>
+      {questions.map((question, index) => (
+        <button
+          key={`${question}-${index}`}
+          type="button"
+          onClick={() => onSelect(question)}
+          className="cursor-pointer rounded-xl border border-gray-200 bg-white px-4 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50"
+        >
+          {question}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function sanitizeAssistantReply(reply: string): string {
   if (!reply) {
@@ -94,6 +120,9 @@ const INITIAL_FIELDS: ExtractedChatFields = {
   priority: ''
 };
 
+const QUOTE_LOADING_STEP1_MS = 1800;
+const QUOTE_LOADING_STEP2_MS = 800;
+
 export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCompleteHandler; onReset: () => void }) {
   const [messages, setMessages] = useState<UIMessage[]>([
     {
@@ -113,6 +142,7 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
   const [sentiment, setSentiment] = useState<SentimentType>('NEUTRAL');
   const [emphasizeOptions, setEmphasizeOptions] = useState(false);
   const [suggestedReplies, setSuggestedReplies] = useState<string[]>([]);
+  const [relatedQuestions, setRelatedQuestions] = useState<string[]>([]);
   const [skippedFields, setSkippedFields] = useState<SkipFieldMap>({});
   const [pendingSkip, setPendingSkip] = useState<PendingSkip | null>(null);
   const [consultationNeeded, setConsultationNeeded] = useState(false);
@@ -120,6 +150,9 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
   const [currentQuestionField, setCurrentQuestionField] = useState<CurrentQuestionField>('housingType');
   const [streamingReplyId, setStreamingReplyId] = useState<number | null>(null);
   const [inlineQuoteData, setInlineQuoteData] = useState<AIQuoteData | null>(null);
+  const [quoteLoadingStep, setQuoteLoadingStep] = useState<0 | 1 | 2>(0);
+  const [hasShownQuickQuoteLoading, setHasShownQuickQuoteLoading] = useState(false);
+  const [hasShownFinalQuoteLoading, setHasShownFinalQuoteLoading] = useState(false);
   const [consumerGroupInfo, setConsumerGroupInfo] = useState<ConsumerGroupInfo | null>(null);
   const [spaceOptions, setSpaceOptions] = useState<string[]>([]);
   const [selectedSpaces, setSelectedSpaces] = useState<string[]>([]);
@@ -130,6 +163,8 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
   
   const bottomRef = useRef<HTMLDivElement>(null);
   const messageIdRef = useRef(1);
+  const quoteLoadingTimerRef = useRef<number | null>(null);
+  const quoteLoadingFollowupTimerRef = useRef<number | null>(null);
 
   const createMessage = (role: UIMessage['role'], content: string): UIMessage => {
     messageIdRef.current += 1;
@@ -137,6 +172,17 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
   };
 
   const handleReset = () => {
+    if (quoteLoadingTimerRef.current) {
+      window.clearTimeout(quoteLoadingTimerRef.current);
+      quoteLoadingTimerRef.current = null;
+    }
+    if (quoteLoadingFollowupTimerRef.current) {
+      window.clearTimeout(quoteLoadingFollowupTimerRef.current);
+      quoteLoadingFollowupTimerRef.current = null;
+    }
+    setQuoteLoadingStep(0);
+    setHasShownQuickQuoteLoading(false);
+    setHasShownFinalQuoteLoading(false);
     setSpaceOptions([]);
     setSelectedSpaces([]);
     setSelectedSpaceSizes({});
@@ -162,7 +208,16 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, loading]);
+  }, [messages, loading, quoteLoadingStep]);
+
+  useEffect(() => () => {
+    if (quoteLoadingTimerRef.current) {
+      window.clearTimeout(quoteLoadingTimerRef.current);
+    }
+    if (quoteLoadingFollowupTimerRef.current) {
+      window.clearTimeout(quoteLoadingFollowupTimerRef.current);
+    }
+  }, []);
 
   const buildHistory = (source: UIMessage[]): ChatMessage[] =>
     source
@@ -187,11 +242,55 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
     setSentiment(data.sentiment);
     setEmphasizeOptions(data.emphasizeOptions);
     setSuggestedReplies(data.suggestedReplies);
+    setRelatedQuestions(data.relatedQuestions ?? []);
     setSkippedFields(data.skippedFields);
     setPendingSkip(data.pendingSkip);
     setConsultationNeeded(data.consultationNeeded);
     setCurrentQuestionField(data.currentQuestionField);
-    if (data.quickQuoteData) setInlineQuoteData(data.quickQuoteData);
+    const isFinalQuoteReveal = Boolean(
+      data.showResult &&
+      data.quoteData &&
+      data.extractedFields?.timing,
+    );
+    const isFirstQuickQuoteReveal = Boolean(
+      data.quickQuoteData &&
+      !hasShownQuickQuoteLoading &&
+      !hasShownFinalQuoteLoading,
+    );
+    const shouldDelayQuoteReveal = isFinalQuoteReveal
+      ? !hasShownFinalQuoteLoading
+      : isFirstQuickQuoteReveal;
+
+    if (shouldDelayQuoteReveal) {
+      if (quoteLoadingTimerRef.current) {
+        window.clearTimeout(quoteLoadingTimerRef.current);
+      }
+      if (quoteLoadingFollowupTimerRef.current) {
+        window.clearTimeout(quoteLoadingFollowupTimerRef.current);
+      }
+      setQuoteLoadingStep(1);
+      quoteLoadingTimerRef.current = window.setTimeout(() => {
+        setQuoteLoadingStep(2);
+        quoteLoadingTimerRef.current = null;
+        quoteLoadingFollowupTimerRef.current = window.setTimeout(() => {
+          setQuoteLoadingStep(0);
+          if (isFinalQuoteReveal) {
+            setHasShownFinalQuoteLoading(true);
+          } else if (isFirstQuickQuoteReveal) {
+            setHasShownQuickQuoteLoading(true);
+          }
+          if (data.quickQuoteData) {
+            setInlineQuoteData(data.quickQuoteData);
+          }
+          if (data.showResult && data.quoteData) {
+            onComplete(data.quoteData);
+          }
+          quoteLoadingFollowupTimerRef.current = null;
+        }, QUOTE_LOADING_STEP2_MS);
+      }, QUOTE_LOADING_STEP1_MS);
+    } else if (data.quickQuoteData) {
+      setInlineQuoteData(data.quickQuoteData);
+    }
     if (data.consumerGroup) setConsumerGroupInfo(data.consumerGroup);
     setSpaceOptions(data.spaceOptions ?? []);
 
@@ -201,7 +300,7 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
       setCurrentQuestionField('housingType');
     }
 
-    if (data.showResult && data.quoteData) {
+    if (!shouldDelayQuoteReveal && data.showResult && data.quoteData) {
       window.setTimeout(() => {
         onComplete(data.quoteData!);
       }, 500);
@@ -213,6 +312,7 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
     if (!trimmed || loading) return;
 
     setError(null);
+    setRelatedQuestions([]);
     const nextUserMessage = createMessage('user', trimmed);
     setMessages((prev) => [...prev, nextUserMessage]);
     setInput('');
@@ -480,7 +580,7 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
             >
               📞 전화 상담
             </a>
-            {canShowQuickQuote && quickQuoteData && (
+            {canShowQuickQuote && inlineQuoteData && (
               <button
                 type="button"
                 onClick={() => setShowQuoteModal(true)}
@@ -490,7 +590,7 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
                   'border-[#ead7bb] bg-[#fbf3e6] text-[#9a6020] hover:bg-[#f6ebda]'
                 }`}
               >
-                {getQuoteLevelButtonLabel(quoteLevel, skippedFields) || quickQuoteData.data.errorRange}
+                {getQuoteLevelButtonLabel(quoteLevel, skippedFields) || inlineQuoteData.data.errorRange}
               </button>
             )}
           </div>
@@ -536,6 +636,8 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
                 ⚠️ {error}
               </div>
             )}
+
+            {quoteLoadingStep > 0 && <LoadingQuote step={quoteLoadingStep as 1 | 2} />}
 
             <div ref={bottomRef} className="h-4" />
           </div>
@@ -643,6 +745,13 @@ export default function AIChatBot({ onComplete, onReset }: { onComplete: QuoteCo
             loading={loading}
             emphasize={emphasizeOptions || fallbackCount >= 2}
             suggestedReplies={suggestedReplies}
+          />
+          <RelatedQuestions
+            questions={relatedQuestions}
+            onSelect={(question) => {
+              setRelatedQuestions([]);
+              void sendMessage(question);
+            }}
           />
           
           <form

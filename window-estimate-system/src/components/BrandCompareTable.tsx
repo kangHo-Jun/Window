@@ -2,44 +2,16 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { isAIQuoteData, type BrandCompareItem, type QuoteData } from '@/types/quote';
-
-const SAMPLE_RESULTS: BrandCompareItem[] = [
-  {
-    brand: 'LX지인',
-    rawTotal: 12000000,
-    marginAmount: 3600000,
-    installAmount: 2400000,
-    discountAmount: 900000,
-    finalTotal: 17100000,
-    isRecommended: true,
-  },
-  {
-    brand: 'KCC글라스',
-    rawTotal: 9000000,
-    marginAmount: 2250000,
-    installAmount: 1800000,
-    discountAmount: 391500,
-    finalTotal: 12658500,
-    isRecommended: false,
-  },
-  {
-    brand: '기타',
-    rawTotal: 7000000,
-    marginAmount: 1400000,
-    installAmount: 1260000,
-    discountAmount: 0,
-    finalTotal: 9660000,
-    isRecommended: false,
-  },
-];
+import { type QuoteData } from '@/types/quote';
+import { getDisplayComparison, getDisplayRecommendedBrand } from '@/lib/demoPricing';
 
 export default function BrandCompareTable({ quoteData }: { quoteData: QuoteData }) {
   if (!quoteData) {
     return <div className="text-center p-8 text-slate-500 font-medium">가견적 산출 중... (룰 엔진 가동)</div>;
   }
 
-  const results = isAIQuoteData(quoteData) ? quoteData.data.comparison : SAMPLE_RESULTS;
+  const results = getDisplayComparison(quoteData);
+  const recommendedBrand = getDisplayRecommendedBrand(quoteData);
 
   return (
     <Card className="border-none shadow-sm bg-white overflow-hidden rounded-2xl w-full">
@@ -49,8 +21,8 @@ export default function BrandCompareTable({ quoteData }: { quoteData: QuoteData 
       <CardContent className="p-0">
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100">
           {results.map((res) => (
-            <div key={res.brand} className={`p-6 relative transition-colors ${res.isRecommended ? 'bg-[#f0f9ff]' : 'hover:bg-slate-50'}`}>
-              {res.isRecommended && (
+            <div key={res.brand} className={`p-6 relative transition-colors ${res.brand === recommendedBrand ? 'bg-[#f0f9ff]' : 'hover:bg-slate-50'}`}>
+              {res.brand === recommendedBrand && (
                 <span className="absolute top-0 right-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
                   추천
                 </span>
@@ -79,7 +51,7 @@ export default function BrandCompareTable({ quoteData }: { quoteData: QuoteData 
 
               <div className="border-t pt-4 border-slate-200">
                 <div className="text-sm text-slate-500 mb-1">최종 예상 견적액</div>
-                <div className={`text-2xl font-extrabold ${res.isRecommended ? 'text-blue-700' : 'text-slate-900'}`}>
+                <div className={`text-2xl font-extrabold ${res.brand === recommendedBrand ? 'text-blue-700' : 'text-slate-900'}`}>
                   {res.finalTotal.toLocaleString()}원
                 </div>
               </div>

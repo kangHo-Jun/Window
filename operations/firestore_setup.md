@@ -61,20 +61,20 @@ PDF 지식DB 청크를 Firestore `window_knowledge` 컬렉션에 적재하기 �
 
 ### 저장 위치
 - 권장 위치:
-  - `docs/stacking-492708-5ea37291b3ae.json`
+  - `private/credentials/stacking-492708-5ea37291b3ae.json`
 
 ### .gitignore 등록
 - 반드시 Git에 올라가지 않게 막아야 합니다.
 - 루트 `.gitignore`에 아래 항목이 있어야 합니다.
 
 ```gitignore
-docs/firebase-credentials.json
+private/credentials/firebase-credentials.json
 ```
 
 또는 실제 파일명을 직접 막아도 됩니다.
 
 ```gitignore
-docs/stacking-492708-5ea37291b3ae.json
+private/credentials/stacking-492708-5ea37291b3ae.json
 ```
 
 ### 화면에서 확인할 것
@@ -102,7 +102,7 @@ loading-sheet@stacking-492708.iam.gserviceaccount.com
 ### 설치 명령어
 
 ```bash
-cd "/Users/zart/Library/Mobile Documents/com~apple~CloudDocs/프로젝트/창호/window-estimate-system"
+cd "/Users/zart/Projects/창호/창호-견적-사이트/window-estimate-system"
 pip3 install pymupdf
 pip3 install google-genai
 pip3 install google-generativeai firebase-admin
@@ -176,7 +176,7 @@ python3 scripts/embed_upload.py ...
 오류 예시:
 
 ```text
-[error] credentials not found: docs/firebase-credentials.json
+[error] credentials not found: private/credentials/firebase-credentials.json
 ```
 
 원인:
@@ -187,8 +187,8 @@ python3 scripts/embed_upload.py ...
 
 ```bash
 python3 scripts/embed_upload.py \
-  --input scripts/output/chunks.json \
-  --credentials "/Users/zart/Library/Mobile Documents/com~apple~CloudDocs/프로젝트/창호/docs/stacking-492708-5ea37291b3ae.json"
+  --input ../knowledge/generated/chunks.json \
+  --credentials "/Users/zart/Projects/창호/창호-견적-사이트/private/credentials/stacking-492708-5ea37291b3ae.json"
 ```
 
 ### 문제 5. API 키 로드 실패
@@ -206,7 +206,7 @@ python3 scripts/embed_upload.py \
 ```python
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path="/Users/zart/Library/Mobile Documents/com~apple~CloudDocs/프로젝트/창호/window-estimate-system/.env.local")
+load_dotenv(dotenv_path="/Users/zart/Projects/창호/창호-견적-사이트/window-estimate-system/.env.local")
 ```
 
 ## 5. 적재 스크립트 실행
@@ -231,11 +231,11 @@ export GEMINI_API_KEY="실제_키"
 ### 실행 명령어
 
 ```bash
-cd "/Users/zart/Library/Mobile Documents/com~apple~CloudDocs/프로젝트/창호/window-estimate-system"
+cd "/Users/zart/Projects/창호/창호-견적-사이트/window-estimate-system"
 
 python3 scripts/embed_upload.py \
-  --input scripts/output/chunks.json \
-  --credentials "/Users/zart/Library/Mobile Documents/com~apple~CloudDocs/프로젝트/창호/docs/stacking-492708-5ea37291b3ae.json"
+  --input ../knowledge/generated/chunks.json \
+  --credentials "/Users/zart/Projects/창호/창호-견적-사이트/private/credentials/stacking-492708-5ea37291b3ae.json"
 ```
 
 ### 정상 실행 시 예시

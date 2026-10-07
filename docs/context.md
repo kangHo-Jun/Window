@@ -1,7 +1,6 @@
 # 창호 프로젝트 컨텍스트 (새 창 시작용)
 
-> 이 문서를 새 창 첫 메시지로 붙여넣으세요.
-> "이 문서를 읽고 프로젝트 맥락을 파악한 후 이어서 진행하라"
+현재 작업 위치: `/Users/zart/Projects/창호/창호-견적-사이트` (2026-10-07 iCloud 작업본에서 복사·정리). iCloud 원본은 보존한다. 폴더 안내와 최신 작업 상태는 루트 `PROJECT_OVERVIEW.md` 및 `HANDOFF.md`를 먼저 확인한다.
 
 ---
 
@@ -66,6 +65,7 @@ feature/pdf-knowledge-rag   ← v4.0 현재 개발 중
 - PDF 컨설팅 레포트 (NotoSansKR)
 - Google Sheets 연동
 - Cloud Run 배포
+- Dev Container 개발 환경 추가
 - Gemini 2.5-flash 연결
 - RAG 엔진 + intentClassifier + sentimentDetector 등 모듈 구현
 - QuoteCard 인라인 견적 카드 (레벨 1/2/3)
@@ -87,6 +87,8 @@ feature/pdf-knowledge-rag   ← v4.0 현재 개발 중
 | knowledge_mode 답변 3문장 최적화 | ✅ |
 | related_questions JSON 반환 구조 구현 | ✅ |
 | AIChatBot.tsx suggestedReplies 상태 관리 | ✅ |
+| 견적 계산 로딩 UI (가견적 1회 / 최종견적 1회) 구현 | ✅ |
+| 브랜드명 `나만의 창·작품 (주)대산` 반영 | ✅ |
 | PRD v4.0 Conversational RAG UX 설계 | ✅ |
 | PRD v4.0 연구기반 UX 전략 (섹션8) | ✅ |
 | 연구 문서 (RAG 프로액티브 대화) | ✅ |
@@ -96,25 +98,25 @@ feature/pdf-knowledge-rag   ← v4.0 현재 개발 중
 ## 진행 중인 것
 - `feature/pdf-knowledge-rag` 브랜치 개발 중
 - 빌드 통과 / Firestore 연결 정상 / 환경변수 완비
+- 견적 카드 노출 전 로딩 버블은 가견적 1회, 최종견적 1회만 실행되도록 조정 완료
+- Dev Container 기준 실행 문서 정리 진행
 
 ---
 
 ## 다음 할 일
-1. **연관 질문 버튼 동적 생성 구현 (ProMISe)** ← 다음 세션 시작점
-   - `route.ts` related_questions → AIChatBot.tsx 버튼 렌더링 연결
-   - SmartOptions 확장 또는 별도 RelatedQuestions 컴포넌트 신규 생성
-2. CHI 2024 타이밍 전략 — 입력 완료 직후 검증 멘트 삽입
-3. BANT Hot Lead 감지 → consumerGrouping.ts 확장
-4. Zero-step 예약 자동 입력
-5. feature/pdf-knowledge-rag → ver20 머지
-6. Cloud Run 재배포
-7. PDF 추가 적재 (기술사양서 등)
+1. CHI 2024 타이밍 전략 — 입력 완료 직후 검증 멘트 삽입
+2. BANT Hot Lead 감지 → consumerGrouping.ts 확장
+3. Zero-step 예약 자동 입력
+4. feature/pdf-knowledge-rag → ver20 머지
+5. Vercel 또는 대체 운영 배포 검토
+6. PDF 추가 적재 (기술사양서 등)
+7. Dev Container 내부에서 실제 실행 검증
 
 ---
 
 ## 주요 파일 위치
 ```text
-/Users/zart/Library/Mobile Documents/com~apple~CloudDocs/프로젝트/창호/
+/Users/zart/Projects/창호/창호-견적-사이트/
 ├── window-estimate-system/         # Next.js 프로젝트
 │   ├── src/
 │   │   ├── app/api/chat/route.ts   # 챗봇 API (핵심)
@@ -132,12 +134,14 @@ feature/pdf-knowledge-rag   ← v4.0 현재 개발 중
 │   │   ├── chunk.py
 │   │   ├── embed_upload.py
 │   │   └── test_search.py
+│   ├── data/source/               # 견적 데이터의 단일 원본
 │   └── .env.local                  # 환경변수
-└── docs/
-    ├── context.md                  # 이 파일
-    ├── PRD_v4.0_PDF_RAG_Integration.md
-    ├── firestore_setup.md
-    └── RAG_기반_프로액티브_대화_시스템_연구.md
+├── knowledge/                      # PDF 원본·정리본·RAG 가공 결과
+├── planning/current/               # 현재 PRD·UI·브랜드 문서
+├── planning/research/              # 벤치마킹·챗봇 연구
+├── operations/                     # 배포·Firestore 안내
+├── archive/direct-sync/            # 이전 정적 견적 시안
+└── docs/context.md                 # 이 파일
 ```
 
 ---

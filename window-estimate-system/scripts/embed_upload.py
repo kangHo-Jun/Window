@@ -2,6 +2,7 @@ import json
 import time
 import argparse
 import os
+from pathlib import Path
 from google import genai
 from google.genai import types
 from google.oauth2 import service_account
@@ -13,11 +14,8 @@ from google.cloud.firestore_v1.types import Write
 from google.cloud.firestore_v1.types import DocumentTransform
 from google.cloud.firestore_v1.vector import Vector
 
-# .env.local에서 키 로드
-load_dotenv(dotenv_path="../window-estimate-system/.env.local")
-load_dotenv(
-    dotenv_path="/Users/zart/Library/Mobile Documents/com~apple~CloudDocs/프로젝트/창호/window-estimate-system/.env.local"
-)
+# 현재 사이트의 환경변수를 읽는다.
+load_dotenv(dotenv_path=Path(__file__).resolve().parents[1] / ".env.local")
 
 EMBEDDING_MODEL = "models/gemini-embedding-001"
 COLLECTION_NAME = "window_knowledge"

@@ -1,0 +1,34 @@
+{
+  "name": "changho-window-estimate",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "workspaceFolder": "/workspaces/changho",
+  "postCreateCommand": "cd window-estimate-system && npm ci",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
+  },
+  "forwardPorts": [
+    3000
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "Next.js",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "mounts": [
+    "source=changho-window-estimate-node-modules,target=/workspaces/changho/window-estimate-system/node_modules,type=volume",
+    "source=changho-window-estimate-next,target=/workspaces/changho/window-estimate-system/.next,type=volume"
+  ],
+  "remoteUser": "node"
+}

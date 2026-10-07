@@ -21,7 +21,7 @@ export default function HomePage() {
         {/* 헤더 타이틀 영역 */}
         <section className="text-center space-y-4">
           <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900">
-            나만의 창·작품 SYNC
+            나만의 창·작품 (주)대산
           </h1>
           <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
             LX지인, KCC글라스, 기타 브랜드를 한눈에 비교하고 스마트한 창호 견적을 받아보세요. 

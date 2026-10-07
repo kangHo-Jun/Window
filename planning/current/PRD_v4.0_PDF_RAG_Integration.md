@@ -661,10 +661,10 @@ interface BANTScore {
 | 문서 | 위치 |
 |---|---|
 | 현재 컨텍스트 | `docs/context.md` |
-| 기존 PRD v2.0 | `docs/PRD_v2.0_봇고도화_final.md` |
-| 브랜드 보이스 | `docs/brand_voice_지인이.md` |
-| 창호 진단 지식DB | `docs/창호_진단_지식DB.md` |
-| 구글런 설정 | `docs/구글런설정.md` |
+| 기존 PRD v2.0 | `planning/history/PRD v2.0봇고도화.md` |
+| 브랜드 보이스 | `planning/current/brand_voice_지인이.md` |
+| 창호 진단 지식DB | `knowledge/curated/창호_진단_지식DB.md` |
+| 구글런 설정 | `operations/구글런설정.md` |
 | AGENTS 룰 | `AGENTS.md` |
 
 ---

@@ -155,6 +155,7 @@ export type ChatApiResponse = {
   sentiment: SentimentType;
   emphasizeOptions: boolean;
   suggestedReplies: string[];
+  relatedQuestions?: string[];
   skippedFields: SkipFieldMap;
   pendingSkip: PendingSkip | null;
   consultationNeeded: boolean;

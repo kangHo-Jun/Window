@@ -15,6 +15,9 @@ build/
 .env
 .env.local
 .env.*.local
+private/
+knowledge/sources/
+knowledge/generated/
 docs/firebase-credentials.json
 
 # 서비스 계정 키

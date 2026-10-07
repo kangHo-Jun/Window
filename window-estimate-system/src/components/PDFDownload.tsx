@@ -4,6 +4,7 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, PDFDownloadLink } from '@react-pdf/renderer';
 import { Button } from '@/components/ui/button';
 import { isAIQuoteData, isLegoQuoteData, type QuoteData } from '@/types/quote';
+import { getDisplayComparison, getDisplayRecommendedBrand, getDisplayRecommendedReason } from '@/lib/demoPricing';
 
 // 로컬 폰트 레지스터 (서버 내장 폰트 다운로드 기반)
 Font.register({
@@ -30,13 +31,17 @@ const styles = StyleSheet.create({
 
 // PDF 문서 컴포넌트 
 const OutputDocument = ({ quoteData }: { quoteData: QuoteData }) => {
-  // 하드코딩 문서 컨텐츠 (Phase 3 범위)
+  const comparison = getDisplayComparison(quoteData);
+  const recommendedBrand = getDisplayRecommendedBrand(quoteData);
+  const recommendedReason = getDisplayRecommendedReason(quoteData);
+  const heatingSavingText = isAIQuoteData(quoteData) ? quoteData.data.heatingSavingText : '';
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <Text style={styles.title}>창호 컨설팅 견적 및 비교 요약 보고서</Text>
-          <Text style={styles.subtitle}>고객 맞춤 스마트 자동 견적 (SYNC 시스템)</Text>
+          <Text style={styles.subtitle}>고객 맞춤 스마트 자동 견적 ((주)대산 시스템)</Text>
         </View>
 
         <View style={styles.section}>
@@ -60,27 +65,23 @@ const OutputDocument = ({ quoteData }: { quoteData: QuoteData }) => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>2. 3사 브랜드 비교</Text>
-          <View style={styles.textRow}>
-             <Text style={styles.label}>[프리미엄] LX지인</Text>
-             <Text style={styles.value}>최종 예상 견적가: 17,100,000원 (제품 마진 및 시공비 포함)</Text>
-          </View>
-          <View style={styles.textRow}>
-             <Text style={styles.label}>[중간 모델] KCC글라스</Text>
-             <Text style={styles.value}>최종 예상 견적가: 12,658,500원 (제품 마진 및 시공비 포함)</Text>
-          </View>
-          <View style={styles.textRow}>
-             <Text style={styles.label}>[실속형] 기타</Text>
-             <Text style={styles.value}>최종 예상 견적가: 9,660,000원 (제품 마진 및 시공비 포함)</Text>
-          </View>
+          {comparison.map((item) => (
+            <View key={item.brand} style={styles.textRow}>
+              <Text style={styles.label}>
+                {item.brand === 'LX지인' ? '[프리미엄] LX지인' : item.brand === 'KCC글라스' ? '[중간 모델] KCC글라스' : '[실속형] 기타'}
+              </Text>
+              <Text style={styles.value}>최종 예상 견적가: {item.finalTotal.toLocaleString()}원 (제품 마진 및 시공비 포함)</Text>
+            </View>
+          ))}
         </View>
 
         <View style={styles.highlightBox}>
           <Text style={styles.highlightTitle}>3. AI 전문가 추천 요약</Text>
           <Text style={styles.highlightText}>
             현재 고객님의 구성 상태와 장기 거주 목적을 고려할 때 {`\n`}
-            [LX지인] 브랜드 시공을 가장 추천합니다.{`\n\n`}
-            기존 창호 대비 교체 시 10년 누적 기준 약 120만 원 이상의 난방비 절감 효과가 예상되며,
-            대량 구매 할인 혜택이 적용되어 프리미엄 모델을 합리적인 예산으로 만나실 수 있습니다.
+            [{recommendedBrand}] 브랜드 시공을 가장 추천합니다.{`\n\n`}
+            {recommendedReason}
+            {heatingSavingText ? `${`\n\n`}예상 절감 효과: ${heatingSavingText}` : ''}
           </Text>
         </View>
 

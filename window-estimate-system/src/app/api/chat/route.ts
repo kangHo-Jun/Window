@@ -468,13 +468,14 @@ function parseGeminiEnvelope(raw: string) {
     };
     return {
       reply: parsed.answer || reply,
-      options: (parsed.related_questions || parsed.options || []),
+      options: parsed.options || [],
+      relatedQuestions: parsed.related_questions || [],
       currentQuestionField: parsed.currentQuestionField ?? null,
       fieldUpdates: parsed.fieldUpdates ?? {},
       triggerQuote: parsed.trigger_quote ?? false,
     };
   } catch {
-    return { reply, options: [], currentQuestionField: null, fieldUpdates: {}, triggerQuote: false };
+    return { reply, options: [], relatedQuestions: [], currentQuestionField: null, fieldUpdates: {}, triggerQuote: false };
   }
 }
 
@@ -590,6 +591,7 @@ export async function POST(req: Request) {
         try {
           let streamedReply = '';
           let suggestedReplies: string[] = [];
+          let relatedQuestions: string[] = [];
           let currentQuestionField: CurrentQuestionField = null;
           let triggerQuote = false;
           let triggerSpaceSelection = false;
@@ -607,7 +609,7 @@ export async function POST(req: Request) {
                 const chunks = await searchKnowledge(body.message);
                 if (chunks.length > 0) {
                   const context = chunks.map((c) => c.chunk_text).join('\n\n---\n\n');
-                  prompt += `\n\n[창호 지식 DB]\n${context}\n\n[출력 형식]\n반드시 아래 JSON 형식으로만 답변한다:\n\`\`\`json\n{\n  "answer": "답변 텍스트 (3문장 이내)",\n  "related_questions": ["질문1", "질문2", "견적 유도 질문"],\n  "trigger_quote": boolean\n}\n\`\`\`\n\n[답변 규칙]\n- "고객님", "님" 등 모든 호칭을 절대 사용하지 않는다\n- "아, 그렇군요" 등 불필요한 감탄사를 절대 사용하지 않는다\n- 답변은 반드시 \`answer\` 필드에 3문장 이내로 작성한다\n- 핵심 수치 1~2개만 포함한다\n- \`related_questions\`는 반드시 소비자 언어(상황/감각)로 2~3개 생성한다 (예: "우리집은 얼마나 절감될까요?")\n- 마지막 \`related_questions\`는 항상 견적과 관련된 질문이어야 한다 (예: "우리집에 맞는 견적 보고 싶어요")\n- 사용자가 견적 의사를 명확히 보이면 \`trigger_quote\`를 true로 설정한다\n- 주거 형태, 평형, 연식 등 추가 정보를 묻지 않는다\n- 가격은 절대 직접 생성하지 않는다`;
+                  prompt += `\n\n[창호 지식 DB]\n${context}\n\n[출력 형식]\n반드시 아래 JSON 형식으로만 답변한다:\n\`\`\`json\n{\n  "answer": "답변 텍스트 (3문장 이내)",\n  "related_questions": ["질문1", "질문2", "견적 유도 질문"],\n  "trigger_quote": boolean\n}\n\`\`\`\n\n[답변 규칙]\n- "고객님", "님" 등 모든 호칭을 절대 사용하지 않는다\n- "아, 그렇군요" 등 불필요한 감탄사를 절대 사용하지 않는다\n- 답변은 반드시 \`answer\` 필드에 3문장 이내로 작성한다\n- 핵심 수치 1~2개만 포함한다\n- 가격은 절대 직접 생성하지 않는다\n- 주거 형태, 평형, 연식 등 추가 정보를 묻지 않는다\n\n[연관 질문 생성 규칙]\n- 반드시 소비자 상황/감각 언어로 작성한다 (전문용어 금지)\n- \`related_questions\`는 반드시 3개 고정으로 생성한다\n- 마지막 질문은 반드시 견적 또는 상담 연결이어야 한다\n- 좋음: "고치면 실제로 따뜻해지나요?"\n- 나쁨: "열관류율 개선 효과가 궁금합니다"`;
                 }
               }
               const raw = await streamGeminiReply(prompt, apiKey, (chunk) => {
@@ -617,6 +619,7 @@ export async function POST(req: Request) {
               const parsed = parseGeminiEnvelope(raw);
               streamedReply = parsed.reply || streamedReply || '조금만 더 쉽게 말씀해 주시면 바로 도와드릴게요 😊';
               suggestedReplies = parsed.options;
+              relatedQuestions = parsed.relatedQuestions ?? [];
               currentQuestionField = parsed.currentQuestionField;
               mergedFields = mergeFields(mergedFields, parsed.fieldUpdates);
               triggerQuote = parsed.triggerQuote || false;
@@ -744,6 +747,7 @@ export async function POST(req: Request) {
             sentiment: 'NEUTRAL',
             emphasizeOptions: consultationNeeded,
             suggestedReplies,
+            relatedQuestions,
             skippedFields: {},
             pendingSkip: null,
             consultationNeeded,

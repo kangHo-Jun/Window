@@ -3,7 +3,7 @@
 PDF 페이지별 Markdown 추출 스크립트.
 
 실행 예:
-python scripts/parse_pdf.py --input docs/교육자료.pdf --output scripts/output/
+python scripts/parse_pdf.py --input ../knowledge/sources/교육자료.pdf --output ../knowledge/generated/
 """
 
 from __future__ import annotations

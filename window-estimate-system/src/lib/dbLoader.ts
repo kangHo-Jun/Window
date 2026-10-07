@@ -14,8 +14,7 @@ const CSV_CACHE = new Map<string, Promise<CsvRow[]>>();
 
 function getCandidatePaths(fileName: string) {
   return [
-    path.join(process.cwd(), 'public', fileName),
-    path.join(process.cwd(), '..', 'docs', fileName),
+    path.join(process.cwd(), 'data', 'source', fileName),
   ];
 }
 
