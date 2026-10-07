@@ -15,6 +15,7 @@
 - 2026-10-07 재검증: `npm run build` 통과. 프로덕션 서버의 `/api/chat`에 `아파트`를 보내 HTTP 200과 다음 질문·선택지를 확인했다. 이 기본 대화에서는 CSV를 읽었으며, 응답의 `아파트님` 호칭은 개선이 필요하다.
 - `npm run lint`는 오류 3건(`verify_loading_quote.spec.js`의 `require`, `dynamicQuestion.ts`의 빈 인터페이스, `ragEngine.ts`의 `any`)과 경고 5건으로 실패했다.
 - GitHub 저장소가 공개 상태임을 확인하고 `knowledge/sources/`, `knowledge/generated/`, `private/`을 업로드 대상에서 제외했다.
+- `feature/pdf-knowledge-rag` 브랜치에 로컬 이전·폴더 정리·기존 미커밋 RAG 작업을 커밋하고 GitHub에 푸시했다. 기본 `main` 브랜치는 변경하지 않았다.
 - 전역 `PROJECTS.md`의 창호 견적 사이트 기본 경로를 새 로컬 작업본으로 갱신했다. 창호팀 관리와 영상 자료의 별도 경계는 유지했다.
 
 ## 미해결
