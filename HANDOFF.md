@@ -1,6 +1,23 @@
 # 창호 견적 사이트 인계
 
-최근 갱신: 2026-10-07
+최근 갱신: 2026-10-08
+
+## 웹 배포 방안 검토 (2026-10-08)
+
+### 후속 실행
+
+- 사용자가 진행을 승인했다. Cloud Run 오류 로그에서 `The request failed because billing is disabled for this project.`를 확인했다. 프로젝트 `billingEnabled: false`, 연결된 기존 결제 계정 `open: false`가 직접 원인이다. 사용자에게 결제 재개 또는 유효한 계정 연결을 요청했다.
+- 기존 Cloud Build 트리거 `window-estimate-main`은 GitHub `kangHo-Jun/Window`의 `^main$`과 `window-estimate-system/cloudbuild.yaml`에 연결되어 있다. 현재 개발 브랜치는 자동 배포 대상이 아니다. 트리거와 main은 변경하지 않았다.
+- Cloud Build 작업 디렉터리를 앱 폴더로 수정하고, `npm ci`에 필요한 package-lock.json을 추적 대상에 포함했다. Docker 전송에서 모든 `.env*`, Git 메타데이터 및 로그를 제외했다.
+- `npm run build` 통과. CSV 동적 경로에 대한 Turbopack 파일 추적 경고가 남아 있으며 오류는 아니다. `git diff --check` 통과.
+- gcloud는 `CLOUDSDK_PYTHON=/opt/homebrew/bin/python3.11`로 실행해야 현재 로컬 Python 호환성 오류를 피한다. GitHub 인증은 샌드박스 밖에서 정상이다.
+- 다음 작업: 결제 활성화 확인 → 별도 테스트 서비스 배포 및 전체 동작 검증 → 배포 브랜치 확정 및 운영 반영. 결제 문제로 실제 새 버전 배포 및 웹 검증은 아직 수행하지 못했다.
+
+- 사용자 요청에 따라 방안만 검토했다. 코드 변경, 푸시, 배포는 실행하지 않았다.
+- 운영 URL을 다시 조회해 HTTP 500을 확인했다. 원인은 서버 로그 확인이 필요하다.
+- 현재 Next.js 서버 API, Firestore, Gemini, Sheets 및 서버 CSV 읽기 구조를 고려해 기존 Cloud Run 복구와 GitHub → Cloud Build 자동 배포 연결을 우선 제안한다. Vercel은 대안이며 GitHub Pages만으로 현재 서버 기능을 실행할 수 없다.
+- 다음 실행 시 배포 루트 `window-estimate-system/`, CSV 포함 여부, 환경변수·서비스 계정 권한, Cloud Build 트리거의 연결·대상 브랜치를 확인한다. 기존 `cloudbuild.yaml`은 `--source .`를 사용하므로 실제 작업 디렉터리를 점검해야 한다.
+- 먼저 별도 테스트 서비스에서 견적·챗봇·PDF·시트 저장을 검증하고 운영 반영한다. 기존 main 보존 원칙을 지키며 자동 배포 브랜치는 실행 단계에서 확정한다.
 
 ## 최근 진행
 

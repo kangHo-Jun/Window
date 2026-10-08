@@ -3,6 +3,7 @@ options:
 
 steps:
   - name: 'gcr.io/cloud-builders/gcloud'
+    dir: 'window-estimate-system'
     args:
       - 'run'
       - 'deploy'

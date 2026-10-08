@@ -52,6 +52,7 @@ npm-debug.log*
 
 # Node.js (필요 시)
 package-lock.json
+!window-estimate-system/package-lock.json
 
 # Python (로컬 서버용)
 __pycache__/
