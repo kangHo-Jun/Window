@@ -1,0 +1,1533 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>대산 인트로 전환 비교</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  /* 시안 전용: 1차 사이트 첫 화면 인트로 — 샘플(Huy Phan 포트폴리오)과 같은 '캐릭터가 검은 화면을 밀어 여는' 구조
+     설계: ../2026-10-21-window-intro-design.md */
+  :root {
+    --white: #FFFFFF;
+    --black: #0B0B0B;
+    --charcoal: #222828;
+    --green: #23433A;
+    --red: #E0625A;      /* 샘플 이름 글자 색에 맞춘 빨강 */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Noto Sans KR", system-ui, sans-serif;
+    color: var(--charcoal);
+    background: var(--white);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- 메인 첫 화면 (인트로 아래에 처음부터 존재) ---------- */
+  .header {
+    position: fixed; inset: 0 0 auto 0; z-index: 10;
+    height: 68px; padding: 0 40px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(255,255,255,.92);
+    border-bottom: 1px solid rgba(34,40,40,.08);
+  }
+  .logo { font-weight: 700; font-size: 22px; letter-spacing: -.02em; }
+  .logo small { font-weight: 400; font-size: 12px; color: #6b7270; margin-left: 6px; }
+  .nav { display: flex; gap: 36px; font-size: 15px; }
+  .nav a { color: inherit; text-decoration: none; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 44px; padding: 0 20px; border-radius: 6px;
+    font: 500 15px/1 inherit; text-decoration: none; cursor: pointer; border: 0;
+  }
+  .btn-primary { background: var(--green); color: var(--white); }
+  .btn-ghost { background: rgba(255,255,255,.14); color: var(--white); border: 1px solid rgba(255,255,255,.55); }
+
+  .hero {
+    position: relative; height: 100vh; min-height: 560px; overflow: hidden;
+    display: flex; align-items: flex-end;
+  }
+  .hero-photo {
+    position: absolute; inset: 0;
+    /* 실제 LX 시공 사진 확보 전 자리 표시 */
+    background:
+      linear-gradient(180deg, rgba(20,26,26,.05) 30%, rgba(20,26,26,.62) 100%),
+      linear-gradient(135deg, #9aa7a6 0%, #c9d0cc 45%, #7f8d8b 100%);
+    transform-origin: 50% 60%;
+  }
+  .photo-label {
+    position: absolute; top: 96px; right: 40px;
+    font-size: 12px; color: rgba(255,255,255,.85);
+    border: 1px dashed rgba(255,255,255,.7); padding: 6px 10px; border-radius: 4px;
+  }
+  .hero-copy { position: relative; padding: 0 40px 12vh; color: var(--white); max-width: 760px; }
+  .hero-copy h1, .hero-copy p { word-break: keep-all; }   /* 한국어 문장이 단어 중간에서 끊기지 않게 */
+  .eyebrow { font-size: 13px; letter-spacing: .18em; font-weight: 500; opacity: .9; }
+  .hero h1 { font-size: clamp(30px, 4.4vw, 56px); line-height: 1.22; font-weight: 700; letter-spacing: -.03em; margin: 16px 0 14px; }
+  .hero p { font-size: 17px; opacity: .9; }
+  .hero-actions { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
+
+  @media (max-width: 640px) {
+    .header { padding: 0 16px; height: 56px; }
+    .nav { display: none; }
+    .btn { height: 40px; padding: 0 14px; font-size: 14px; }
+    .hero-copy { padding: 0 16px 10vh; }
+    .hero p { font-size: 15px; }
+    .photo-label { top: 72px; right: 16px; }
+  }
+
+  /* ---------- 본문 구간 (B2B_HOMEPAGE_COPY.md 문구). [ ] 자리는 '자료 준비 중' 표시로 둔다 ---------- */
+  html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  .page { --cream: #F6F3EE; --line: rgba(34,40,40,.12); --muted: #5f6664; --gold: #E8B45F; }
+  .sec { padding: 96px 40px; }
+  .sec.alt { background: var(--cream); }
+  .wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 28px; }
+  .kicker { font-size: 13px; letter-spacing: .16em; font-weight: 500; color: var(--green); }
+  .sec h2 { font-size: clamp(26px, 3.2vw, 40px); line-height: 1.25; letter-spacing: -.02em; font-weight: 700; word-break: keep-all; text-wrap: balance; }
+  .sec h3 { font-size: 19px; letter-spacing: -.01em; word-break: keep-all; }
+  .lead { font-size: 17px; line-height: 1.7; color: var(--muted); max-width: 640px; word-break: keep-all; }
+  .head { display: grid; gap: 12px; }
+  .ph { /* 사진 자리 */
+    aspect-ratio: 4 / 3; border-radius: 6px; display: flex; align-items: center; justify-content: center; text-align: center;
+    background: repeating-linear-gradient(135deg, #ECE8E1 0 12px, #E6E1D9 12px 24px); color: #8a8f8c; font-size: 13px; padding: 12px;
+  }
+  .tbd { /* 아직 없는 실제 자료 */
+    display: inline-block; font-size: 13px; color: #8a6a2c; background: #FBF4E6; border: 1px dashed #D9B36A;
+    border-radius: 4px; padding: 2px 8px; line-height: 1.6;
+  }
+  .tbd::before { content: "자료 준비 중 · "; font-weight: 500; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
+  .merit, .pcard { display: grid; gap: 12px; align-content: start; min-width: 0; }
+  .merit p, .pcard p { color: var(--muted); line-height: 1.65; word-break: keep-all; }
+  .verify { font-size: 12px; color: #8a8f8c; }
+  .merit img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; display: block; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+  .prod img { width: 100%; max-width: 220px; aspect-ratio: 1; object-fit: contain; justify-self: center; display: block; }
+  .prod .models { font-size: 14px; color: var(--charcoal); line-height: 1.6; }
+  .prod .actions { margin-top: auto; }
+  .pcard { /* 제품·사례 카드 (D안 인트로의 .card와 이름이 겹치지 않게) */ border: 1px solid var(--line); border-radius: 8px; padding: 18px; background: var(--white); }
+  .facts { display: grid; grid-template-columns: max-content 1fr; gap: 8px 14px; font-size: 14px; }
+  .facts dt { color: var(--muted); }
+  .facts dd { min-width: 0; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .btn-line { background: transparent; color: var(--charcoal); border: 1px solid rgba(34,40,40,.3); }
+  .btn-sm { height: 38px; padding: 0 14px; font-size: 14px; }
+  .note { font-size: 13px; color: #8a8f8c; }
+  .thumbs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .thumbs .ph { aspect-ratio: 1; font-size: 11px; }
+  /* ALL IN ONE: 차콜 배경 · 흰 글씨 · 골드 숫자 (B2B_SITE_PLAN 4절) */
+  .benefit { background: var(--charcoal); color: var(--white); }
+  .benefit .kicker { color: var(--gold); }
+  .benefit .lead, .benefit .cond { color: rgba(255,255,255,.75); }
+  .benefit-row { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; }
+  .pct { font-size: clamp(64px, 9vw, 120px); font-weight: 700; color: var(--gold); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .pct small { display: block; font-size: 15px; font-weight: 500; letter-spacing: 0; color: rgba(255,255,255,.85); margin-top: 10px; }
+  .cond { font-size: 14px; line-height: 1.6; }
+  .benefit .tbd { background: rgba(232,180,95,.12); color: var(--gold); border-color: rgba(232,180,95,.5); }
+  .about-top { align-items: center; }
+  .site-mosaic { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .site-mosaic img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; display: block; }
+  .site-mosaic figcaption { grid-column: 1 / -1; font-size: 13px; color: #6b7270; }
+  .site-mosaic a { color: var(--green); }
+  .stats { margin: 40px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--charcoal); border-radius: 8px; }
+  .stats div { padding: 28px 24px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+  .stats div + div { border-left: 1px solid rgba(255,255,255,.12); }
+  .stats dt { font-size: clamp(24px, 3vw, 36px); font-weight: 700; color: var(--gold); letter-spacing: -.02em; word-break: keep-all; }
+  .stats dd { margin: 0; font-size: 15px; color: rgba(255,255,255,.8); }
+  .knowhow { margin-top: 20px; }
+  .knowhow div { display: grid; gap: 6px; padding-top: 14px; border-top: 2px solid var(--gold); min-width: 0; }
+  .knowhow span { font-size: 14px; color: var(--muted); line-height: 1.6; word-break: keep-all; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-size: 14px; padding: 6px 12px; border-radius: 999px; background: var(--white); border: 1px solid var(--line); }
+  .steps { list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; counter-reset: step; }
+  .steps li { counter-increment: step; display: grid; gap: 8px; align-content: start; padding-top: 14px; border-top: 2px solid var(--green); min-width: 0; }
+  .steps li::before { content: counter(step); font-size: 13px; font-weight: 700; color: var(--green); }
+  .steps b { font-size: 16px; }
+  .steps span { font-size: 14px; color: var(--muted); line-height: 1.6; word-break: keep-all; }
+  .faq { display: grid; border-top: 1px solid var(--line); }
+  .faq details { border-bottom: 1px solid var(--line); padding: 18px 0; }
+  .faq summary { cursor: pointer; font-weight: 500; font-size: 16px; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+  .faq summary::after { content: "+"; color: var(--green); font-weight: 700; }
+  .faq details[open] summary::after { content: "−"; }
+  .faq p { margin-top: 10px; color: var(--muted); line-height: 1.7; max-width: 760px; word-break: keep-all; }
+  .contact-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 48px; align-items: start; }
+  .channels { display: grid; gap: 10px; }
+  .channel { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); color: inherit; text-decoration: none; }
+  .channel b { font-size: 16px; }
+  form.apply { display: grid; gap: 14px; background: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 24px; }
+  .field { display: grid; gap: 6px; }
+  .field label { font-size: 14px; font-weight: 500; }
+  .field label em { font-style: normal; color: var(--green); font-size: 12px; margin-left: 4px; }
+  .field input, .field select, .field textarea { font: 400 15px/1.4 inherit; padding: 11px 12px; border: 1px solid rgba(34,40,40,.25); border-radius: 6px; background: var(--white); color: var(--charcoal); width: 100%; }
+  .field textarea { min-height: 96px; resize: vertical; }
+  .field input:focus, .field select:focus, .field textarea:focus, .btn:focus-visible, summary:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+  .agree { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; }
+  .consent { display: grid; gap: 8px; }
+  .privacy { font-size: 13px; color: var(--muted); padding-left: 24px; }
+  .privacy summary { cursor: pointer; width: max-content; text-decoration: underline; text-underline-offset: 3px; }
+  .privacy dl { display: grid; grid-template-columns: 68px 1fr; gap: 6px 12px; margin: 10px 0 0; padding: 12px 14px; background: var(--cream); border-radius: 6px; line-height: 1.6; word-break: keep-all; }
+  .privacy dt { font-weight: 500; color: var(--charcoal); }
+  .privacy dd { margin: 0; }
+  .form-msg { font-size: 14px; line-height: 1.6; padding: 12px 14px; border-radius: 6px; background: #EEF3F0; color: var(--green); }
+  .foot { background: #1B2020; color: rgba(255,255,255,.75); padding: 48px 40px; }
+  .foot .wrap { gap: 14px; font-size: 14px; line-height: 1.8; }
+  .foot strong { color: var(--white); font-size: 18px; }
+  .foot .tbd { background: rgba(255,255,255,.06); color: rgba(255,255,255,.8); border-color: rgba(255,255,255,.3); }
+  @media (max-width: 900px) {
+    .grid3, .grid2, .contact-grid, .benefit-row { grid-template-columns: minmax(0, 1fr); }
+    .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stats { grid-template-columns: minmax(0, 1fr); }
+    .stats div + div { border-left: 0; border-top: 1px solid rgba(255,255,255,.12); }
+    .steps { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .sec { padding: 64px 16px; }
+    .grid4 { grid-template-columns: minmax(0, 1fr); }
+    .foot { padding: 40px 16px; }
+    .header .btn { font-size: 13px; }
+  }
+
+  /* ---------- 인트로 ---------- */
+  .intro {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--white);   /* 밀려난 자리에 드러나는 흰 바탕 */
+    overflow: hidden; cursor: pointer;
+  }
+  .intro[hidden] { display: none; }
+  .name { /* 흰 바탕에 처음부터 놓여 있고, 검은 판이 밀려나며 드러난다 */
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Noto Serif KR", serif; font-weight: 700;
+    font-size: clamp(96px, 17vw, 260px); letter-spacing: -.02em; line-height: 1;
+    color: var(--red);
+  }
+  .black { /* 화면을 덮은 검은 판. 왼쪽 가장자리를 캐릭터가 오른쪽으로 민다 */
+    position: absolute; top: 0; bottom: 0; left: 0; width: 100%;
+    background: var(--black);
+    will-change: transform;
+  }
+  .pusher { /* 검은 판의 왼쪽 가장자리에 붙어 함께 움직이는 반장 */
+    position: absolute; right: 100%; top: 50%;
+    height: 34vh; aspect-ratio: 200 / 300;
+    margin-top: -14vh;
+    margin-right: -2px;   /* 장갑이 판 가장자리에 닿도록 */
+  }
+  .pusher svg { width: 100%; height: 100%; overflow: visible; }
+  .skip {
+    position: absolute; right: 20px; bottom: 20px; z-index: 5;
+    font: 500 13px/1 inherit; color: #d6d6d6; background: rgba(60,60,60,.6);
+    border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 9px 14px; cursor: pointer;
+  }
+
+  #nameText { display: inline-block; transform-origin: 50% 50%; }
+  .site.over { position: relative; z-index: 200; }   /* A·C: 내려오는 랜딩이 인트로 위로 */
+  .cards { position: absolute; inset: 0; pointer-events: none; }
+  .card { /* D: 위에서 떨어져 쌓이는 사진 카드 (실제 시공 사진 자리) */
+    position: absolute; left: 50%; top: 50%;
+    width: min(34vw, 440px); aspect-ratio: 4 / 3;
+    border-radius: 6px; box-shadow: 0 18px 40px rgba(0,0,0,.22);
+    display: flex; align-items: flex-end; padding: 10px 12px;
+    font-size: 12px; color: rgba(255,255,255,.85);
+  }
+
+  /* E: 손그림 선 일러스트 창호 (반장과 같은 검은 외곽선·흰 면) */
+  .win { position: absolute; left: 50%; top: 50%; filter: drop-shadow(0 14px 22px rgba(0,0,0,.16)); }
+  .win svg { display: block; width: 100%; height: 100%; }
+  .win-last { /* 마지막 창: 화면 가득 커진 뒤 두 창짝이 열려야 해서 SVG가 아닌 요소로 만든다 */
+    position: absolute; left: 50%; top: 50%;
+    border: 6px solid #111; border-radius: 6px; background: #fff;
+    box-shadow: 0 18px 36px rgba(0,0,0,.18);
+  }
+  .win-sash {
+    position: absolute; top: 10px; bottom: 10px; width: calc(50% - 4px);
+    border: 5px solid #111; border-radius: 3px; background: #fff; padding: 14px;
+  }
+  .win-sash.l { left: 10px; z-index: 2; }
+  .win-sash.r { right: 10px; }
+  .win-glass {
+    position: relative; width: 100%; height: 100%; overflow: hidden;
+    border: 4px solid #111; background: #EAF2F4;
+  }
+  .win-glass::after { content: ""; position: absolute; left: 18%; top: -10%; width: 9%; height: 130%; background: rgba(255,255,255,.9); transform: rotate(28deg); }
+  .win-lock { position: absolute; right: -14px; top: 50%; width: 9px; height: 34px; margin-top: -17px; border-radius: 4px; background: #111; }
+
+  /* F: 실측 도면 → 견적서 → 펼쳐져 첫 페이지 */
+  .measure { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(40vw, 440px); }
+  .measure svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .est {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: min(560px, 88vw); background: #fff; overflow: hidden;
+    border: 1px solid rgba(34,40,40,.12); border-radius: 10px; box-shadow: 0 24px 60px rgba(0,0,0,.14);
+    display: flex; flex-direction: column;
+  }
+  .est-head {
+    flex: none; height: 68px; padding: 0 24px; background: #fff;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(34,40,40,.08);
+  }
+  .est-tag { font-size: 13px; color: #6b7270; }
+  .est-body { padding: 16px 24px 20px; }
+  .est-title { display: flex; justify-content: space-between; font-size: 12px; color: #8a918f; margin-bottom: 8px; }
+  .est-row {
+    display: grid; grid-template-columns: 38px 1fr auto 34px 92px; gap: 12px; align-items: center;
+    padding: 10px 0; border-bottom: 1px dashed rgba(34,40,40,.14); font-size: 14px;
+  }
+  .est-row svg { width: 34px; height: 24px; display: block; }
+  .est-row .spec { color: #6b7270; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .est-row .qty, .est-row .amt { text-align: right; font-variant-numeric: tabular-nums; }
+  .est-row .amt, .est-sum .amt { color: #9aa09e; font-size: 12px; }
+  .est-sum { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; font-weight: 700; font-size: 15px; }
+  @media (max-width: 640px) {
+    .est-head { height: 56px; padding: 0 16px; }
+    .est-body { padding: 12px 16px 16px; }
+    .est-row { grid-template-columns: 30px 1fr 30px 70px; font-size: 13px; }
+    .est-row .spec { display: none; }
+  }
+
+  /* G: 선으로 그린 집에 창호가 설치되고, 큰 창으로 다가가 열린다 */
+  .house { position: absolute; left: 50%; top: 50%; width: min(64vw, 760px); margin-left: calc(min(64vw, 760px) / -2); }
+  .house svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .house .w, .house .sash { transform-box: fill-box; transform-origin: 50% 50%; }
+
+  /* I: 아파트 한 세대 3D(천장을 걷어낸 모형)에 LX 시스템창호 형태의 창이 조립된다 */
+  .scene3d { position: absolute; inset: 0; perspective: 2600px; perspective-origin: 50% 50%; overflow: hidden; }
+  .world { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; transform-origin: 0 0 0; }
+  .world .pl { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  .world .p3 { transform-style: preserve-3d; }
+  .room-label { font: 500 30px/1 "Noto Sans KR", sans-serif; color: #b3a68f; letter-spacing: .05em; display: flex; align-items: center; justify-content: center; }
+  .wpart { position: absolute; box-sizing: border-box; }
+  .wglass {
+    background: linear-gradient(165deg, rgba(226,238,243,.92) 0%, rgba(196,218,228,.86) 100%);
+    overflow: hidden;
+  }
+  .wglass::after { content: ""; position: absolute; left: 22%; top: -20%; width: 10%; height: 140%; background: rgba(255,255,255,.75); transform: rotate(24deg); }
+
+  .case-link { text-decoration: none; color: inherit; display: block; }
+  .case-link img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; margin-bottom: 12px; }
+  .case-link .meta { font-size: 13px; color: #6b7270; }
+  .case-link h3 { margin: 4px 0 8px; }
+  .case-link .more { font-size: 14px; color: var(--green); }
+  /* L: 밝은 배경 위 차콜 글씨 (검은 그림자 대신 글자 뒤만 옅은 흰 베일) */
+  .hero.ink-dark .hero-copy { color: var(--charcoal); }
+  .hero.ink-dark .btn-ghost { color: var(--charcoal); background: rgba(255,255,255,.5); border-color: rgba(34,40,40,.35); }
+
+
+  /* N: 영상이 끝나면 왼쪽에서 창짝 같은 패널이 밀려 들어와 글씨 바탕이 된다. 배경은 선명하게 둔다 */
+  .sash { position: absolute; left: 0; top: 0; bottom: 0; width: 44%; background: #f5f2ec; box-shadow: 10px 0 28px rgba(30,30,25,.10); display: none; }
+  .sash::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 12px; background: linear-gradient(90deg, #d6cebf, #efe9de 45%, #cdc4b4); }
+  .sash::before { content: ""; position: absolute; right: 24px; top: calc(50% - 34px); width: 6px; height: 68px; border-radius: 3px; background: #b8ae9d; }
+  .hero.mode-sash .sash { display: block; }
+  .hero.mode-sash .hero-copy { max-width: 44%; }
+  /* O: 영상 마지막 장면이 오른쪽 창틀 액자 안으로 줄어든다 */
+  .hero.mode-frame { background: #f5f2ec; }
+  .hero.mode-frame .hero-photo { transform-origin: 100% 50%; transform: translateX(-4vw) scale(.5); box-shadow: 0 0 0 24px #e3dccd, 0 40px 80px rgba(30,30,25,.22); }
+  .hero.mode-frame .hero-copy { max-width: 46%; }
+  @media (max-width: 640px) {
+    .sash { top: auto; width: 100%; height: 56%; box-shadow: 0 -10px 28px rgba(30,30,25,.10); }
+    .sash::after { top: 0; bottom: auto; width: 100%; height: 12px; background: linear-gradient(180deg, #d6cebf, #efe9de 45%, #cdc4b4); }
+    .sash::before { display: none; }
+    .hero.mode-sash .hero-copy, .hero.mode-frame .hero-copy { max-width: none; }
+    .hero.mode-frame .hero-photo { transform: none; box-shadow: none; clip-path: inset(9% 4% 50% 4% round 6px); }
+  }
+
+  /* J: I안을 Blender로 렌더한 영상 (intro-3d/renders/final_anim) */
+  .intro-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #ecebe7; }
+  /* ?debug=1: 영상 점검용 프레임 번호 */
+  .frame-no {
+    position: absolute; left: 16px; top: 16px; z-index: 6; pointer-events: none;
+    font: 700 15px/1.4 ui-monospace, Menlo, monospace; color: #fff; background: rgba(0,0,0,.6);
+    padding: 6px 10px; border-radius: 6px; white-space: pre;
+  }
+
+  /* 시안 검토용 전환 방식 선택 (실제 사이트에는 넣지 않음) */
+  .switcher {
+    position: absolute; top: 84px; left: 50%; transform: translateX(-50%); z-index: 400;
+    display: flex; gap: 4px; padding: 4px; border-radius: 999px;
+    background: rgba(34,40,40,.82); box-shadow: 0 6px 18px rgba(0,0,0,.18);
+  }
+  .switcher button {
+    font: 500 12px/1 inherit; color: rgba(255,255,255,.75); background: transparent;
+    border: 0; border-radius: 999px; padding: 8px 12px; cursor: pointer; white-space: nowrap;
+  }
+  .switcher button[aria-pressed="true"] { background: var(--white); color: var(--charcoal); }
+  @media (max-width: 640px) { .switcher { top: 66px; } .switcher button { padding: 7px 8px; font-size: 11px; } }
+
+  /* 시안 검토용 다시 보기 버튼 (실제 사이트에는 넣지 않음) */
+  .replay {
+    position: fixed; left: 16px; bottom: 16px; z-index: 50;
+    font: 500 12px/1 inherit; color: var(--white); background: rgba(34,40,40,.75);
+    border: 0; border-radius: 999px; padding: 9px 13px; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="site page" id="site">
+<header class="header" id="header">
+  <div class="logo"><span id="logoMark">대산</span><small>LX 창호</small></div>
+  <nav class="nav"><a href="#products">LX 창호</a><a href="#cases">시공 사례</a><a href="#about">대산 소개</a></nav>
+  <a class="btn btn-primary" href="#contact">창호 상담 신청</a>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-photo" id="heroPhoto"></div>
+    <div class="sash" id="sash"></div>
+    <span class="photo-label">대표 시공 사진 자리 (실제 LX 사진 확보 후 교체)</span>
+    <div class="hero-copy">
+      <div class="eyebrow" data-rise>LX WINDOW · DAESAN</div>
+      <h1 data-rise>다음 현장의 LX 창호,<br>대산과 함께하세요.</h1>
+      <p data-rise>창호는 전담 직원이 상담하고, 현장 자재는 한곳에서 함께 준비하세요. 실측과 견적까지 대산이 안내합니다.</p>
+      <div class="hero-actions" data-rise>
+        <a class="btn btn-primary" href="#contact">창호 상담 신청</a>
+        <a class="btn btn-ghost" href="#cases">시공 사례 보기</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. LX 제품 소개 -->
+  <section class="sec" id="products">
+    <div class="wrap">
+      <div class="head">
+        <p class="kicker">LX 창호</p>
+        <h2>현장에 맞는 LX 창호를 만나보세요.</h2>
+        <p class="lead">넓은 유리와 슬림한 프레임으로 시야는 시원하게, 실내는 더 밝게. 설치할 공간에 맞는 제품을 살펴보세요.</p>
+      </div>
+      <div class="grid3">
+        <article class="merit">
+          <img src="media/lx/merit-view.jpg" alt="LX Z:IN 뷰프레임 발코니창 너머로 보이는 강 풍경" loading="lazy">
+          <h3>확 트인 뷰</h3>
+          <p>슬림해진 프레임 두께만큼 유리 면이 넓어져, 창밖 풍경이 그대로 들어옵니다.</p>
+        </article>
+        <article class="merit">
+          <img src="media/lx/merit-space.jpg" alt="LX Z:IN 뷰프레임 광폭단창" loading="lazy">
+          <h3>넓어진 공간감</h3>
+          <p>플랫한 창틀 하부 디자인으로 발코니와 실내가 이어지는 듯 넓어 보입니다.</p>
+        </article>
+        <article class="merit">
+          <img src="media/lx/merit-design.jpg" alt="LX Z:IN 베젤리스 뷰프레임 285" loading="lazy">
+          <h3>고급스러운 디자인</h3>
+          <p>프레임이 드러나지 않는 베젤리스 디자인과 실리콘 없는 깔끔한 유리 마감.</p>
+        </article>
+      </div>
+      <h3>취급 제품</h3>
+      <div class="grid4">
+        <article class="pcard prod">
+          <img src="media/lx/f-265.jpg" alt="F-265 프레임 단면" loading="lazy">
+          <h3>발코니창</h3>
+          <p class="models">F-140 · F-145 (단창)<br>F-250 · F-265 · F-285 (이중창)</p>
+          <dl class="facts"><dt>적용 공간</dt><dd>아파트·주택 발코니창</dd><dt>주요 특징</dt><dd>슬림 프레임, 최대 28mm 유리, F-285 베젤리스</dd></dl>
+          <div class="actions"><a class="btn btn-line btn-sm" href="https://www.lxzin.com/zin/product/101603" target="_blank" rel="noopener">LX 공식 제품 정보</a><a class="btn btn-primary btn-sm" href="#contact">이 제품 상담하기</a></div>
+        </article>
+        <article class="pcard prod">
+          <img src="media/lx/f-250i.jpg" alt="F-250I 프레임 단면" loading="lazy">
+          <h3>일반창</h3>
+          <p class="models">F-130I (단창)<br>F-250I · F-270I (이중창)</p>
+          <dl class="facts"><dt>적용 공간</dt><dd>아파트 실내창, 빌라·주택 후면 발코니창</dd><dt>주요 특징</dt><dd>실리콘 없는 유리 마감, F-270I 베젤리스</dd></dl>
+          <div class="actions"><a class="btn btn-line btn-sm" href="https://www.lxzin.com/zin/product/101603" target="_blank" rel="noopener">LX 공식 제품 정보</a><a class="btn btn-primary btn-sm" href="#contact">이 제품 상담하기</a></div>
+        </article>
+        <article class="pcard prod">
+          <img src="media/lx/f-230wf.jpg" alt="F-230WF 프레임 단면" loading="lazy">
+          <h3>분합창 (광폭단창)</h3>
+          <p class="models">F-230W · F-230WF</p>
+          <dl class="facts"><dt>적용 공간</dt><dd>아파트·빌라·주택 분합문</dd><dt>주요 특징</dt><dd>플랫한 창틀 하부로 실내와 발코니를 잇는 공간감</dd></dl>
+          <div class="actions"><a class="btn btn-line btn-sm" href="https://www.lxzin.com/zin/product/101603" target="_blank" rel="noopener">LX 공식 제품 정보</a><a class="btn btn-primary btn-sm" href="#contact">이 제품 상담하기</a></div>
+        </article>
+        <article class="pcard prod">
+          <img src="media/lx/f-td140.jpg" alt="F-TD140 프레임 단면" loading="lazy">
+          <h3>터닝도어 · 여닫이 창</h3>
+          <p class="models">F-TD140 (도어)<br>F-SH60 · F-TH60 (창)</p>
+          <dl class="facts"><dt>적용 공간</dt><dd>실내 다용도 출입문, 단독주택·상가 소형창</dd><dt>주요 특징</dt><dd>바깥으로 열리는 옆걸이(SH)·위걸이(TH) 창</dd></dl>
+          <div class="actions"><a class="btn btn-line btn-sm" href="https://www.lxzin.com/zin/product/101603" target="_blank" rel="noopener">LX 공식 제품 정보</a><a class="btn btn-primary btn-sm" href="#contact">이 제품 상담하기</a></div>
+        </article>
+      </div>
+      <p class="note">제품 사진·단면도: LX Z:IN 공식 자료. 색상·유리 사양은 현장에 맞춰 상담 때 안내합니다.</p>
+    </div>
+  </section>
+
+  <!-- 3. 시공 사례 -->
+  <section class="sec alt" id="cases">
+    <div class="wrap">
+      <div class="head">
+        <p class="kicker">시공 사례</p>
+        <h2>현장에서 만나는 LX 창호</h2>
+        <p class="lead">대산이 LX 창호를 공급한 실제 현장입니다. 시공 직후 현장 사진과 현장 정보를 함께 살펴보세요.</p>
+      </div>
+      <div class="grid3">
+        <a class="pcard case-link" href="cases.html#ds-ricenz-209">
+          <img src="media/cases/ds-ricenz-209-0.jpg" alt="잠실 리센츠 시공 후 창" loading="lazy">
+          <span class="meta">잠실 리센츠 · 서울 송파</span>
+          <h3>한강 야경을 그대로 담은 거실 창</h3>
+          <span class="more">사진과 현장 정보 보기 →</span>
+        </a>
+        <a class="pcard case-link" href="cases.html#ds-seoripul">
+          <img src="media/cases/ds-seoripul-0.jpg" alt="방배 서리풀 e편한세상 시공 후 창" loading="lazy">
+          <span class="meta">방배 서리풀 e편한세상 · 서울 서초</span>
+          <h3>숲이 창 가득 들어오는 집</h3>
+          <span class="more">사진과 현장 정보 보기 →</span>
+        </a>
+        <a class="pcard case-link" href="cases.html#ds-bisan">
+          <img src="media/cases/ds-bisan-0.jpg" alt="비산 롯데캐슬 시공 후 창" loading="lazy">
+          <span class="meta">비산 롯데캐슬 · 경기 안양</span>
+          <h3>살던 집 그대로, 창만 새로</h3>
+          <span class="more">사진과 현장 정보 보기 →</span>
+        </a>
+      </div>
+      <p style="margin-top:24px"><a class="btn btn-line btn-sm" href="cases.html">시공 사례 전체 보기 →</a></p>
+    </div>
+  </section>
+
+  <!-- 4. ALL IN ONE 구매 혜택 -->
+  <section class="sec benefit" id="benefit">
+    <div class="wrap">
+      <p class="kicker">ALL IN ONE</p>
+      <div class="benefit-row">
+        <div class="pct">10%<small>같은 공사 건의 목자재·기초자재 할인</small></div>
+        <div class="head">
+          <h2>창호 구매도, 현장 자재 준비도. 대산에서 한 번에.</h2>
+          <p class="lead">대산에서 LX 창호를 구매하시면, 같은 공사에 필요한 목자재·기초자재를 10% 할인해 드립니다.</p>
+          <p class="cond">창호 금액은 할인 대상에서 제외됩니다. 대상 품목과 적용 조건은 상담 시 확인해 주세요.</p>
+          <span class="tbd">대상·제외 품목, 기준 가격, 적용 시점, 중복 여부</span>
+          <div class="actions"><a class="btn btn-primary" href="#contact">창호·자재 함께 상담하기</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 대산 소개 · 상담 안내 · 진행 절차 · FAQ -->
+  <section class="sec" id="about">
+    <div class="wrap">
+      <div class="grid2 about-top">
+        <div class="head">
+          <p class="kicker">대산 소개</p>
+          <h2>전국에서 도어를 가장 많이 파는 회사가, 창호를 맡습니다.</h2>
+          <p class="lead">도어와 창호는 같은 현장에서, 같은 시공업자와 함께 움직입니다. 35년 동안 전국의 시공업자에게 도어를 팔며 쌓은 판매·A/S·서비스 노하우를 LX 창호에 그대로 씁니다.</p>
+          <p class="lead">창호는 전담 직원이 처음부터 실측 연결까지 맡아 상담하고, 같은 현장의 목자재·단열재·석고보드도 대산에서 함께 준비할 수 있습니다.</p>
+        </div>
+        <figure class="site-mosaic">
+          <img src="media/cases/ds-artheal-0.jpg" alt="대산이 LX 창호를 공급한 현장" loading="lazy">
+          <img src="media/cases/ds-sangam-0.jpg" alt="대산이 LX 창호를 공급한 현장" loading="lazy">
+          <img src="media/cases/ds-hongje-0.jpg" alt="대산이 LX 창호를 공급한 현장" loading="lazy">
+          <img src="media/cases/ds-gwangmyeong-0.jpg" alt="대산이 LX 창호를 공급한 현장" loading="lazy">
+          <figcaption>대산이 LX 창호를 공급한 현장 · <a href="cases.html">시공 현장 더 보기 →</a></figcaption>
+        </figure>
+      </div>
+      <dl class="stats">
+        <div><dt>35년</dt><dd>전통</dd></div>
+        <div><dt>도어 판매 전국 1위</dt><dd>도어를 가장 많이 파는 회사</dd></div>
+        <div><dt>GS건설 3년 연속</dt><dd>협력 납품업체</dd></div>
+      </dl>
+      <div class="grid3 knowhow">
+        <div><b>판매 노하우</b><span>전국 시공업자와 거래하며, 현장에 무엇이 언제 필요한지 압니다.</span></div>
+        <div><b>A/S 노하우</b><span>판매 뒤에 생기는 문제까지 챙겨 온 경험으로 끝까지 대응합니다.</span></div>
+        <div><b>서비스 노하우</b><span>업자 한 분 한 분을 전담 직원이 응대합니다.</span></div>
+      </div>
+
+      <div class="head" style="margin-top:40px">
+        <p class="kicker">진행 절차</p>
+        <h2>상담부터 주문까지, 이렇게 진행됩니다.</h2>
+        <p class="lead">창호 선택부터 실측 준비까지, 필요한 내용을 함께 확인합니다.</p>
+      </div>
+      <ol class="steps">
+        <li><b>창호 상담</b><span>현장 상황과 필요한 창호를 전담 직원과 상의합니다.</span></li>
+        <li><b>실측 요청</b><span>실측을 원하시면 진행 가능 여부와 일정을 협의합니다.</span></li>
+        <li><b>현장 실측</b><span>협력업체가 현장을 방문해 치수와 현장 조건을 확인합니다.</span></li>
+        <li><b>견적 안내</b><span>실측 내용을 바탕으로 견적서를 안내합니다.</span></li>
+        <li><b>주문 진행</b><span>제품과 견적 내용을 확인한 뒤 주문을 진행합니다.</span></li>
+      </ol>
+      <p class="note">상담 신청만으로 실측 일정이나 주문이 확정되지는 않습니다.</p>
+
+      <div class="head" style="margin-top:40px">
+        <p class="kicker">자주 묻는 질문</p>
+      </div>
+      <div class="faq">
+        <details><summary>도면이나 정확한 치수가 없어도 상담할 수 있나요?</summary><p>네. 처음에는 현장 상황과 궁금한 내용을 알려주세요. 견적에 필요한 치수와 현장 조건은 이후 실측 과정에서 확인합니다.</p></details>
+        <details><summary>일반 소비자도 상담할 수 있나요?</summary><p>네. 인테리어 업체뿐 아니라 창호 구매를 알아보시는 고객도 문의하실 수 있습니다.</p></details>
+        <details><summary>실측은 어떻게 요청하나요?</summary><p>창호 전담 직원과 상담한 뒤 실측을 요청하시면, 진행 가능 여부와 일정을 협의합니다. 현장 실측은 협력업체가 진행합니다. <span class="tbd">비용·지역·일정 조건</span></p></details>
+        <details><summary>견적은 어떻게 받나요?</summary><p>상담과 현장 실측을 거쳐 제품과 현장 조건을 확인한 뒤 견적서를 안내합니다. <span class="tbd">전달 방식·소요 기간</span></p></details>
+        <details><summary>10% 할인은 창호 가격에도 적용되나요?</summary><p>창호 금액은 제외됩니다. LX 창호 구매와 함께 같은 공사 건의 목자재·기초자재를 구매하실 때 적용하는 혜택입니다. 대상 품목과 세부 조건은 상담 시 확인해 주세요.</p></details>
+      </div>
+      <p class="note">시공·A/S 문의 창구는 담당 범위가 정해지면 질문을 추가합니다.</p>
+    </div>
+  </section>
+
+  <!-- 6. 상담 신청 -->
+  <section class="sec alt" id="contact">
+    <div class="wrap contact-grid">
+      <div class="head">
+        <p class="kicker">창호 상담 신청</p>
+        <h2>다음 현장, 대산과 상의하세요.</h2>
+        <p class="lead">궁금한 제품이나 현장 상황을 알려주세요. 창호 전담 직원이 상담해 드립니다. 전화와 카카오톡으로 문의하거나 연락처를 남겨주세요.</p>
+        <div class="channels">
+          <div class="channel"><b>전화 상담</b><span class="tbd">전화번호 · 상담 시간</span></div>
+          <div class="channel"><b>카카오톡 상담</b><span class="tbd">카카오톡 채널</span></div>
+          <a class="channel" href="#apply-phone"><b>연락처 남기기</b><span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+      <form class="apply" id="applyForm" novalidate>
+        <div class="field"><label for="apply-phone">연락처<em>필수</em></label><input id="apply-phone" name="phone" type="tel" placeholder="연락받으실 전화번호를 입력해 주세요." required></div>
+        <div class="field"><label for="apply-name">이름 / 업체명</label><input id="apply-name" name="name" type="text" placeholder="성함 또는 업체명을 남겨주세요."></div>
+        <div class="field"><label for="apply-area">현장 지역</label><input id="apply-area" name="area" type="text" placeholder="예: 시·구 단위 지역"></div>
+        <div class="field"><label for="apply-topic">관심 내용</label><select id="apply-topic" name="topic"><option value="">선택해 주세요</option><option>창호 구매</option><option>창호·자재 함께 구매</option><option>기타</option></select></div>
+        <div class="field"><label for="apply-msg">문의 내용</label><textarea id="apply-msg" name="message" placeholder="궁금한 제품이나 공사 계획을 편하게 남겨주세요."></textarea></div>
+        <div class="consent">
+          <label class="agree" for="apply-agree"><input id="apply-agree" type="checkbox" required> <span>개인정보 수집·이용에 동의합니다. <em style="font-style:normal;color:var(--green);font-size:12px">필수</em></span></label>
+          <!-- 초안(2026-10-26). 보관 기간·저장 위치는 대산 확인 후 확정. B2B_HOMEPAGE_COPY.md 6절과 같은 문구 -->
+          <details class="privacy">
+            <summary>수집·이용 안내 보기</summary>
+            <dl>
+              <dt>수집 목적</dt><dd>상담 신청 확인, 연락, 실측·견적 안내</dd>
+              <dt>수집 항목</dt><dd>필수: 연락처<br>선택: 이름 또는 업체명, 현장 지역, 관심 내용, 문의 내용</dd>
+              <dt>보관 기간</dt><dd>상담이 끝난 날부터 1년간 보관한 뒤 파기합니다. 계약으로 이어진 경우에는 관계 법령이 정한 기간 동안 보관합니다.</dd>
+              <dt>저장 위치</dt><dd>신청 내용은 대산이 관리하는 Google 스프레드시트(Google LLC)에 저장되며, 상담 담당 직원만 확인합니다.</dd>
+              <dt>동의 거부</dt><dd>동의하지 않으셔도 됩니다. 다만 이 경우 온라인 상담 신청은 할 수 없으며, 전화·카카오톡 상담은 그대로 이용하실 수 있습니다.</dd>
+              <dt>자세히</dt><dd><a href="privacy.html" target="_blank" rel="noopener" style="color:var(--green)">개인정보처리방침 전문 보기</a></dd>
+            </dl>
+          </details>
+        </div>
+        <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label>홈페이지 <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+        <button class="btn btn-primary" type="submit">상담 신청하기</button>
+        <p class="form-msg" id="applyMsg" hidden></p>
+      </form>
+    </div>
+  </section>
+</main>
+<footer class="foot">
+  <div class="wrap">
+    <strong>대산</strong>
+    <p>LX 창호와 현장에 필요한 건축자재, 대산에서 함께 상담하세요.</p>
+    <p>(주)대산 · 대표 손장범 · 사업자등록번호 138-81-10613 · 통신판매업신고 제2015-안양동안-228호<br>경기 안양시 동안구 관악대로 279<br>고객센터 <a href="tel:031-388-3833" style="color:inherit">031-388-3833</a> · 팩스 031-429-0447 · <a href="mailto:sales@daesan.biz" style="color:inherit">sales@daesan.biz</a><br>상담 시간 평일 08:00~17:00 (점심 12:00~13:00) · 토요일 08:00~12:00<br>카카오톡 상담 · <a href="privacy.html" style="color:inherit">개인정보처리방침</a></p>
+  </div>
+</footer>
+</div>
+
+<div class="intro" id="intro" aria-hidden="true" hidden>
+  <div class="name"><span id="nameText">대산</span></div>
+  <div class="cards" id="cards"></div>
+  <div class="black" id="black">
+    <div class="pusher" id="pusher">
+      <!-- 반장: 노란 안전모·조끼·장갑. 오른쪽을 보고 몸을 기울여 두 손으로 판을 민다 -->
+      <svg viewBox="0 0 200 300" fill="none" stroke="#111" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+        <g transform="rotate(10 100 290)">
+          <g id="body">
+            <!-- 뒷팔 -->
+            <path class="limb" d="M118 122 L160 116" />
+            <circle cx="168" cy="115" r="11" fill="#fff" />
+            <!-- 몸통(조끼) -->
+            <rect x="84" y="104" width="56" height="88" rx="16" fill="#fff" />
+            <path d="M86 158 H138 M86 170 H138" stroke-width="4" />
+            <path d="M112 106 V190" stroke-width="3" />
+            <!-- 머리 -->
+            <circle cx="103" cy="78" r="9" fill="#fff" />
+            <circle cx="118" cy="70" r="32" fill="#fff" />
+            <circle cx="134" cy="70" r="3.6" fill="#111" stroke="none" />
+            <path d="M131 58 H141" stroke-width="4" />
+            <path d="M139 86 H147" stroke-width="5" />
+            <!-- 안전모 -->
+            <path d="M84 58 C86 26 150 22 154 54 Z" fill="#FFD62A" />
+            <path d="M80 60 L160 53" stroke-width="7" />
+            <path d="M118 30 L120 54" stroke-width="3.5" />
+            <!-- 앞팔 -->
+            <path class="limb" d="M120 132 L165 134" />
+            <circle cx="174" cy="134" r="12" fill="#fff" />
+          </g>
+          <!-- 다리 두 동작을 번갈아 보여 걷는 느낌을 낸다 (다리는 몸통 뒤에 그린다) -->
+          <g id="legA">
+            <path class="limb" d="M100 186 L78 236 L56 272" />
+            <path d="M40 280 H66" stroke-width="12" />
+            <path class="limb" d="M124 186 L144 230 L140 272" />
+            <path d="M134 280 H162" stroke-width="12" />
+          </g>
+          <g id="legB" opacity="0">
+            <path class="limb" d="M102 186 L92 236 L72 274" />
+            <path d="M58 282 H84" stroke-width="12" />
+            <path class="limb" d="M122 186 L132 232 L118 272" />
+            <path d="M110 280 H138" stroke-width="12" />
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <button class="skip" id="skip" type="button" tabindex="-1">건너뛰기</button>
+</div>
+
+<div class="switcher" id="switcher" role="group" aria-label="전환 방식 비교 (시안용)">
+  <button type="button" data-v="A">A 내려오기</button>
+  <button type="button" data-v="B">B 로고로</button>
+  <button type="button" data-v="C">C 밀어내기</button>
+  <button type="button" data-v="D">D 사진</button>
+  <button type="button" data-v="E">E 창호 쌓기</button>
+  <button type="button" data-v="F">F 견적 펼침</button>
+  <button type="button" data-v="G">G 집에 설치</button>
+  <button type="button" data-v="H">H 집에서 시작</button>
+  <button type="button" data-v="I">I 아파트 3D 조립</button>
+  <button type="button" data-v="J">J I 영상</button>
+  <button type="button" data-v="K">K 자연·3짝</button>
+  <button type="button" data-v="L">L LX 밝은 배경</button>
+  <button type="button" data-v="M">M L 선명하게</button>
+  <button type="button" data-v="N">N 창짝 패널</button>
+  <button type="button" data-v="O">O 창틀 액자</button>
+</div>
+<button class="replay" id="replay" type="button">인트로 다시 보기 (시안용)</button>
+
+<script>
+(() => {
+  const KEY = 'daesan-intro-seen';
+  const intro = document.getElementById('intro');
+  const black = document.getElementById('black');
+  const pusher = document.getElementById('pusher');
+  const body = document.getElementById('body');
+  const legA = document.getElementById('legA');
+  const legB = document.getElementById('legB');
+  const heroPhoto = document.getElementById('heroPhoto');
+  const rises = [...document.querySelectorAll('[data-rise]')];
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // 팔·다리를 반장 기준 그림처럼 굵은 흰 몸에 검은 외곽선으로: 검은 굵은 선 위에 흰 선을 겹친다
+  document.querySelectorAll('.limb').forEach(p => {
+    p.setAttribute('stroke-width', '20');
+    const inner = p.cloneNode();
+    inner.removeAttribute('class');
+    inner.setAttribute('stroke', '#fff');
+    inner.setAttribute('stroke-width', '11');
+    p.after(inner);
+  });
+  // 다리를 몸통 뒤로
+  const fig = legA.parentNode;
+  fig.insertBefore(legB, body);
+  fig.insertBefore(legA, legB);
+
+  const site = document.getElementById('site');
+  const header = document.getElementById('header');
+  const logoMark = document.getElementById('logoMark');
+  const nameText = document.getElementById('nameText');
+  const cards = document.getElementById('cards');
+
+  // 샘플 영상에서 잰 검은 판 왼쪽 가장자리 위치(화면 폭 대비 %)와 시각(초).
+  // 빠르게 들어와 → 힘겹게 조금씩 → 한 번 크게 → 버티기 → 마지막에 가속해 밀어낸다
+  const PUSH = [
+    [0.0, 4], [0.3, 27], [0.9, 33], [1.2, 58], [2.2, 63],
+    [2.4, 67], [2.6, 75], [2.8, 90], [3.05, 112]
+  ];
+  const PUSH_END = 3050;      // 검은 판이 화면 밖으로 나간 시각(ms)
+  const T0 = 4000;            // 흰 화면에 '대산'만 남아 있다가 랜딩으로 넘어가기 시작하는 시각
+
+  // 메인 대표 사진 자리와 D안 마지막 카드가 같은 바탕을 써야 이어져 보인다
+  const HERO_BG = getComputedStyle(heroPhoto).backgroundImage;
+  const CARD_BGS = [
+    'linear-gradient(135deg, #b9a58c, #e2d6c4)',
+    'linear-gradient(135deg, #8d9a8e, #c8d1c5)',
+    'linear-gradient(135deg, #a3aab3, #dfe3e8)',
+    HERO_BG
+  ];
+
+  let variant = 'A', anims = [], heroAnims = [], done = true, failsafe;
+
+  const seen = () => { try { return sessionStorage.getItem(KEY) === '1'; } catch { return false; } };
+  const markSeen = () => { try { sessionStorage.setItem(KEY, '1'); } catch {} };
+
+  // cubic-bezier 곡선 값을 직접 계산한다 (C안: 랜딩 아래 가장자리와 '대산'이 같은 곡선으로 움직여야 함)
+  function bezier(x1, y1, x2, y2) {
+    const f = (s, a, b) => 3 * (1 - s) * (1 - s) * s * a + 3 * (1 - s) * s * s * b + s * s * s;
+    return t => {
+      let s = t;
+      for (let i = 0; i < 10; i++) {
+        const dx = 3 * (1 - s) * (1 - s) * x1 + 6 * (1 - s) * s * (x2 - x1) + 3 * s * s * (1 - x2);
+        if (Math.abs(dx) < 1e-6) break;
+        s = Math.min(1, Math.max(0, s - (f(s, x1, x2) - t) / dx));
+      }
+      return f(s, y1, y2);
+    };
+  }
+
+  // 메인 첫 화면 동작 (B2B_SITE_PLAN 5.1): 사진 살짝 확대 → 작은 문구·제목·버튼 순서로 떠오름
+  // start: 0초 기준 시작 시각(ms). 인트로가 걷히기 시작할 때 맞춰 미리 예약한다
+  function playHero(start = 0) {
+    heroAnims.forEach(a => a.cancel());
+    if (reduced) {
+      heroAnims = [heroPhoto.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, fill: 'both' })];
+      return;
+    }
+    // M·N·O는 배경의 최종 모양(흐림·액자 크기)을 CSS·인라인 값으로 정해 두므로 확대 대신 나타나기만 한다
+    const fixedBg = heroPhoto.closest('.hero').matches('.mode-sash, .mode-frame') || heroPhoto.style.filter;
+    heroAnims = [fixedBg
+      ? heroPhoto.animate([{ opacity: 0 }, { opacity: 1 }], { delay: start, duration: 500, fill: 'both' })
+      : heroPhoto.animate([{ transform: 'scale(1.06)' }, { transform: 'scale(1)' }],
+          { delay: start, duration: 1600, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'both' })];
+    rises.forEach((el, i) => heroAnims.push(el.animate(
+      [{ opacity: 0, transform: 'translateY(18px)' }, { opacity: 1, transform: 'none' }],
+      { delay: start + 120 + i * 110, duration: 600, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'both' })));
+  }
+
+  // 인트로가 끝난 뒤에도 이어서 움직이는 랜딩 동작은 heroAnims에 넣는다 (finish에서 끊기지 않게)
+  const H = (el, kf, opt) => { const a = el.animate(kf, { fill: 'both', ...opt }); heroAnims.push(a); return a; };
+
+  function finish(replayHero) {
+    if (done) return;
+    done = true;
+    clearTimeout(failsafe);
+    anims.forEach(a => a.cancel());
+    anims = [];
+    intro.hidden = true;
+    site.classList.remove('over');
+    cards.replaceChildren();
+    markSeen();
+    if (replayHero) playHero();
+  }
+
+  function skip() {
+    if (done) return;
+    anims.forEach(a => a.pause());
+    heroAnims.forEach(a => a.cancel());
+    heroAnims = [];
+    const fade = intro.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, fill: 'forwards' });
+    fade.onfinish = () => { fade.cancel(); finish(true); };
+  }
+
+  // ---------- 1단계: 반장이 검은 화면을 밀어 '대산'을 드러냄 (4안 공통) ----------
+  function playPush(A) {
+    A(black, PUSH.map(([t, x]) => ({
+      transform: `translateX(${x}vw)`, offset: t / PUSH[PUSH.length - 1][0],
+      easing: 'cubic-bezier(.3,.6,.4,1)'
+    })), { duration: PUSH_END });
+
+    // 걷기: 다리 두 동작을 0.13초마다 바꾸고, 몸은 걸음에 맞춰 살짝 들썩인다
+    const STEP = 260, steps = Math.ceil(PUSH_END / STEP);
+    const blink = [{ opacity: 1 }, { opacity: 1, offset: .5 }, { opacity: 0, offset: .5 }, { opacity: 0 }];
+    A(legA, blink, { duration: STEP, iterations: steps, fill: 'none' });
+    A(legB, blink.map(k => ({ ...k, opacity: 1 - k.opacity })), { duration: STEP, iterations: steps, fill: 'none' });
+    A(body, [{ transform: 'translateY(0)' }, { transform: 'translateY(3px)', offset: .5 }, { transform: 'translateY(0)' }],
+      { duration: STEP / 2, iterations: steps * 2, easing: 'ease-in-out', fill: 'none' });
+    // 버티는 구간(1.2~2.2초)에는 몸을 더 숙여 힘주는 모습
+    A(pusher, [
+      { transform: 'rotate(0deg)', offset: 0 }, { transform: 'rotate(0deg)', offset: 1.2 / 3.05 },
+      { transform: 'rotate(5deg)', offset: 1.5 / 3.05 }, { transform: 'rotate(5deg)', offset: 2.2 / 3.05 },
+      { transform: 'rotate(0deg)', offset: 2.4 / 3.05 }, { transform: 'rotate(0deg)', offset: 1 }
+    ], { duration: PUSH_END, easing: 'ease-in-out' });
+  }
+
+  // ---------- 2단계: '대산' → 랜딩 전환 4안. 각 함수는 인트로를 끝낼 애니메이션을 돌려준다 ----------
+  const TRANSITIONS = {
+    // A. 랜딩이 통째로 위에서 내려오고, 안의 요소가 조금씩 늦게 따라와 자리를 잡는다
+    A(A) {
+      const DUR = 1000;
+      site.classList.add('over');
+      const end = A(site, [{ transform: 'translateY(-100vh)' }, { transform: 'translateY(0)' }],
+        { delay: T0, duration: DUR, easing: 'cubic-bezier(.7,0,.2,1)', fill: 'backwards' });
+      H(header, [{ transform: 'translateY(-48px)' }, { transform: 'none' }],
+        { delay: T0, duration: DUR + 250, easing: 'cubic-bezier(.3,.7,.2,1)' });
+      H(heroPhoto, [{ transform: 'translateY(-16vh) scale(1.1)' }, { transform: 'none' }],
+        { delay: T0, duration: DUR + 700, easing: 'cubic-bezier(.3,.7,.2,1)' });
+      rises.forEach((el, i) => H(el, [{ opacity: 0, transform: `translateY(${-(50 + i * 36)}px)` }, { opacity: 1, transform: 'none' }],
+        { delay: T0 + 150 + i * 70, duration: DUR + 250 + i * 110, easing: 'cubic-bezier(.3,.7,.2,1)' }));
+      return end;
+    },
+
+    // B. 가운데 '대산'이 작아지며 헤더 로고 자리로 날아가 붙는다. 그동안 흰 바탕이 걷히며 랜딩이 떠오른다
+    B(A) {
+      const DUR = 950;
+      const from = nameText.getBoundingClientRect(), to = logoMark.getBoundingClientRect();
+      const scale = to.height / from.height;
+      const dx = (to.left + to.width / 2) - (from.left + from.width / 2);
+      const dy = (to.top + to.height / 2) - (from.top + from.height / 2);
+      const end = A(nameText, [
+        { transform: 'none', color: getComputedStyle(nameText).color },
+        { transform: `translate(${dx}px, ${dy}px) scale(${scale})`, color: '#222828' }
+      ], { delay: T0, duration: DUR, easing: 'cubic-bezier(.65,0,.25,1)' });
+      A(intro, [{ backgroundColor: '#fff' }, { backgroundColor: 'rgba(255,255,255,0)' }],
+        { delay: T0 + 150, duration: 650, easing: 'ease-in-out' });
+      playHero(T0 + 250);   // playHero가 heroAnims를 비우므로 로고 동작은 그 뒤에 추가
+      H(logoMark, [{ opacity: 0 }, { opacity: 0, offset: .99 }, { opacity: 1 }], { duration: T0 + DUR });
+      return end;
+    },
+
+    // C. 내려오는 랜딩의 아래 가장자리가 '대산'에 닿으면 그대로 아래로 밀어낸다 (덮지 않고 밀어냄)
+    C(A) {
+      const DUR = 1150, N = 30, ease = bezier(.65, 0, .25, 1);
+      const vh = innerHeight, top = nameText.getBoundingClientRect().top;
+      const siteKf = [], nameKf = [];
+      for (let i = 0; i <= N; i++) {
+        const e = ease(i / N), edge = vh * e;
+        siteKf.push({ transform: `translateY(${edge - vh}px)` });
+        nameKf.push({ transform: `translateY(${Math.max(0, edge - top)}px)` });
+      }
+      site.classList.add('over');
+      const end = A(site, siteKf, { delay: T0, duration: DUR, fill: 'backwards' });
+      A(nameText, nameKf, { delay: T0, duration: DUR });
+      playHero(T0 + 450);
+      return end;
+    },
+
+    // D. 사진 카드가 위에서 떨어져 비스듬히 쌓이고, 맨 위 카드가 화면 가득 커지며 메인 대표 사진이 된다
+    D(A) {
+      const DROP = 700, GAP = 110, GROW_AT = T0 + 3 * GAP + DROP - 80, GROW = 750;
+      const POSE = [[-9, -46, -6], [8, -40, 5], [-4, -55, -3], [2, -50, 1.5]];  // [x%, y%, 회전°]
+      const els = CARD_BGS.map((bg, i) => {
+        const c = document.createElement('div');
+        c.className = 'card';
+        c.style.background = bg;
+        c.textContent = i < 3 ? `시공 사진 ${i + 1} 자리` : '';
+        cards.append(c);
+        const [x, y, r] = POSE[i];
+        A(c, [
+          { transform: `translate(-50%, -160vh) rotate(${r * 2.5}deg)` },
+          { transform: `translate(${x - 50}%, ${y}%) rotate(${r}deg)` }
+        ], { delay: T0 + i * GAP, duration: DROP, easing: 'cubic-bezier(.2,.8,.25,1)' });
+        return c;
+      });
+      const last = els[3], [x, y, r] = POSE[3];
+      const end = A(last, [
+        { transform: `translate(${x - 50}%, ${y}%) rotate(${r}deg)`, width: getComputedStyle(last).width, height: getComputedStyle(last).height, borderRadius: '6px' },
+        { transform: 'translate(-50%, -50%) rotate(0deg)', width: '100vw', height: '100vh', borderRadius: '0px' }
+      ], { delay: GROW_AT, duration: GROW, easing: 'cubic-bezier(.65,0,.25,1)', fill: 'forwards' });
+      H(header, [{ transform: 'translateY(-100%)' }, { transform: 'none' }],
+        { delay: GROW_AT + GROW - 100, duration: 500, easing: 'cubic-bezier(.2,.7,.2,1)' });
+      rises.forEach((el, i) => H(el, [{ opacity: 0, transform: 'translateY(18px)' }, { opacity: 1, transform: 'none' }],
+        { delay: GROW_AT + GROW - 150 + i * 110, duration: 600, easing: 'cubic-bezier(.2,.7,.2,1)' }));
+      return end;
+    },
+    // E. 글자 없이, 검은 판이 빠지는 순간부터 창호 4개가 날아와 쌓이고
+    //    마지막 창이 화면 가득 커진 뒤 두 창짝이 좌우로 열리며 그 너머로 랜딩이 보인다
+    E(A) {
+      const DROP_AT = 2800, GAP = 150, DROP = 620;
+      const GROW_AT = DROP_AT + 3 * GAP + DROP + 50, GROW = 650;
+      const OPEN_AT = GROW_AT + GROW + 50, OPEN = 850;
+      const W = Math.min(innerWidth * 0.3, 380);
+      A(nameText, [{ opacity: 0 }, { opacity: 0 }], { duration: OPEN_AT + OPEN });   // E안은 '대산' 글자를 쓰지 않는다
+
+      const LINE = 'fill="#fff" stroke="#111" stroke-width="5" stroke-linejoin="round"';
+      const GLASS = 'fill="#EAF2F4" stroke="#111" stroke-width="4"';
+      const SHINE = (x1, y1, x2, y2) => `<path d="M${x1} ${y1} L${x2} ${y2}" stroke="#fff" stroke-width="10" stroke-linecap="round"/>`;
+      const glassRect = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" ${GLASS}/>` +
+        SHINE(x + w * .25, y + h * .9, x + w * .7, y + h * .15);
+      const WINDOWS = [
+        { // 시스템창 (여닫이 한 짝 + 손잡이)
+          w: W * .78, vb: [300, 400],
+          svg: `<rect x="4" y="4" width="292" height="392" rx="6" ${LINE} stroke-width="6"/>
+                <rect x="28" y="28" width="244" height="344" rx="3" ${LINE}/>
+                ${glassRect(50, 50, 200, 300)}
+                <path d="M262 176 V222" stroke="#111" stroke-width="9" stroke-linecap="round"/>`
+        },
+        { // 이중창 (두 짝 미닫이, 가운데 겹침)
+          w: W, vb: [400, 300],
+          svg: `<rect x="4" y="4" width="392" height="292" rx="6" ${LINE} stroke-width="6"/>
+                <rect x="22" y="22" width="184" height="256" rx="3" ${LINE}/>
+                <rect x="194" y="22" width="184" height="256" rx="3" ${LINE}/>
+                ${glassRect(40, 40, 148, 220)}${glassRect(212, 40, 148, 220)}
+                <circle cx="200" cy="150" r="7" fill="#111"/>`
+        },
+        { // 발코니창 (네 짝 미닫이)
+          w: W * 1.25, vb: [560, 300],
+          svg: `<rect x="4" y="4" width="552" height="292" rx="6" ${LINE} stroke-width="6"/>
+                ${[0, 1, 2, 3].map(i => `<rect x="${22 + i * 130}" y="22" width="132" height="256" rx="3" ${LINE}/>` +
+                  glassRect(38 + i * 130, 38, 100, 224)).join('')}`
+        }
+      ];
+      const POSE = [[-14, -58, -7], [10, -44, 6], [-4, -52, -3], [3, -50, 1.5]];  // [x%, y%, 회전°]
+      const drop = (el, i) => {
+        const [x, y, r] = POSE[i];
+        A(el, [
+          { transform: `translate(-50%, -170vh) rotate(${r * 3}deg)` },
+          { transform: `translate(${x - 50}%, ${y}%) rotate(${r}deg)` }
+        ], { delay: DROP_AT + i * GAP, duration: DROP, easing: 'cubic-bezier(.2,.9,.35,1.12)' });  // 끝에서 살짝 튕기며 '착'
+      };
+      const stack = WINDOWS.map((def, i) => {
+        const el = document.createElement('div');
+        el.className = 'win';
+        el.style.width = def.w + 'px';
+        el.style.aspectRatio = `${def.vb[0]} / ${def.vb[1]}`;
+        el.innerHTML = `<svg viewBox="0 0 ${def.vb[0]} ${def.vb[1]}">${def.svg}</svg>`;
+        cards.append(el);
+        drop(el, i);
+        return el;
+      });
+
+      // 마지막 창 (두 짝 미닫이): 날아와 → 똑바로 서며 화면 가득 → 두 창짝이 좌우로 열림
+      const last = document.createElement('div');
+      last.className = 'win-last';
+      last.style.width = W + 'px';
+      last.style.height = W * .75 + 'px';
+      last.innerHTML = '<div class="win-sash l"><div class="win-glass"></div><div class="win-lock"></div></div>' +
+                       '<div class="win-sash r"><div class="win-glass"></div></div>';
+      cards.append(last);
+      drop(last, 3);
+      const [x, y, r] = POSE[3];
+      A(last, [
+        { transform: `translate(${x - 50}%, ${y}%) rotate(${r}deg)`, width: W + 'px', height: W * .75 + 'px', borderRadius: '6px' },
+        { transform: 'translate(-50%, -50%) rotate(0deg)', width: '100vw', height: '100vh', borderRadius: '0px' }
+      ], { delay: GROW_AT, duration: GROW, easing: 'cubic-bezier(.65,0,.25,1)', fill: 'forwards' });
+
+      // 열리는 순간: 흰 바탕·뒤 창호들·창 바탕을 비워 창짝 사이로 랜딩이 보이게 한다
+      const clear = (el, prop, from) => A(el, [{ [prop]: from }, { [prop]: from, offset: .999 }, { [prop]: prop === 'opacity' ? 0 : 'rgba(255,255,255,0)' }],
+        { duration: OPEN_AT });
+      clear(intro, 'backgroundColor', '#fff');
+      clear(last, 'backgroundColor', '#fff');
+      stack.forEach(el => clear(el, 'opacity', 1));
+      const [sl, sr] = last.querySelectorAll('.win-sash');
+      const end = A(sl, [{ transform: 'translateX(0)' }, { transform: 'translateX(-105%)' }],
+        { delay: OPEN_AT, duration: OPEN, easing: 'cubic-bezier(.65,0,.25,1)' });
+      A(sr, [{ transform: 'translateX(0)' }, { transform: 'translateX(105%)' }],
+        { delay: OPEN_AT, duration: OPEN, easing: 'cubic-bezier(.65,0,.25,1)' });
+      A(last, [{ borderColor: '#111' }, { borderColor: 'rgba(17,17,17,0)' }],   // 남은 창틀은 열리면서 사라진다
+        { delay: OPEN_AT + 250, duration: 500, easing: 'ease-out', fill: 'forwards' });
+
+      playHero(OPEN_AT + 150);   // playHero가 heroAnims를 비우므로 헤더 동작은 그 뒤에 추가
+      H(header, [{ transform: 'translateY(-100%)' }, { transform: 'none' }],
+        { delay: OPEN_AT + 100, duration: 600, easing: 'cubic-bezier(.2,.7,.2,1)' });
+      return end;
+    },
+    // F. 글자 없이: 흰 화면에 창이 선으로 그려지고 치수가 재어진 뒤(실측) → 견적서 한 줄로 들어가며
+    //    줄이 착착 쌓이고(견적 정리) → 견적서가 화면 가득 펼쳐져 머리줄이 그대로 사이트 헤더가 된다
+    //    금액은 실제 가격 확인 전이므로 '상담 후 확정'으로 비워 둔다
+    F(A) {
+      const DRAW_AT = 2900, DIM_AT = 3250, SHEET_AT = 3600, ROW_GAP = 110;
+      const EXPAND_AT = 4150, EXPAND = 600, OPEN_AT = EXPAND_AT + EXPAND, OPEN = 320;
+      const ease = 'cubic-bezier(.65,0,.25,1)', out = 'cubic-bezier(.2,.7,.2,1)';
+      A(nameText, [{ opacity: 0 }, { opacity: 0 }], { duration: OPEN_AT + OPEN });   // F안은 '대산' 글자를 쓰지 않는다
+
+      // ② 실측 도면: 창(두 짝 미닫이) 1,800 × 1,200 mm
+      const m = document.createElement('div');
+      m.className = 'measure';
+      m.innerHTML = `<svg viewBox="0 0 380 270" fill="none" stroke="#111" stroke-linecap="round" stroke-linejoin="round">
+          <rect class="d" pathLength="1" x="20" y="20" width="300" height="200" rx="4" stroke-width="5"/>
+          <rect class="d" pathLength="1" x="34" y="34" width="142" height="172" rx="2" stroke-width="3.5"/>
+          <rect class="d" pathLength="1" x="164" y="34" width="142" height="172" rx="2" stroke-width="3.5"/>
+          <path class="g" d="M50 190 L110 50 M190 190 L250 50" stroke="#cfdfe4" stroke-width="10"/>
+          <path class="dim" pathLength="1" d="M20 246 H320 M20 238 V254 M320 238 V254" stroke="#E0625A" stroke-width="2.5"/>
+          <path class="dim" pathLength="1" d="M346 20 V220 M338 20 H354 M338 220 H354" stroke="#E0625A" stroke-width="2.5"/>
+          <text class="t" x="170" y="266" text-anchor="middle" fill="#E0625A" stroke="none" font-size="15" font-weight="700">1,800 mm</text>
+          <text class="t" x="366" y="124" text-anchor="middle" fill="#E0625A" stroke="none" font-size="15" font-weight="700" transform="rotate(90 366 124)">1,200 mm</text>
+        </svg>`;
+      cards.append(m);
+
+      // ③ 견적서 (예시 값). 첫 줄 아이콘 자리로 도면이 줄어들어 들어간다
+      const ICON = '<svg viewBox="0 0 34 24" fill="#fff" stroke="#111" stroke-width="2"><rect x="1" y="1" width="32" height="22" rx="2"/><path d="M17 3 V21" /></svg>';
+      const ROWS = [
+        ['LX 시스템창', '1,800 × 1,200', '2'],
+        ['LX 이중창', '2,400 × 1,500', '1'],
+        ['LX 발코니창', '3,600 × 2,300', '1']
+      ];
+      const est = document.createElement('div');
+      est.className = 'est';
+      est.innerHTML = `<div class="est-head"><div class="logo">대산<small>LX 창호</small></div><span class="est-tag">창호 견적서 · 예시</span></div>
+        <div class="est-body">
+          <div class="est-title"><span>품목 · 규격(mm) · 수량</span><span>금액</span></div>
+          ${ROWS.map(([n, sp, q]) => `<div class="est-row"><span class="ic">${ICON}</span><span>${n}</span><span class="spec">${sp}</span><span class="qty">${q}</span><span class="amt">상담 후 확정</span></div>`).join('')}
+          <div class="est-sum"><span>합계</span><span class="amt">실측 후 안내</span></div>
+        </div>`;
+      cards.append(est);
+      const estW = est.offsetWidth, estH = est.offsetHeight;
+      est.style.height = estH + 'px';
+      const head = est.querySelector('.est-head'), bodyEl = est.querySelector('.est-body');
+      const rows = [...est.querySelectorAll('.est-row')], sum = est.querySelector('.est-sum');
+
+      // 도면 → 첫 줄 아이콘: 위치·크기 차이를 재서 그만큼 옮기고 줄인다
+      const from = m.getBoundingClientRect(), to = rows[0].querySelector('.ic').getBoundingClientRect();
+      const k = to.width / from.width;
+      const dx = (to.left + to.width / 2) - (from.left + from.width / 2);
+      const dy = (to.top + to.height / 2) - (from.top + from.height / 2);
+
+      // ② 그리기: 창틀 → 창짝 → 치수선 → 치수 글자
+      m.querySelectorAll('.d').forEach((el, i) => A(el, [{ strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDasharray: 1, strokeDashoffset: 0 }],
+        { delay: DRAW_AT + i * 90, duration: 380, easing: out }));
+      A(m.querySelector('.g'), [{ opacity: 0 }, { opacity: 1 }], { delay: DRAW_AT + 300, duration: 200 });
+      m.querySelectorAll('.dim').forEach((el, i) => A(el, [{ strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDasharray: 1, strokeDashoffset: 0 }],
+        { delay: DIM_AT + i * 80, duration: 260, easing: out }));
+      m.querySelectorAll('.t').forEach((el, i) => A(el, [{ opacity: 0 }, { opacity: 1 }], { delay: DIM_AT + 160 + i * 80, duration: 160 }));
+      A(m, [
+        { transform: 'translate(-50%, -50%)', opacity: 1 },
+        { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${k})`, opacity: 1, offset: .85 },
+        { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${k})`, opacity: 0 }
+      ], { delay: SHEET_AT, duration: 380, easing: ease });
+
+      // ③ 견적서 등장 → 줄이 하나씩 착착
+      A(est, [{ opacity: 0, transform: 'translate(-50%, -48%) scale(.97)' }, { opacity: 1, transform: 'translate(-50%, -50%)' }],
+        { delay: SHEET_AT - 60, duration: 260, easing: out });
+      rows.forEach((r, i) => A(r, [{ opacity: 0, transform: 'translateX(16px)' }, { opacity: 1, transform: 'none' }],
+        { delay: SHEET_AT + 200 + i * ROW_GAP, duration: 220, easing: out }));
+      A(sum, [{ opacity: 0 }, { opacity: 1 }], { delay: SHEET_AT + 200 + 3 * ROW_GAP, duration: 200 });
+
+      // ④ 펼쳐짐: 견적서가 화면 가득 → 머리줄은 사이트 헤더 자리·여백에 맞춰지고, 본문은 비워진다
+      const hs = getComputedStyle(header);
+      A(est, [
+        { width: estW + 'px', height: estH + 'px', borderRadius: '10px' },
+        { width: '100vw', height: '100vh', borderRadius: '0px' }
+      ], { delay: EXPAND_AT, duration: EXPAND, easing: ease, fill: 'forwards' });
+      A(head, [{ paddingLeft: '24px', paddingRight: '24px', height: getComputedStyle(head).height },
+               { paddingLeft: hs.paddingLeft, paddingRight: hs.paddingRight, height: hs.height }],
+        { delay: EXPAND_AT, duration: EXPAND, easing: ease, fill: 'forwards' });
+      A(bodyEl, [{ opacity: 1 }, { opacity: 0 }], { delay: EXPAND_AT, duration: 240, fill: 'forwards' });
+      A(est.querySelector('.est-tag'), [{ opacity: 1 }, { opacity: 0 }], { delay: EXPAND_AT + EXPAND - 200, duration: 200, fill: 'forwards' });
+
+      // 펼쳐진 순간 견적서 바탕을 비워 아래 첫 페이지가 드러나고, 머리줄이 실제 헤더와 겹쳐지며 사라진다
+      const clear = (el, prop, from) => A(el, [{ [prop]: from }, { [prop]: from, offset: .999 }, { [prop]: 'rgba(255,255,255,0)' }], { duration: OPEN_AT });
+      clear(intro, 'backgroundColor', '#fff');
+      clear(est, 'backgroundColor', '#fff');
+      A(est, [{ borderColor: 'rgba(34,40,40,.12)' }, { borderColor: 'rgba(34,40,40,0)' }], { delay: EXPAND_AT, duration: EXPAND, fill: 'forwards' });
+      const end = A(head, [{ opacity: 1 }, { opacity: 0 }], { delay: OPEN_AT, duration: OPEN, easing: 'ease-out', fill: 'forwards' });
+      playHero(OPEN_AT - 100);
+      return end;
+    },
+    // G. E 수정안: 창호가 허공에 쌓이지 않고, 선으로 그려진 집의 빈 창 자리에 하나씩 끼워져 설치된다.
+    //    마지막에 1층 큰 창으로 화면이 다가가 창이 화면을 가득 채우면 두 창짝이 열리며 그 너머로 랜딩이 보인다
+    // opt.start: 집 장면 시작 시각(ms), opt.drawn: 집이 처음부터 그려져 있음(H안)
+    G(A, opt = {}) {
+      const DRAW_AT = opt.start ?? 2800, drawn = !!opt.drawn;
+      const INSTALL_AT = DRAW_AT + (drawn ? 450 : 550), GAP = 170, INSTALL = 420;
+      const ZOOM_AT = INSTALL_AT + 3 * GAP + INSTALL + 120, ZOOM = 750;
+      const OPEN_AT = ZOOM_AT + ZOOM + 60, OPEN = 800;
+      const ease = 'cubic-bezier(.65,0,.25,1)', out = 'cubic-bezier(.2,.7,.2,1)';
+      A(nameText, [{ opacity: 0 }, { opacity: 0 }], { duration: OPEN_AT + OPEN + 400 });   // G안은 '대산' 글자를 쓰지 않는다
+
+      // 창 자리 [x, y, w, h]. o3(1층 큰 창)이 마지막에 화면을 채운다 — 화면 비율과 비슷하게 16:10
+      const O = { o1: [150, 200, 110, 72], o2: [340, 200, 110, 72], o4: [272, 104, 56, 42], o3: [150, 300, 176, 110] };
+      const ring = ([x, y, w, h], t) => `M${x} ${y}h${w}v${h}h${-w}Z M${x + t} ${y + t}v${h - 2 * t}h${w - 2 * t}v${-(h - 2 * t)}Z`;
+      const glass = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#EAF2F4" stroke="#111" stroke-width="2.5"/>` +
+        `<path d="M${x + w * .2} ${y + h * .85} L${x + w * .55} ${y + h * .12}" stroke="#fff" stroke-width="${Math.max(4, w * .06)}" stroke-linecap="round"/>`;
+      // 일반 창: 창틀 + 유리 한 장(o4) 또는 두 짝(o1, o2)
+      const simpleWin = (id, [x, y, w, h], two) => `<g class="w" id="${id}">
+          <path d="${ring([x, y, w, h], 7)}" fill="#fff" fill-rule="evenodd" stroke="#111" stroke-width="3.5"/>
+          ${two ? glass(x + 9, y + 9, w / 2 - 10, h - 18) + glass(x + w / 2 + 1, y + 9, w / 2 - 10, h - 18)
+                : glass(x + 9, y + 9, w - 18, h - 18)}
+        </g>`;
+      const [bx, by, bw, bh] = O.o3, half = (bw - 14) / 2;
+      const sash = (cls, sx) => `<g class="sash ${cls}">
+          <path d="${ring([sx, by + 7, half + 3, bh - 14], 6)}" fill="#fff" fill-rule="evenodd" stroke="#111" stroke-width="3"/>
+          ${glass(sx + 7, by + 14, half + 3 - 14, bh - 28)}
+        </g>`;
+
+      const house = document.createElement('div');
+      house.className = 'house';
+      house.innerHTML = `<svg viewBox="0 0 600 440" fill="none" stroke="#111" stroke-linejoin="round" stroke-linecap="round">
+          <path class="d" pathLength="1" d="M20 420 H580" stroke-width="4"/>
+          <!-- 벽: 1층 큰 창 자리는 구멍으로 비워 둔다 (열릴 때 그 너머로 랜딩이 보이도록) -->
+          <path class="d wall" pathLength="1" d="M110 175 H490 V420 H110 Z M${bx} ${by}v${bh}h${bw}v${-bh}Z" fill="#fff" fill-rule="evenodd" stroke-width="5"/>
+          <path class="d" pathLength="1" d="M88 182 L300 52 L512 182 Z" fill="#fff" stroke-width="5"/>
+          <path class="d" pathLength="1" d="M410 96 V60 H446 V118" fill="#fff" stroke-width="5"/>
+          <path class="d" pathLength="1" d="M372 310 H436 V420 H372 Z M424 366 h1" fill="#fff" stroke-width="4.5"/>
+          ${Object.entries(O).map(([k, r]) => `<rect class="o" data-o="${k}" x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" stroke="#9aa3a1" stroke-width="2.5" stroke-dasharray="7 6"/>`).join('')}
+          ${simpleWin('w1', O.o1, true)}${simpleWin('w2', O.o2, true)}${simpleWin('w4', O.o4, false)}
+          <g class="w" id="w3">
+            <path d="${ring(O.o3, 7)}" fill="#fff" fill-rule="evenodd" stroke="#111" stroke-width="3.5"/>
+            ${sash('r', bx + 7 + half - 3)}${sash('l', bx + 7)}
+          </g>
+        </svg>`;
+      cards.append(house);
+      house.style.marginTop = -house.offsetHeight / 2 + 'px';
+
+      // ① 집 그리기
+      if (!drawn) {
+        house.querySelectorAll('.d').forEach((el, i) => A(el, [{ strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDasharray: 1, strokeDashoffset: 0 }],
+          { delay: DRAW_AT + i * 70, duration: 420, easing: out }));
+        house.querySelectorAll('.o').forEach(el => A(el, [{ opacity: 0 }, { opacity: 1 }], { delay: DRAW_AT + 380, duration: 200 }));
+      }
+
+      // ② 설치: 위층 → 다락 → 1층 큰 창 순서로, 앞에서 다가와 창 자리에 '착' 끼워진다
+      ['w1', 'w2', 'w4', 'w3'].forEach((id, i) => {
+        const at = INSTALL_AT + i * GAP;
+        A(house.querySelector('#' + id), [
+          { opacity: 0, transform: 'translateY(-26px) scale(1.35)' },
+          { opacity: 1, transform: 'translateY(2px) scale(.96)', offset: .72 },
+          { opacity: 1, transform: 'none' }
+        ], { delay: at, duration: INSTALL, easing: 'cubic-bezier(.3,.6,.3,1)' });
+        A(house.querySelector(`.o[data-o="o${id[1]}"]`), [{ opacity: 1 }, { opacity: 0 }], { delay: at + INSTALL * .7, duration: 120, fill: 'forwards' });
+      });
+
+      // ③ 1층 큰 창으로 다가가기: 창이 화면을 덮을 만큼 키우고 창 가운데를 화면 가운데로
+      const h = house.getBoundingClientRect(), svgScale = h.width / 600;
+      const wx = h.left + (bx + bw / 2) * svgScale, wy = h.top + (by + bh / 2) * svgScale;
+      const k = Math.max(innerWidth / (bw * svgScale), innerHeight / (bh * svgScale)) * 1.06;
+      house.style.transformOrigin = `${wx - h.left}px ${wy - h.top}px`;
+      A(house, [{ transform: 'none' }, { transform: `translate(${innerWidth / 2 - wx}px, ${innerHeight / 2 - wy}px) scale(${k})` }],
+        { delay: ZOOM_AT, duration: ZOOM, easing: ease, fill: 'forwards' });
+
+      // ④ 열림: 흰 바탕을 비우고 두 창짝을 양옆 벽 쪽으로 밀어 연다 → 남은 창틀·벽은 사라진다
+      A(intro, [{ backgroundColor: '#fff' }, { backgroundColor: '#fff', offset: .999 }, { backgroundColor: 'rgba(255,255,255,0)' }], { duration: OPEN_AT });
+      A(house.querySelector('.sash.l'), [{ transform: 'none' }, { transform: 'translateX(-108%)' }], { delay: OPEN_AT, duration: OPEN, easing: ease, fill: 'forwards' });
+      A(house.querySelector('.sash.r'), [{ transform: 'none' }, { transform: 'translateX(108%)' }], { delay: OPEN_AT, duration: OPEN, easing: ease, fill: 'forwards' });
+      const end = A(house, [{ opacity: 1 }, { opacity: 0 }], { delay: OPEN_AT + OPEN - 250, duration: 350, easing: 'ease-out', fill: 'forwards' });
+
+      playHero(OPEN_AT + 150);   // playHero가 heroAnims를 비우므로 헤더 동작은 그 뒤에 추가
+      H(header, [{ transform: 'translateY(-100%)' }, { transform: 'none' }],
+        { delay: OPEN_AT + 100, duration: 600, easing: 'cubic-bezier(.2,.7,.2,1)' });
+      return end;
+    },
+    // H. G 변형: 반장이 문을 미는 장면 없이, 첫 화면부터 그려진 집에서 시작해 바로 창호가 설치된다
+    H(A) {
+      A(black, [{ opacity: 0 }, { opacity: 0 }], { duration: 1 });
+      return TRANSITIONS.G(A, { start: 0, drawn: true });
+    },
+    // I. 아파트 한 세대를 천장을 걷어낸 3D 모형으로 보여주고, 창 자리마다 LX 시스템창호 형태의 창이
+    //    창틀 → 유리 → 창짝 → 손잡이 순서로 조립된다. 안방·작은방을 먼저, 거실 큰 창은 마지막에
+    //    카메라가 그 창 정면으로 다가가는 동안 조립되고, 다 조립되면 창짝이 열리며 그 너머 랜딩으로 들어간다
+    I(A) {
+      A(black, [{ opacity: 0 }, { opacity: 0 }], { duration: 1 });
+      A(nameText, [{ opacity: 0 }, { opacity: 0 }], { duration: 4000 });
+      const ease = 'cubic-bezier(.65,0,.25,1)', out = 'cubic-bezier(.2,.7,.2,1)';
+      const UW = 900, UD = 600, WH = 260, T = 22;            // 세대 가로·세로, 벽 높이·두께 (모형 단위 px)
+      const DARK = '#34383b', WHITE = '#f6f6f4';               // 거실 리프트&슬라이드(차콜) / 방 틸트&턴(화이트)
+
+      const scene = document.createElement('div'); scene.className = 'scene3d';
+      const world = document.createElement('div'); world.className = 'world';
+      scene.append(world); cards.append(scene);
+
+      const XY = (x, y, z) => `translate3d(${x}px,${y}px,${z}px)`;                         // 바닥과 나란한 면
+      const XZ = (x, y, z) => `translate3d(${x}px,${y}px,${z}px) rotateX(90deg)`;          // x 방향으로 선 벽
+      const YZ = (x, y, z) => `translate3d(${x}px,${y}px,${z}px) rotateZ(90deg) rotateX(90deg)`;  // y 방향으로 선 벽
+      const fadeLater = [];   // 카메라가 창 앞으로 다가갈 때 지울 면 (카메라 뒤로 넘어가는 바닥·벽)
+      const plane = (tf, w, h, bg, parent = world, keep = false) => {
+        const d = document.createElement('div');
+        d.className = 'pl';
+        d.style.cssText = `width:${w}px;height:${h}px;transform:${tf};background:${bg}`;
+        parent.append(d);
+        if (!keep) fadeLater.push(d);
+        return d;
+      };
+
+      // 벽: 창·문 자리를 비워 두고 조각으로 짓는다. axis 'x' = y=at 위치에서 x 방향, 'y' = x=at 위치에서 y 방향
+      // out: 벽 두께가 나가는 쪽(-1/+1), keep: 거실 뒷벽처럼 마지막까지 남기는 벽
+      function wall({ axis, at, from, len, h = WH, t = T, out = -1, openings: abs = [], inner = '#f5f3ee', outer = '#e2ded6', keep = false }) {
+        const openings = abs.map(o => ({ ...o, a: o.a - from, b: o.b - from }));   // 창 자리는 세대 기준 좌표로 받아 벽 기준으로 바꾼다
+        const rects = [];
+        let cur = 0;
+        [...openings].sort((a, b) => a.a - b.a).forEach(o => {
+          rects.push([cur, o.a, 0, h]);
+          if (o.zs > 0) rects.push([o.a, o.b, 0, o.zs]);
+          if (o.zh < h) rects.push([o.a, o.b, o.zh, h]);
+          cur = o.b;
+        });
+        rects.push([cur, len, 0, h]);
+        const face = axis === 'x' ? XZ : YZ;
+        const pos = (u, w, z) => axis === 'x' ? [from + u, at + w, z] : [at + w, from + u, z];
+        rects.forEach(([u0, u1, v0, v1]) => {
+          if (u1 - u0 <= 0 || v1 - v0 <= 0) return;
+          plane(face(...pos(u0, 0, v0)), u1 - u0, v1 - v0, inner, world, keep);
+          plane(face(...pos(u0, out * t, v0)), u1 - u0, v1 - v0, outer, world, keep);
+        });
+        const lo = Math.min(0, out * t);
+        const cap = axis === 'x' ? [len, t] : [t, len];
+        plane(XY(...pos(0, lo, h)), ...cap, '#2e3032', world, keep);          // 벽 윗면: 짙게 칠해 단면처럼
+        openings.forEach(o => {                                               // 창 자리 안쪽 면(두께)
+          const side = axis === 'x' ? YZ : XZ, flat = axis === 'x' ? [o.b - o.a, t] : [t, o.b - o.a];
+          plane(side(...pos(o.a, lo, o.zs)), t, o.zh - o.zs, '#d9d5cc', world, keep);
+          plane(side(...pos(o.b, lo, o.zs)), t, o.zh - o.zs, '#d9d5cc', world, keep);
+          if (o.zs > 0) plane(XY(...pos(o.a, lo, o.zs)), ...flat, '#ebe7df', world, keep);
+          if (o.zh < h) plane(XY(...pos(o.a, lo, o.zh)), ...flat, '#d2cdc3', world, keep);
+        });
+      }
+
+      // 바닥(마루) + 방 이름
+      const floor = plane(XY(0, 0, 0), UW, UD, 'repeating-linear-gradient(90deg, #e9dcc6 0 58px, #dccdb3 58px 60px)');
+      floor.style.boxShadow = '0 40px 80px rgba(0,0,0,.18)';
+      [['안방', 0, 0, 300, 300], ['작은방', 0, 300, 300, 300], ['거실', 300, 0, 600, 600]].forEach(([n, x, y, w, h]) => {
+        const l = plane(XY(x, y, 1), w, h, 'transparent'); l.classList.add('room-label'); l.textContent = n;
+      });
+
+      // 창 자리
+      const WIN = {
+        master: { axis: 'x', a: 70, b: 240, zs: 80, zh: 215 },     // 안방 (뒷벽)
+        small: { axis: 'y', a: 370, b: 530, zs: 80, zh: 215 },     // 작은방 (왼쪽 벽)
+        living: { axis: 'x', a: 360, b: 850, zs: 8, zh: 238 }      // 거실 (뒷벽, 바닥까지 내려오는 큰 창)
+      };
+      wall({ axis: 'x', at: 0, from: 0, len: 300, openings: [WIN.master] });
+      wall({ axis: 'x', at: 0, from: 300, len: 600, openings: [WIN.living], keep: true });
+      wall({ axis: 'y', at: 0, from: 0, len: UD, openings: [WIN.small] });
+      plane(XY(-T, -T, WH), T, T, '#2e3032');                                  // 모서리 기둥 윗면
+      wall({ axis: 'y', at: 300, from: 0, len: UD, t: 12, out: 1, inner: '#f1efe9', outer: '#f1efe9',   // 안쪽 칸막이(문 두 곳)
+             openings: [{ a: 190, b: 270, zs: 0, zh: 205 }, { a: 430, b: 510, zs: 0, zh: 205 }] });
+      wall({ axis: 'x', at: 300, from: 0, len: 300, t: 12, out: 1, inner: '#f1efe9', outer: '#f1efe9' });
+      wall({ axis: 'x', at: UD, from: 0, len: UW, h: 26, out: 1 });             // 앞·오른쪽은 낮게 잘라 안이 보이게
+      wall({ axis: 'y', at: UW, from: 0, len: UD, h: 26, out: 1 });
+
+      // 창 하나 만들기: 창틀 / [창짝 + 유리] × n / 손잡이. 거실은 두 짝(리프트&슬라이드), 방은 한 짝(틸트&턴)
+      function makeWindow(o, color, leaves) {
+        const w = o.b - o.a, h = o.zh - o.zs;
+        const box = axis => axis === 'x' ? XZ(o.a, -T / 2, o.zs) : YZ(-T / 2, o.a, o.zs);
+        const c = plane(box(o.axis), w, h, 'transparent', world, true);
+        c.classList.add('p3');
+        const flip = document.createElement('div');                    // 벽 면은 아래위가 뒤집혀 있어 바로 세운다
+        flip.className = 'p3';
+        flip.style.cssText = `position:absolute;inset:0;transform:scaleY(-1)`;
+        c.append(flip);
+        const part = (css, parent = flip) => { const d = document.createElement('div'); d.className = 'wpart'; d.style.cssText = css; parent.append(d); return d; };
+        const f = color === DARK ? 9 : 11;
+        const frame = part(`inset:0;border:${f}px solid ${color};box-shadow:inset 0 0 0 1px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.2)`);
+        const lw = (w - 2 * f) / leaves;
+        const L = [...Array(leaves)].map((_, i) => {
+          const leaf = part(`left:${f + i * lw - (i ? 4 : 0)}px;top:${f}px;width:${lw + (leaves > 1 ? 4 : 0)}px;height:${h - 2 * f}px`);
+          leaf.classList.add('p3');
+          const glass = part(`inset:${f - 2}px`, leaf); glass.classList.add('wglass');
+          const sash = part(`inset:0;border:${f - 2}px solid ${color};box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)`, leaf);
+          const handle = part(`width:${Math.max(4, f * .55)}px;height:${h * .16}px;top:${h * .42}px;${i ? 'left' : 'right'}:${f * .25}px;` +
+            `background:${color === DARK ? '#8d9296' : '#c9cbcd'};border-radius:3px;transform-origin:50% 15%`, leaf);
+          return { leaf, glass, sash, handle };
+        });
+        return { c, frame, L, toRoom: o.axis === 'x' ? -1 : 1 };   // 방 쪽(카메라 쪽) 방향
+      }
+
+      // 조립: 창틀이 방 쪽에서 날아와 박힘 → 유리가 들어감 → 창짝이 옆에서 미끄러져 끼워짐 → 손잡이 '딸깍'
+      function assemble(win, at) {
+        const z = d => `translateZ(${win.toRoom * d}px)`;
+        A(win.frame, [{ opacity: 0, transform: z(220) }, { opacity: 1, transform: 'translateZ(0)' }], { delay: at, duration: 320, easing: out });
+        win.L.forEach((l, i) => {
+          A(l.glass, [{ opacity: 0, transform: z(140) }, { opacity: 1, transform: 'translateZ(0)' }], { delay: at + 170 + i * 70, duration: 280, easing: out });
+          A(l.sash, [{ opacity: 0, transform: `translateX(${(i ? 1 : -1) * 45}%)` }, { opacity: 1, transform: 'none' }],
+            { delay: at + 330 + i * 70, duration: 300, easing: 'cubic-bezier(.3,.7,.3,1.15)' });
+          A(l.handle, [{ opacity: 0, transform: 'rotate(90deg)' }, { opacity: 1, transform: 'rotate(90deg)', offset: .4 },
+                       { opacity: 1, transform: 'rotate(-8deg)', offset: .85 }, { opacity: 1, transform: 'rotate(0deg)' }],
+            { delay: at + 560 + i * 60, duration: 260, easing: 'ease-out' });
+        });
+        return at + 560 + win.L.length * 60 + 260;   // 조립이 끝나는 시각
+      }
+
+      const master = makeWindow(WIN.master, WHITE, 1);
+      const small = makeWindow(WIN.small, WHITE, 1);
+      const living = makeWindow(WIN.living, DARK, 2);
+
+      // 카메라: 비스듬히 내려다보는 모형 → 거실 큰 창 정면, 창이 화면을 덮을 만큼
+      const s0 = Math.min(innerWidth * .62 / UW, innerHeight * .78 / 720);
+      const lw = WIN.living.b - WIN.living.a, lh = WIN.living.zh - WIN.living.zs;
+      const k1 = Math.max(innerWidth / lw, innerHeight / lh) * 1.04;
+      const cx = (WIN.living.a + WIN.living.b) / 2, cz = (WIN.living.zs + WIN.living.zh) / 2;
+      const ISO = `scale(${s0}) rotateX(58deg) rotateZ(-32deg) translate3d(${-UW / 2}px, ${-UD / 2}px, ${-WH / 3}px)`;
+      const FRONT = `scale(${k1}) rotateX(90deg) rotateZ(0deg) translate3d(${-cx}px, ${T / 2}px, ${-cz}px)`;
+
+      const CAM_AT = 1150, CAM = 1350, LIVE_AT = 1350, OPEN = 750;
+      A(scene, [{ opacity: 0, transform: 'translateY(30px)' }, { opacity: 1, transform: 'none' }], { duration: 450, easing: out });
+      A(world, [{ transform: ISO }, { transform: FRONT }], { delay: CAM_AT, duration: CAM, easing: ease });
+      assemble(master, 350);
+      assemble(small, 620);
+      const livingDone = assemble(living, LIVE_AT);
+      [master, small].forEach(w => fadeLater.push(w.frame, ...w.L.flatMap(l => [l.glass, l.sash, l.handle])));   // 방 창도 카메라 뒤로 넘어가므로 함께 지움
+      fadeLater.forEach(el => A(el, [{ opacity: 1 }, { opacity: 0 }], { delay: CAM_AT + CAM * .45, duration: CAM * .4, fill: 'forwards' }));
+
+      // 거실 창이 다 조립되면(카메라도 도착) 두 창짝이 양옆으로 열리고 그 너머가 랜딩이 된다
+      const OPEN_AT = Math.max(livingDone, CAM_AT + CAM) + 80;
+      A(intro, [{ backgroundColor: '#fff' }, { backgroundColor: '#fff', offset: .999 }, { backgroundColor: 'rgba(255,255,255,0)' }], { duration: OPEN_AT });
+      living.L.forEach((l, i) => A(l.leaf, [{ transform: 'none' }, { transform: `translateX(${(i ? 1 : -1) * 102}%)` }],
+        { delay: OPEN_AT, duration: OPEN, easing: ease, fill: 'forwards' }));
+      const end = A(scene, [{ opacity: 1 }, { opacity: 0 }], { delay: OPEN_AT + OPEN - 280, duration: 380, easing: 'ease-out', fill: 'forwards' });
+
+      playHero(OPEN_AT + 120);   // playHero가 heroAnims를 비우므로 헤더 동작은 그 뒤에 추가
+      H(header, [{ transform: 'translateY(-100%)' }, { transform: 'none' }],
+        { delay: OPEN_AT + 100, duration: 600, easing: 'cubic-bezier(.2,.7,.2,1)' });
+      return end;
+    },
+    // J. I안 확정본을 Blender로 렌더한 영상(5초)으로 재생한다. 영상 마지막 장면(열린 창 너머 도심)을
+    //    메인 대표 사진 자리에 똑같이 깔아 두고, 영상이 끝나면 인트로만 걷어 내 끊김 없이 첫 페이지로 이어진다
+    J(A) { return videoIntro(A, 'intro_i'); },
+
+    // K. J의 수정판(사용자 참고 이미지 기준): 거실 창 3짝·샴페인 베이지, 창이 열리면 호수·산 자연 전망
+    K(A) { return videoIntro(A, 'intro_k'); },
+
+    // L. LX 창호 장점(확 트인 뷰·넓은 공간감·고급 디자인)을 살린 밝은 영상. 끝 장면 = 밝은 배경 + 차콜 글씨
+    L(A) { return videoIntro(A, 'intro_l', { ink: 'dark' }); },
+    M(A) { return videoIntro(A, 'intro_m', { ink: 'dark', mode: 'soft' }); },
+    N(A) { return videoIntro(A, 'intro_m', { ink: 'dark', mode: 'sash' }); },    // M 영상 + 창짝 패널
+    O(A) { return videoIntro(A, 'intro_m', { ink: 'dark', mode: 'frame' }); }    // M 영상 + 창틀 액자   // L과 같은 장면, 대비·채도 보정 + 약한 압축(선명도 개선)
+  };
+
+  // 영상 안의 첫 페이지 배경 = 영상 마지막 장면. 인트로를 건너뛴 재방문에서도 같은 배경을 쓴다
+  // soft: 첫 페이지에서는 배경을 흐리게 (인트로 영상은 선명하게 보여 준 뒤 흐려진다)
+  // mode: 'soft' 흐린 배경(M) · 'sash' 창짝 패널(N) · 'frame' 창틀 액자(O)
+  function setVideoHero(name, ink, mode = '') {
+    const veil = ink === 'dark'
+      ? 'linear-gradient(90deg, rgba(250,248,244,.55) 0%, rgba(250,248,244,.2) 40%, rgba(250,248,244,0) 60%)'
+      : 'linear-gradient(180deg, rgba(20,26,26,0) 40%, rgba(20,26,26,.5) 100%)';
+    const plain = mode === 'sash' || mode === 'frame';   // 글씨가 패널·흰 바탕 위에 있으므로 베일 없이 선명하게
+    heroPhoto.style.backgroundImage = plain ? `url(media/${name}_last.jpg)` : `${veil}, url(media/${name}_last.jpg)`;
+    const hero = heroPhoto.closest('.hero');
+    hero.classList.toggle('ink-dark', ink === 'dark');
+    hero.classList.toggle('mode-sash', mode === 'sash');
+    hero.classList.toggle('mode-frame', mode === 'frame');
+    document.querySelector('.photo-label').hidden = true;   // 실제 배경을 쓰므로 '사진 자리' 안내는 숨김
+    heroPhoto.style.backgroundSize = 'cover';
+    heroPhoto.style.backgroundPosition = 'center';
+    if (mode === 'soft') { heroPhoto.style.filter = 'blur(6px)'; heroPhoto.style.transform = 'scale(1.05)'; }
+  }
+  const VIDEO_HERO = { J: ['intro_i', 'light'], K: ['intro_k', 'light'], L: ['intro_l', 'dark'], M: ['intro_m', 'dark', 'soft'], N: ['intro_m', 'dark', 'sash'], O: ['intro_m', 'dark', 'frame'] };
+
+  const HD_VIDEO = new Set(['intro_m']);   // 1920x1080 판도 있는 영상
+  // 영상 인트로 공통: media/<name>_1280x720.webm|mp4, <name>_first.jpg(포스터), <name>_last.jpg(대표 사진)
+  function videoIntro(A, name, { ink = 'light', mode = '' } = {}) {
+      const VID = 5000, FADE = 450, LATE = 2500;
+      A(black, [{ opacity: 0 }, { opacity: 0 }], { duration: 1 });
+      A(nameText, [{ opacity: 0 }, { opacity: 0 }], { duration: VID + FADE + LATE });
+
+      const v = document.createElement('video');
+      v.className = 'intro-video';
+      v.muted = true;            // 소리 없는 영상만 자동 재생이 허용된다
+      v.playsInline = true;
+      v.preload = 'auto';
+      v.poster = `media/${name}_first.jpg`;
+      // 큰 화면(가로 실제 픽셀 1500 이상)에는 1080p 영상이 있으면 그것을, 휴대폰 등에는 720p를 쓴다
+      const size = HD_VIDEO.has(name) && innerWidth * devicePixelRatio >= 1500 ? '1920x1080' : '1280x720';
+      v.innerHTML = `<source src="media/${name}_${size}.webm" type="video/webm">` +
+                    `<source src="media/${name}_${size}.mp4" type="video/mp4">`;
+      cards.append(v);
+
+      // 대표 사진 = 영상 마지막 장면. 확대 동작 없이 그대로 두어야 영상과 겹쳐 보인다
+      setVideoHero(name, ink, mode);
+
+      const end = A(intro, [{ opacity: 1 }, { opacity: 0 }], { delay: VID, duration: FADE, easing: 'ease-out', fill: 'forwards' });
+      const from = heroAnims.length;
+      // soft: 문이 열린 마지막 장면을 선명하게 잠시 보여 준 뒤 배경으로 물러나며 흐려지고, 그다음 글씨가 올라온다
+      const T = mode === 'soft' ? VID + FADE + 350 : mode ? VID + FADE + 950 : VID;
+      const narrow = matchMedia('(max-width: 640px)').matches;
+      // N: 열린 장면을 잠깐 보여 준 뒤 창짝 패널이 미끄러져 들어와 멈춘다
+      if (mode === 'sash') H(document.getElementById('sash'), [{ transform: narrow ? 'translateY(100%)' : 'translateX(-100%)' }, { transform: 'none' }],
+        { delay: VID + FADE + 250, duration: 900, easing: 'cubic-bezier(.6,0,.2,1)' });
+      // O: 장면이 오른쪽 창틀 액자로 줄어든다 (최종 모양은 CSS의 .mode-frame 값을 그대로 쓴다)
+      if (mode === 'frame') {
+        const cs = getComputedStyle(heroPhoto);
+        H(heroPhoto, [{ transform: 'none', boxShadow: '0 0 0 0 #e3dccd, 0 0 0 rgba(30,30,25,0)', clipPath: 'inset(0% 0% 0% 0% round 0px)' },
+                      { transform: cs.transform, boxShadow: cs.boxShadow, clipPath: cs.clipPath === 'none' ? 'inset(0% 0% 0% 0% round 0px)' : cs.clipPath }],
+          { delay: VID + FADE + 250, duration: 1000, easing: 'cubic-bezier(.6,0,.2,1)' });
+      }
+      if (mode === 'soft') H(heroPhoto, [{ filter: 'blur(0px)', transform: 'scale(1)' }, { filter: 'blur(6px)', transform: 'scale(1.05)' }],
+        { delay: VID + FADE + 250, duration: 1000, easing: 'cubic-bezier(.4,0,.2,1)' });
+      H(header, [{ transform: 'translateY(-100%)' }, { transform: 'none' }],
+        { delay: T + 80, duration: 600, easing: 'cubic-bezier(.2,.7,.2,1)' });
+      rises.forEach((el, i) => H(el, [{ opacity: 0, transform: 'translateY(18px)' }, { opacity: 1, transform: 'none' }],
+        { delay: T + 160 + i * 110, duration: 600, easing: 'cubic-bezier(.2,.7,.2,1)' }));
+
+      // 시간표는 영상이 실제로 재생되기 시작할 때 출발한다 (불러오는 동안 어긋나지 않게)
+      const timeline = [end, ...heroAnims.slice(from)];
+      timeline.forEach(a => a.pause());
+      if (DEBUG) {   // 점검 모드: 자동으로 넘어가지 않고 멈춤·한 프레임씩 이동 (Space, ←/→, Shift+←/→ = 10프레임)
+        clearTimeout(failsafe);
+        v.controls = true;
+        const no = document.createElement('div');
+        no.className = 'frame-no';
+        intro.append(no);
+        const FPS = 30, show = () => { no.textContent = `프레임 ${Math.min(150, Math.floor(v.currentTime * FPS + 0.001) + 1)} / 150   ${v.currentTime.toFixed(2)}초\nSpace 재생·멈춤  ←/→ 1프레임  Shift+←/→ 10프레임`; };
+        const tick = () => { show(); if (!done) requestAnimationFrame(tick); };
+        tick();
+        addEventListener('keydown', e => {
+          if (done) return;
+          const step = (e.shiftKey ? 10 : 1) / FPS;
+          if (e.key === ' ') { e.preventDefault(); e.stopImmediatePropagation(); v.paused ? v.play() : v.pause(); }
+          if (e.key === 'ArrowRight') { e.preventDefault(); v.pause(); v.currentTime = Math.min(v.duration, v.currentTime + step); }
+          if (e.key === 'ArrowLeft') { e.preventDefault(); v.pause(); v.currentTime = Math.max(0, v.currentTime - step); }
+        }, true);
+        v.addEventListener('loadeddata', () => { v.pause(); v.currentTime = 0; }, { once: true });
+        return end;
+      }
+      let started = false;
+      const go = () => { if (started) return; started = true; timeline.forEach(a => a.play()); };
+      v.addEventListener('playing', go, { once: true });
+      v.play().catch(() => {});
+      setTimeout(() => {           // 자동 재생이 막히거나 너무 늦으면 첫 장면을 잠깐 보여 주고 넘어간다
+        if (started) return;
+        go();
+        timeline.forEach(a => { a.currentTime = VID - 600; });
+      }, LATE);
+      return end;
+  }
+
+  const DEBUG = new URLSearchParams(location.search).has('debug');   // 영상 점검 모드
+  const NO_PUSH = new Set(['H', 'I', 'J', 'K', 'L', 'M', 'N', 'O']);   // 반장이 문을 미는 1단계 없이 시작하는 안
+
+  function play() {
+    anims.forEach(a => a.cancel());
+    heroAnims.forEach(a => a.cancel());
+    anims = []; heroAnims = [];
+    cards.replaceChildren();
+    site.classList.remove('over');
+    heroPhoto.removeAttribute('style');   // 영상 안(J·K·L)이 바꾼 대표 사진을 원래 자리 표시로
+    heroPhoto.closest('.hero').classList.remove('ink-dark', 'mode-sash', 'mode-frame');
+    document.querySelector('.photo-label').hidden = false;
+    intro.hidden = false;
+    done = false;
+
+    // 모든 애니메이션을 0초 기준 delay로 만든다 (구간별 캡처 시 currentTime을 한 번에 맞출 수 있음)
+    const A = (el, kf, opt) => { const a = el.animate(kf, { fill: 'both', ...opt }); anims.push(a); return a; };
+    if (!NO_PUSH.has(variant)) playPush(A);
+    const end = TRANSITIONS[variant](A);
+    end.onfinish = () => finish(false);
+    if (!DEBUG) failsafe = setTimeout(() => finish(true), ['J', 'K', 'L', 'M', 'N', 'O'].includes(variant) ? 11000 : T0 + 4000);   // 점검 모드는 저절로 넘어가지 않음   // 영상 5초 + 불러오기 여유
+  }
+
+  function setVariant(v) {
+    variant = TRANSITIONS[v] ? v : 'A';
+    document.querySelectorAll('#switcher button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === variant)));
+  }
+
+  intro.addEventListener('click', e => { if (!DEBUG) skip(); });
+  document.getElementById('skip').addEventListener('click', e => { e.stopPropagation(); skip(); });
+  addEventListener('keydown', e => { if (!done && ['Escape', 'Enter', ' '].includes(e.key)) { e.preventDefault(); skip(); } });
+  const replay = () => { if (reduced) { playHero(); return; } play(); };
+  document.getElementById('replay').addEventListener('click', replay);
+  document.querySelectorAll('#switcher button').forEach(b => b.addEventListener('click', () => { setVariant(b.dataset.v); replay(); }));
+
+  // 상담 신청 → 구글 시트(Apps Script 웹 앱). 주소는 planning/current/consult-sheet/README.md 순서로 배포해서 받는다.
+  // 비어 있으면 시안 안내만 보여 준다. ?sheet=배포주소 로 열면 파일을 고치지 않고 시험할 수 있다
+  const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxsEHRtCRFVqw_i3nyAwqH9sBDpB_PXPAkL4IqraKLLJdTmokZNL7d4mQOTuwaj_n4j/exec';
+  const sheetEndpoint = new URLSearchParams(location.search).get('sheet') || SHEET_ENDPOINT;
+  const MSG_OK = '상담 신청이 접수되었습니다. 창호 전담 직원이 남겨주신 연락처로 연락드립니다.';
+  const MSG_FAIL = '상담 신청을 완료하지 못했습니다. 다시 시도하시거나 전화·카카오톡으로 문의해 주세요.';
+  const applyForm = document.getElementById('applyForm'), applyMsg = document.getElementById('applyMsg');
+  const applyBtn = applyForm.querySelector('button[type=submit]');
+  applyForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = applyForm.elements;
+    const phone = f.phone.value.trim(), agreed = document.getElementById('apply-agree').checked;
+    const digits = phone.replace(/\D/g, '').length;
+    applyMsg.hidden = false;
+    if (!phone || digits < 9 || digits > 12 || !agreed) {
+      applyMsg.textContent = !phone ? '연락받으실 전화번호를 입력해 주세요.'
+        : !agreed ? '개인정보 수집·이용에 동의해 주세요.' : '전화번호를 다시 확인해 주세요.';
+      (agreed ? f.phone : document.getElementById('apply-agree')).focus();
+      return;
+    }
+    if (!sheetEndpoint) {
+      applyMsg.textContent = '시안 화면이라 실제로 접수되지 않았습니다. 실제 사이트에서는 "' + MSG_OK + '"가 표시됩니다.';
+      return;
+    }
+    applyBtn.disabled = true;
+    applyMsg.textContent = '접수 중입니다…';
+    try {
+      // text/plain 으로 보내야 브라우저의 사전 확인 요청 없이 Apps Script 로 바로 간다
+      const res = await fetch(sheetEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          // form.name 은 폼 자신의 이름이라 입력칸은 elements 로 읽는다
+          phone, name: f.name.value, area: f.area.value, topic: f.topic.value,
+          message: f.message.value, agree: agreed, page: location.pathname, website: f.website.value
+        })
+      });
+      const out = await res.json();
+      if (!out.ok) throw new Error(out.error || 'fail');
+      applyForm.reset();
+      applyMsg.textContent = MSG_OK;
+    } catch (err) {
+      applyMsg.textContent = MSG_FAIL;
+    } finally {
+      applyBtn.disabled = false;
+    }
+  });
+
+  // ?v=B 처럼 전환 방식을 고를 수 있다. ?intro=1 이면 재방문이어도 다시 재생 (검토용)
+  const params = new URLSearchParams(location.search);
+  setVariant((params.get('v') || 'A').toUpperCase());
+  if (reduced || (seen() && !params.has('intro'))) {
+    if (VIDEO_HERO[variant]) setVideoHero(...VIDEO_HERO[variant]);
+    playHero();
+  }
+  else play();
+
+  window.__intro = {
+    play, skip, setVariant,
+    get anims() { return [...anims, ...heroAnims]; },
+    // 검증용: 안전 종료 타이머를 멈추고 원하는 시각(ms)으로 이동
+    seek(t) { clearTimeout(failsafe); [...anims, ...heroAnims].forEach(a => { a.pause(); a.currentTime = t; }); }
+  };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+# 용량이 큰 생성물: 연속 프레임은 build_apartment.py로, Poly Haven 자료는 tools/fetch_polyhaven.py로 다시 만들 수 있다
+renders/**/anim_*/
+renders/**/render.log
+assets/polyhaven/

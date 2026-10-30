@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>대산 배경 확인</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* 시안 검토용: 배경 후보 위에 실제 헤더·문구·버튼을 올려 가독성을 본다. ?bg=hero_1b|hero_4b|hero_lx &ink=light|dark */
+  :root { --charcoal: #222828; --green: #23433A; --white: #fff; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Noto Sans KR", system-ui, sans-serif; color: var(--charcoal); }
+  .header {
+    position: fixed; inset: 0 0 auto 0; z-index: 10; height: 68px; padding: 0 40px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(255,255,255,.92); border-bottom: 1px solid rgba(34,40,40,.08);
+  }
+  .logo { font-weight: 700; font-size: 22px; }
+  .logo small { font-weight: 400; font-size: 12px; color: #6b7270; margin-left: 6px; }
+  .nav { display: flex; gap: 36px; font-size: 15px; }
+  .btn { display: inline-flex; align-items: center; height: 44px; padding: 0 20px; border-radius: 6px; font: 500 15px/1 inherit; text-decoration: none; }
+  .btn-primary { background: var(--green); color: var(--white); }
+  .btn-ghost { background: rgba(255,255,255,.14); color: var(--white); border: 1px solid rgba(255,255,255,.6); }
+  .hero { position: relative; height: 100vh; min-height: 560px; display: flex; align-items: flex-end; overflow: hidden; }
+  .hero-photo { position: absolute; inset: 0; background-size: cover; background-position: center; }
+  .shade { /* 글자 뒤에만 명암 보완 (B2B_SITE_PLAN 3.2) */
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(90deg, rgba(24,28,28,.55) 0%, rgba(24,28,28,.25) 38%, rgba(24,28,28,0) 60%),
+      linear-gradient(0deg, rgba(24,28,28,.45) 0%, rgba(24,28,28,0) 45%);
+  }
+  .copy { position: relative; padding: 0 40px 12vh; color: var(--white); max-width: 760px; }
+  .copy h1, .copy p { word-break: keep-all; }
+  .eyebrow { font-size: 13px; letter-spacing: .18em; font-weight: 500; opacity: .9; }
+  h1 { font-size: clamp(30px, 4.4vw, 56px); line-height: 1.22; letter-spacing: -.03em; margin: 16px 0 14px; }
+  p { font-size: 17px; opacity: .92; }
+  .actions { display: flex; gap: 10px; margin-top: 28px; }
+  /* ink=dark: 밝은 배경 위 차콜 글씨. 검은 그림자 대신 글자 뒤만 아주 옅은 흰 베일 */
+  body.dark .shade { background: linear-gradient(90deg, rgba(250,248,244,.55) 0%, rgba(250,248,244,.2) 40%, rgba(250,248,244,0) 60%); }
+  body.dark .copy { color: var(--charcoal); }
+  body.dark .btn-ghost { color: var(--charcoal); background: rgba(255,255,255,.5); border-color: rgba(34,40,40,.35); }
+  /* ink=light(밝은 배경용): 그림자를 아주 옅게 */
+  body.soft .shade { background: linear-gradient(90deg, rgba(24,28,28,.32) 0%, rgba(24,28,28,.1) 40%, rgba(24,28,28,0) 60%); }
+  body.soft .copy { text-shadow: 0 1px 12px rgba(0,0,0,.18); }
+  .tag { position: fixed; right: 16px; bottom: 16px; font: 500 12px/1 inherit; color: #fff; background: rgba(34,40,40,.75); padding: 8px 12px; border-radius: 999px; }
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="logo">대산<small>LX 창호</small></div>
+  <nav class="nav"><span>LX 창호</span><span>시공 사례</span><span>대산 소개</span></nav>
+  <a class="btn btn-primary" href="#">창호 상담 신청</a>
+</header>
+<section class="hero">
+  <div class="hero-photo" id="photo"></div>
+  <div class="shade"></div>
+  <div class="copy">
+    <div class="eyebrow">LX WINDOW · DAESAN</div>
+    <h1>다음 현장의 LX 창호,<br>대산과 함께하세요.</h1>
+    <p>창호는 전담 직원이 상담하고, 현장 자재는 한곳에서 함께 준비하세요. 실측과 견적까지 대산이 안내합니다.</p>
+    <div class="actions"><a class="btn btn-primary" href="#">창호 상담 신청</a><a class="btn btn-ghost" href="#">시공 사례 보기</a></div>
+  </div>
+</section>
+<span class="tag" id="tag"></span>
+<script>
+  const q = new URLSearchParams(location.search);
+  const bg = q.get('bg') || 'hero_1b';
+  if (q.get('ink') === 'dark') document.body.classList.add('dark');
+  if (q.get('ink') === 'light') document.body.classList.add('soft');
+  document.getElementById('photo').style.backgroundImage = `url(media/${bg}.jpg)`;
+  document.getElementById('tag').textContent = `배경 후보: ${bg}${q.get('ink') ? ' · 글자 ' + q.get('ink') : ''} (시안용)`;
+</script>
+</body>
+</html>

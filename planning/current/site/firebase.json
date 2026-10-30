@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "site": "daesan-win",
+    "public": "public",
+    "cleanUrls": false,
+    "headers": [
+      { "source": "**/*.@(jpg|mp4|webm)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }] },
+      { "source": "**/*.@(html|js)", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+    ]
+  }
+}

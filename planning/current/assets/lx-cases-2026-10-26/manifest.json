@@ -1,0 +1,385 @@
+{
+  "created_at": "2026-10-26",
+  "authorization_basis": "사용자가 LX 홈페이지·공식 유튜브 자료를 활용할 수 있다고 설명하고 진행 지시. 별도 라이선스 문서 검증을 의미하지 않음.",
+  "source_credit": "사진·사례 출처: LX Z:IN / LX하우시스. 원 시공업체 별도 표시.",
+  "excluded": [
+    "공간 솔루션 페이지의 AI/유료 스톡 예시 이미지",
+    "단종 창호가 명시된 5343 사례",
+    "광고 모델 등장 영상 재편집",
+    "예산·전체 리모델링 기간을 창호 공사 가격/기간으로 전환"
+  ],
+  "cases": [
+    {
+      "id": "6384",
+      "title": "공원 풍경을 담은 거실",
+      "site": "서대문 독립문극동",
+      "size": "32평",
+      "home_type": "아파트",
+      "original_contractor": "행복한집짓기",
+      "product_family": "LX Z:IN 뷰프레임",
+      "specific_model": null,
+      "source_url": "https://www.lxzin.com/styling/expert-style/detail/6384",
+      "label": "LX Z:IN 공식 시공 사례",
+      "is_daesan_project": false,
+      "description": "발코니를 확장한 거실에 뷰프레임을 적용한 LX 공식 사례입니다. 창밖 녹지와 밝은 실내가 자연스럽게 이어지는 모습을 살펴보세요.",
+      "daesan_consultation_note": "확장부 창의 크기와 개폐 방식, 외부와 맞닿는 부분의 단열 계획을 함께 검토합니다.",
+      "tags": [
+        "개방감",
+        "확장 거실"
+      ],
+      "images": [
+        {
+          "file": "lx-6384-cover-0.jpg",
+          "url": "https://octapi.lxzin.com/interior/hImgFileSeq/202412/11/6be1d60c-04a5-473b-9be0-c13b20eb7ce7.jpg",
+          "source_image_index": 0,
+          "role": "cover",
+          "width": 1170,
+          "height": 600
+        },
+        {
+          "file": "lx-6384-after-1.jpg",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202412/11/720/0/7c654113-9861-4396-8529-1db68b8420f3.jpg",
+          "source_image_index": 9,
+          "role": "after",
+          "width": 720,
+          "height": 720
+        },
+        {
+          "file": "lx-6384-after-2.jpg",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202412/11/720/0/56a4eba9-5556-4ce4-ada2-4ab9c050f2d4.jpg",
+          "source_image_index": 10,
+          "role": "after",
+          "width": 720,
+          "height": 720
+        },
+        {
+          "file": "lx-6384-before-3.jpg",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202412/11/720/0/f0e5d3b1-1bdf-4613-ad87-432e3f254dbc.jpg",
+          "source_image_index": 7,
+          "role": "before",
+          "width": 720,
+          "height": 720
+        }
+      ]
+    },
+    {
+      "id": "8149",
+      "title": "소음 고민에서 시작한 창호 교체",
+      "site": "안양 한승미메이드",
+      "size": "34평",
+      "home_type": "아파트",
+      "original_contractor": "누아디자인",
+      "product_family": "LX Z:IN 뷰프레임",
+      "specific_model": null,
+      "source_url": "https://www.lxzin.com/styling/expert-style/detail/8149",
+      "label": "LX Z:IN 공식 시공 사례",
+      "is_daesan_project": false,
+      "description": "외부 기찻길 소음을 고려해 뷰프레임으로 교체한 LX 공식 사례입니다. 거실 창의 구성과 창가 마감을 중심으로 소개합니다.",
+      "daesan_consultation_note": "창이 향하는 방향과 주변 소음, 기존 창의 상태를 확인한 뒤 유리와 창호 구성을 검토합니다.",
+      "tags": [
+        "소음 고려",
+        "거실 창"
+      ],
+      "images": [
+        {
+          "file": "lx-8149-cover-0.png",
+          "url": "https://octapi.lxzin.com/interior/hImgFileSeq/202512/05/0c80b448-1f32-4bc5-9be8-7dc0f6bb88f0.png",
+          "source_image_index": 0,
+          "role": "cover",
+          "width": 1170,
+          "height": 600
+        },
+        {
+          "file": "lx-8149-after-1.png",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202512/05/720/0/12fa3d3e-c7d2-4dfc-b46c-fd7d5fc2a7e5.png",
+          "source_image_index": 6,
+          "role": "after",
+          "width": 720,
+          "height": 720
+        },
+        {
+          "file": "lx-8149-after-2.png",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202512/05/720/0/83e07145-396e-40f8-8718-b3b5df628351.png",
+          "source_image_index": 7,
+          "role": "after",
+          "width": 720,
+          "height": 720
+        }
+      ]
+    },
+    {
+      "id": "6281",
+      "title": "햇살이 머무는 확장부",
+      "site": "구리 토평동 e편한세상",
+      "size": "33평",
+      "home_type": "아파트",
+      "original_contractor": "주식회사 조우",
+      "product_family": "LX Z:IN 뷰프레임",
+      "specific_model": null,
+      "source_url": "https://www.lxzin.com/styling/expert-style/detail/6281",
+      "label": "LX Z:IN 공식 시공 사례",
+      "is_daesan_project": false,
+      "description": "거실 확장부에 베젤리스 디자인의 뷰프레임을 적용한 LX 공식 사례입니다. 창가의 식탁과 넓은 유리면이 만드는 공간감을 볼 수 있습니다.",
+      "daesan_consultation_note": "베젤리스 디자인의 적용 모델과 창 크기, 유리 사양을 현장 조건에 맞춰 확인합니다.",
+      "tags": [
+        "베젤리스",
+        "확장 거실"
+      ],
+      "images": [
+        {
+          "file": "lx-6281-cover-0.jpg",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202411/26/720/0/4512619b-5b90-4f08-9454-b4f7d3ada2d8.jpg",
+          "source_image_index": 8,
+          "role": "cover",
+          "width": 720,
+          "height": 720
+        },
+        {
+          "file": "lx-6281-after-1.jpg",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202411/26/720/0/2fa8b4d9-8d7c-493d-9b95-9a1ee32109f4.jpg",
+          "source_image_index": 9,
+          "role": "after",
+          "width": 720,
+          "height": 720
+        },
+        {
+          "file": "lx-6281-after-2.jpg",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202411/26/720/0/4e87dda5-e340-4fbb-a193-24c8b3ababcd.jpg",
+          "source_image_index": 5,
+          "role": "after",
+          "width": 720,
+          "height": 720
+        },
+        {
+          "file": "lx-6281-before-3.jpg",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202411/26/720/0/ce8fffc5-cdf4-4766-a82a-00e2211832ef.jpg",
+          "source_image_index": 7,
+          "role": "before",
+          "width": 720,
+          "height": 720
+        }
+      ]
+    },
+    {
+      "id": "6024",
+      "title": "창가에 더한 작은 휴식 공간",
+      "site": "해운대 좌동 삼성아파트",
+      "size": "32평",
+      "home_type": "아파트",
+      "original_contractor": "재경디자인",
+      "product_family": "LX Z:IN 뷰프레임",
+      "specific_model": null,
+      "source_url": "https://www.lxzin.com/styling/expert-style/detail/6024",
+      "label": "LX Z:IN 공식 시공 사례",
+      "is_daesan_project": false,
+      "description": "확장한 거실에 뷰프레임을 적용하고 창가 쪽에 홈 바를 구성한 LX 공식 사례입니다. 창 주변의 사용 동선과 채광을 살펴보세요.",
+      "daesan_consultation_note": "창 앞 가구 배치와 손잡이 위치, 환기 동선을 함께 확인합니다. 원문에 소개된 자동환기는 별도 옵션으로 공급 가능 여부를 확인합니다.",
+      "tags": [
+        "창가 활용",
+        "확장 거실"
+      ],
+      "images": [
+        {
+          "file": "lx-6024-cover-0.jpg",
+          "url": "https://octapi.lxzin.com/interior/hImgFileSeq/202410/16/e7cb5d61-6f76-4ca2-a3a0-027da9a38fe9.jpg",
+          "source_image_index": 0,
+          "role": "cover",
+          "width": 1170,
+          "height": 600
+        },
+        {
+          "file": "lx-6024-after-1.jpg",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202410/16/720/0/9b705fee-60fe-42ab-91f5-5cf7b42face5.jpg",
+          "source_image_index": 8,
+          "role": "after",
+          "width": 720,
+          "height": 720
+        },
+        {
+          "file": "lx-6024-after-2.jpg",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202410/16/720/0/1ed3a963-d630-45fb-bf60-c99bf8658f9f.jpg",
+          "source_image_index": 10,
+          "role": "after",
+          "width": 720,
+          "height": 720
+        },
+        {
+          "file": "lx-6024-before-3.jpg",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202410/16/720/0/b3db1baa-f8c4-4c7d-8e1c-cb65b90c49c9.jpg",
+          "source_image_index": 7,
+          "role": "before",
+          "width": 720,
+          "height": 720
+        }
+      ]
+    },
+    {
+      "id": "8203",
+      "title": "간결한 창으로 정돈한 거실",
+      "site": "동대문 장안현대홈타운3차",
+      "size": "30평",
+      "home_type": "아파트",
+      "original_contractor": "돋움디자인",
+      "product_family": "LX Z:IN 뷰프레임",
+      "specific_model": null,
+      "source_url": "https://www.lxzin.com/styling/expert-style/detail/8203",
+      "label": "LX Z:IN 공식 시공 사례",
+      "is_daesan_project": false,
+      "description": "발코니 확장과 뷰프레임 시공을 함께 진행한 LX 공식 사례입니다. 밝은 거실과 슬림한 창의 조화를 전후 사진으로 비교할 수 있습니다.",
+      "daesan_consultation_note": "확장 여부와 실내 마감 계획에 맞춰 창의 구성과 연결부를 검토합니다.",
+      "tags": [
+        "개방감",
+        "확장 거실"
+      ],
+      "images": [
+        {
+          "file": "lx-8203-cover-0.png",
+          "url": "https://octapi.lxzin.com/interior/hImgFileSeq/202512/16/417a7544-769d-4787-8129-9eb4d0cd6da1.png",
+          "source_image_index": 0,
+          "role": "cover",
+          "width": 1170,
+          "height": 600
+        },
+        {
+          "file": "lx-8203-after-1.png",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202512/16/720/0/6a42b09f-6a1c-4b1c-aca2-d4eb02ee7740.PNG",
+          "source_image_index": 4,
+          "role": "after",
+          "width": 720,
+          "height": 720
+        },
+        {
+          "file": "lx-8203-after-2.png",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202512/16/720/0/35ebd1cf-d69f-4c76-a707-b267c9fda0e8.PNG",
+          "source_image_index": 5,
+          "role": "after",
+          "width": 720,
+          "height": 720
+        },
+        {
+          "file": "lx-8203-before-3.png",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202512/16/720/0/ad2d8ed6-d670-46bc-8be7-9047d804a7be.png",
+          "source_image_index": 3,
+          "role": "before",
+          "width": 720,
+          "height": 720
+        }
+      ]
+    },
+    {
+      "id": "7699",
+      "title": "넓은 공간을 잇는 창",
+      "site": "부산 우동 동경위너스",
+      "size": "65평",
+      "home_type": "빌라/연립",
+      "original_contractor": "재경디자인",
+      "product_family": "LX Z:IN 뷰프레임",
+      "specific_model": null,
+      "source_url": "https://www.lxzin.com/styling/expert-style/detail/7699",
+      "label": "LX Z:IN 공식 시공 사례",
+      "is_daesan_project": false,
+      "description": "여러 방향의 창과 슬림한 창호 디자인이 돋보이는 LX 공식 사례입니다. 넓은 거실에서 창의 배치가 만드는 시야를 살펴보세요.",
+      "daesan_consultation_note": "창이 여러 면에 있는 현장은 면별 크기와 방향, 여닫는 위치를 나누어 확인합니다.",
+      "tags": [
+        "큰 창",
+        "개방감"
+      ],
+      "images": [
+        {
+          "file": "lx-7699-cover-0.png",
+          "url": "https://octapi.lxzin.com/interior/hImgFileSeq/202508/11/38fb3450-2ffa-467e-98ff-f2b07209552a.png",
+          "source_image_index": 0,
+          "role": "cover",
+          "width": 1170,
+          "height": 600
+        },
+        {
+          "file": "lx-7699-after-1.png",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202508/11/720/0/acda213e-3bef-4391-8089-54ee3330bf0d.PNG",
+          "source_image_index": 4,
+          "role": "after",
+          "width": 720,
+          "height": 720
+        },
+        {
+          "file": "lx-7699-after-2.png",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202508/11/720/0/b8bbf75c-b299-46da-a600-89d31fe273e5.PNG",
+          "source_image_index": 10,
+          "role": "after",
+          "width": 720,
+          "height": 720
+        },
+        {
+          "file": "lx-7699-before-3.png",
+          "url": "https://octapi.lxzin.com/imageBlockProp/image/202508/11/720/0/f3f07fba-6c61-499d-b8ac-720566cf7b5d.png",
+          "source_image_index": 3,
+          "role": "before",
+          "width": 720,
+          "height": 720
+        }
+      ]
+    }
+  ],
+  "videos": [
+    {
+      "id": "euQccdhSIAI",
+      "title": "LX하우시스의 새로운 창호, '뷰프레임' 알아보기 - 디자인, 기능, 특징 총정리",
+      "url": "https://www.youtube.com/watch?v=euQccdhSIAI",
+      "author_name": "LX Z:IN",
+      "author_url": "https://www.youtube.com/@LXZIN-official",
+      "thumbnail_url": "https://i.ytimg.com/vi/euQccdhSIAI/hqdefault.jpg",
+      "embed_url": "https://www.youtube.com/embed/euQccdhSIAI",
+      "verification": "공식 채널 검색 결과 및 YouTube oEmbed 확인; 전체 영상 내용과 현재 전 사양을 검증한 것은 아님"
+    },
+    {
+      "id": "pX9CifWXK98",
+      "title": "뷰프레임 창호로 단열과 개방감까지｜수원 주공뉴타운 33평",
+      "url": "https://www.youtube.com/watch?v=pX9CifWXK98",
+      "author_name": "LX Z:IN",
+      "author_url": "https://www.youtube.com/@LXZIN-official",
+      "thumbnail_url": "https://i.ytimg.com/vi/pX9CifWXK98/hqdefault.jpg",
+      "embed_url": "https://www.youtube.com/embed/pX9CifWXK98",
+      "verification": "공식 채널 검색 결과 및 YouTube oEmbed 확인; 전체 영상 내용과 현재 전 사양을 검증한 것은 아님"
+    }
+  ],
+  "daesan_projects": [
+    {
+      "name": "잠실 리센츠",
+      "source": "대산 기존 창호 성과정리.xlsx / Sheet1",
+      "source_rows": [
+        5,
+        6,
+        10
+      ]
+    },
+    {
+      "name": "잠실 엘스",
+      "source": "대산 기존 창호 성과정리.xlsx / Sheet1",
+      "source_rows": [
+        14
+      ]
+    },
+    {
+      "name": "광명 KBS우성",
+      "source": "대산 기존 창호 성과정리.xlsx / Sheet1",
+      "source_rows": [
+        12
+      ]
+    },
+    {
+      "name": "둔촌 푸르지오",
+      "source": "대산 기존 창호 성과정리.xlsx / Sheet1",
+      "source_rows": [
+        13,
+        16
+      ]
+    },
+    {
+      "name": "상암 월드컵파크",
+      "source": "대산 기존 창호 성과정리.xlsx / Sheet1",
+      "source_rows": [
+        40
+      ]
+    }
+  ]
+}
