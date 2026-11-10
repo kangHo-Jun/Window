@@ -26,7 +26,7 @@ INTRO_MEDIA = 'intro_m'
 SITE = 'https://win.daesan.ai'
 GOOGLE_VERIFY = ''   # 구글 서치 콘솔 'HTML 태그' 확인 값(content)
 NAVER_VERIFY = '369f06160be208f6a51c44947a2247c0c6a9b1ea'    # 네이버 서치어드바이저 'HTML 태그' 확인 값(content)
-DESC = 'LX 창호는 대산 창호 전담 직원이 상담합니다. 현장 자재까지 한곳에서 함께 준비하세요.'
+DESC = '프리미엄 창호의 선두주자 LX ZIN 창호, 대산이 함께합니다. LX 창호 제품과 시공 사례, 상담 안내.'
 
 
 def sub(text, pattern, repl, count=1, flags=re.S):
@@ -61,14 +61,13 @@ ORG_LD = '''<script type="application/ld+json">
 "description":"LX 창호 상담·공급과 현장 자재(목자재·단열재·도어·석고보드)를 함께 준비하는 건축자재 회사",
 "telephone":"+82-31-388-3833","faxNumber":"+82-31-429-0447","email":"sales@daesan.biz","logo":"https://win.daesan.ai/media/og.jpg",
 "address":{"@type":"PostalAddress","streetAddress":"관악대로 279","addressLocality":"안양시 동안구","addressRegion":"경기도","addressCountry":"KR"},
-"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"08:00","closes":"17:00"},
-{"@type":"OpeningHoursSpecification","dayOfWeek":"Saturday","opens":"08:00","closes":"12:00"}]}
+"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"08:00","closes":"17:00"}]}
 </script>
 '''
 
 
 def build_index():
-    s = (SRC / 'window-intro-prototype.html').read_text(encoding='utf-8')
+    s = (SRC / 'landing-q.html').read_text(encoding='utf-8')
     s = sub(s, r'<title>.*?</title>', '<title>대산 | LX 창호 상담·시공 사례</title>\n'
             f'<meta name="description" content="{DESC}">\n' + seo_head('/', '대산 | LX 창호 상담·시공 사례', DESC) + ORG_LD.rstrip('\n'))
     # 인트로: L안 고정, 시안용 버튼 제거
@@ -82,12 +81,9 @@ def build_index():
     s = s.replace('<a class="btn btn-line btn-sm" href="cases.html">시공 사례 전체 보기 →</a>',
                   '<a class="btn btn-primary" href="cases.html">시공 사례 보기 →</a>')
     # 남은 '자료 준비 중' 표시와 내부 메모
-    s = sub(s, r'\s*<span class="tbd">대상·제외 품목.*?</span>', '')
-    s = sub(s, r' <span class="tbd">(비용·지역·일정 조건|전달 방식·소요 기간)</span>', '', count=2)
-    s = sub(s, r'\s*<p class="note">시공·A/S 문의 창구는.*?</p>', '')
     # 상담 창구: 전화는 실제 번호, 카카오톡은 채널이 생기면 넣는다
     s = sub(s, r'<div class="channel"><b>전화 상담</b><span class="tbd">.*?</span></div>',
-            '<a class="channel" href="tel:031-388-3833"><b>전화 상담</b><span>031-388-3833 · 평일 08~17시, 토 08~12시</span></a>')
+            '<a class="channel" href="tel:031-388-3833"><b>전화 상담</b><span>031-388-3833 · 평일 08~17시</span></a>')
     s = sub(s, r'\s*<div class="channel"><b>카카오톡 상담</b><span class="tbd">.*?</span></div>', '')
     s = sub(s, r'전화와 카카오톡으로 문의하거나', '전화로 문의하거나')
     s = sub(s, r'전화·카카오톡 상담은 그대로', '전화 상담은 그대로')
@@ -117,6 +113,9 @@ def build_privacy():
 
 
 def main():
+    # 재생성 대상이 프로젝트의 public 폴더인지 확인한 뒤에만 정리한다.
+    if OUT.resolve() != HERE.resolve() / 'public':
+        raise SystemExit('빌드 출력 경로 확인 실패')
     if OUT.exists():
         shutil.rmtree(OUT)
     (OUT / 'media').mkdir(parents=True)
@@ -126,6 +125,7 @@ def main():
     shutil.copytree(SRC / 'data', OUT / 'data', ignore=shutil.ignore_patterns('*.py', '*.md'))
     shutil.copytree(SRC / 'media' / 'cases', OUT / 'media' / 'cases')
     shutil.copytree(SRC / 'media' / 'lx', OUT / 'media' / 'lx')
+    shutil.copy2(SRC / 'media' / 'all-in-one-interior.png', OUT / 'media' / 'all-in-one-interior.png')
     name = INTRO_MEDIA
     for f in (SRC / 'media').glob(f'{name}_*'):
         shutil.copy2(f, OUT / 'media' / f.name)
